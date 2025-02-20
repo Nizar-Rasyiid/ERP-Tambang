@@ -6,6 +6,10 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\AssetController;
+use App\Http\Controllers\PaymentTypeController;
+use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\DeliveryOrderController;
+use App\Http\Controllers\PurchaseOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,3 +37,8 @@ Route::apiResource('customers', CustomerController::class);
 
 // Asset routes
 Route::apiResource('assets', AssetController::class);
+
+Route::apiResource('payment-types', PaymentTypeController::class);
+Route::apiResource('bank-accounts', BankAccountController::class);
+Route::apiResource('delivery-orders', DeliveryOrderController::class);
+Route::apiResource('purchase-orders', PurchaseOrderController::class);
