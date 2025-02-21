@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\DeliveryOrder;
+use App\Models\Invoice;
+use App\Models\PurchaseOrder;
 
 class DeliveryOrderController extends Controller
 {
@@ -11,7 +14,8 @@ class DeliveryOrderController extends Controller
      */
     public function index()
     {
-        //
+        $deliveryOrders = DeliveryOrder::all();
+        return response()->json($deliveryOrders);
     }
 
     /**
@@ -72,14 +76,14 @@ class DeliveryOrderController extends Controller
             'invoice'       => $invoice
         ], 201);
     }
-    
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        //
+        $deliveryOrder = DeliveryOrder::findOrFail($id);
+        return response()->json($deliveryOrder);
     }
 
     /**
@@ -95,7 +99,22 @@ class DeliveryOrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'id_customer'     => 'required|exists:customers,id_customer',
+            'id_employee'     => 'required|exists:employees,id_employee',
+            'id_bank_account' => 'required|exists:bank_accounts,id_bank_account',
+            'id_po'           => 'required|exists:purchaseorders,id_po',
+            'issued_at'       => 'required|date',
+            'due_at'          => 'required|date',
+        ]);
+
+        $deliveryOrder = DeliveryOrder::findOrFail($id);
+        $deliveryOrder->update($request->all());
+
+        return response()->json([
+            'message'       => 'Delivery Order berhasil diperbarui!',
+            'delivery_order'=> $deliveryOrder
+        ]);
     }
 
     /**
@@ -103,6 +122,11 @@ class DeliveryOrderController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $deliveryOrder = DeliveryOrder::findOrFail($id);
+        $deliveryOrder->delete();
+
+        return response()->json([
+            'message' => 'Delivery Order berhasil dihapus!'
+        ]);
     }
 }
