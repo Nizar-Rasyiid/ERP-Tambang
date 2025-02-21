@@ -8,6 +8,8 @@ use App\Models\Customer;
 use App\Models\PaymentType;
 use App\Models\BankAccount;
 use App\Models\Employee;
+use App\Models\DetailPo;
+use App\Models\Product;
 
 use Illuminate\Http\Request;
 
@@ -26,6 +28,8 @@ class PurchaseOrderController extends Controller
     {
         $request->validate([
             'id_customer'     => 'required|exists:customers,id_customer',
+            'id_product'      => 'required|array|exists:products,id_product',
+            'quantity'        => 'required|integer',
             'id_payment_type' => 'required|exists:payment_types,id_payment_type',
             'id_bank_account' => 'required|exists:bank_accounts,id_bank_account',
             'po_type'         => 'required|in:type1,type2,type3',
@@ -37,39 +41,59 @@ class PurchaseOrderController extends Controller
             'issue_at'        => 'required|date',
             'due_at'          => 'required|date',
         ]);
+
+        $lastPo = PurchaseOrder::latest()->first();
+        $lastIdPo = $lastPo ? intval(substr($lastPo->id_po, 5)) : 0;
+        $newIdPo = $lastIdPo + 1;
+        $id_purchase_orders = 'PO-'. str_pad($newIdPo, 6, '0', STR_PAD_LEFT);        
+
+        //variable total_biaya from product_price
+        $sub_total = 0;
+
+        foreach($request->id_product as $key => $pro){
+            $detailpo = DetailPO::insert([
+                'id_po' => $id_purchase_orders,
+                'id_product' => $pro,
+                'quantity' => $req->quantity,
+            ]);
+
+            $sub_total += Product::where('id_product', $pro)
+                ->sum('product_price');
+        }
     
         // ✅ Hitung PPN (11% dari sub_total)
         $ppn = $request->sub_total * 0.11;
     
         // ✅ Hitung Grand Total
-        $grand_total = $request->sub_total + $request->total_tax + $request->total_service + $ppn - $request->deposit;
-    
-        // 1️⃣ Buat Purchase Order dengan PPN & Grand Total
+        $grand_total = $sub_total  + $ppn;        
+
+        // Buat Purchase Order dengan PPN & Grand Total
         $purchaseOrder = PurchaseOrder::create([
+            'id_po'           => $id_purchase_orders,
             'id_customer'     => $request->id_customer,
             'id_payment_type' => $request->id_payment_type,
             'id_bank_account' => $request->id_bank_account,
             'po_type'         => $request->po_type,
             'status_payment'  => $request->status_payment,
-            'sub_total'       => $request->sub_total,
-            'total_tax'       => $request->total_tax,
-            'total_service'   => $request->total_service,
-            'deposit'         => $request->deposit,
+            'sub_total'       => $cost,
+            'total_tax'       => 0,
+            'total_service'   => 0,
+            'deposit'         => 0,
             'ppn'             => $ppn, // ✅ PPN otomatis dihitung
             'grand_total'     => $grand_total, // ✅ Grand Total otomatis dihitung
             'issue_at'        => $request->issue_at,
             'due_at'          => $request->due_at,
-        ]);
+        ]);            
     
         // 2️⃣ Buat Invoice dari Purchase Order yang baru dibuat
-        $invoice = Invoice::create([
-            'id_do'          => null, // Jika DO belum ada, biarkan null
-            'id_po'          => $purchaseOrder->id_po,
-            'id_customer'    => $purchaseOrder->id_customer,
-            'id_bank_account'=> $purchaseOrder->id_bank_account,
-            'id_payment_type'=> $purchaseOrder->id_payment_type,
-            'no_invoice'     => 'INV-' . now()->format('Ymd') . '-' . $purchaseOrder->id_po,
-        ]);
+        // $invoice = Invoice::create([
+        //     'id_do'          => null, // Jika DO belum ada, biarkan null
+        //     'id_po'          => $purchaseOrder->id_po,
+        //     'id_customer'    => $purchaseOrder->id_customer,
+        //     'id_bank_account'=> $purchaseOrder->id_bank_account,
+        //     'id_payment_type'=> $purchaseOrder->id_payment_type,
+        //     'no_invoice'     => 'INV-' . now()->format('Ymd') . '-' . $purchaseOrder->id_po,
+        // ]);
     
         return response()->json([
             'message'  => 'Purchase Order dan Invoice berhasil dibuat!',

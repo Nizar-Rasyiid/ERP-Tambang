@@ -17,7 +17,8 @@ return new class extends Migration
             $table->text('employee_phone');
             $table->string('employee_email')->unique();
             $table->text('employee_address');
-            $table->boolean('status');
+            $table->integer('nik');
+            $table->text('position');
             $table->timestamps();
         });
     }
