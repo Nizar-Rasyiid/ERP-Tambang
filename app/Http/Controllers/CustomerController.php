@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Customer;
 
 class CustomerController extends Controller
 {
@@ -11,7 +12,8 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        //
+        $customers = Customer::all();
+        return response()->json($customers);
     }
 
     /**
@@ -27,7 +29,18 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:15',
+            'customer_email' => 'required|string|email|max:255',
+            'customer_address' => 'required|string|max:255',
+            'bidang_usaha' => 'required|string|max:255',
+            'pilihan' => 'required|string|max:255',
+        ]);
+
+        $customer = Customer::create($validatedData);
+
+        return response()->json($customer, 201);
     }
 
     /**
@@ -35,7 +48,8 @@ class CustomerController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $customer = Customer::findOrFail($id);
+        return response()->json($customer);
     }
 
     /**
@@ -51,7 +65,19 @@ class CustomerController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validatedData = $request->validate([
+            'customer_name' => 'sometimes|required|string|max:255',
+            'customer_phone' => 'sometimes|required|string|max:15',
+            'customer_email' => 'sometimes|required|string|email|max:255',
+            'customer_address' => 'sometimes|required|string|max:255',
+            'bidang_usaha' => 'sometimes|required|string|max:255',
+            'pilihan' => 'sometimes|required|string|max:255',
+        ]);
+
+        $customer = Customer::findOrFail($id);
+        $customer->update($validatedData);
+
+        return response()->json($customer);
     }
 
     /**
@@ -59,6 +85,9 @@ class CustomerController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $customer = Customer::findOrFail($id);
+        $customer->delete();
+
+        return response()->json(null, 204);
     }
 }
