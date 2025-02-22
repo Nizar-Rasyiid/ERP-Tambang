@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class PurchaseOrder extends Model
 {
     use HasFactory;
-    protected $table = 'purchase_orders';
+    protected $table = 'purchaseorders';
     protected $primaryKey = 'id_po';
 
     protected $fillable = [
         'id_customer',
         'id_payment_type',
-        'id_bank_account',
+        'id_bank_account',  
+        'code_po',
         'po_type',
         'status_payment',
         'sub_total',

@@ -11,7 +11,9 @@ class DetailPo extends Model
     protected $table = 'detailpo';
     protected $primaryKey = 'id_detail_po';
     protected $fillable = [
-        'id_po',
-        'id_product'
+        'id_po',   
+        'code_po',     
+        'id_product',
+        'quantity'        
     ];
 }

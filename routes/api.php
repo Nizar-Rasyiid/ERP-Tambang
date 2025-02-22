@@ -22,23 +22,52 @@ use App\Http\Controllers\PurchaseOrderController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
-// Employee routes
-Route::apiResource('employees', EmployeeController::class);
-
-// Product routes
-Route::apiResource('products', ProductController::class);
-
-// Customer routes
-Route::apiResource('customers', CustomerController::class);
-
-// Asset routes
+//a
 Route::apiResource('assets', AssetController::class);
+Route::get('/assets', [AssetController::class, 'index'])->name('get.asset');
+Route::post('/assets_code', [AssetController::class, 'store'])->name('post.asset');
+//b
+Route::get('/bank_accounts', [BankAccountController::class, 'index'])->name('get.bank_account');
+Route::post('/bank_accounts_code', [BankAccountController::class, 'store'])->name('post.bank_account');
+//c
+Route::get('/customers', [CustomerController::class, 'index'])->name('get.customer');
+Route::post('/customers_code', [CustomerController::class, 'store'])->name('post.customer');
 
-Route::apiResource('payment-types', PaymentTypeController::class);
-Route::apiResource('bank-accounts', BankAccountController::class);
-Route::apiResource('delivery-orders', DeliveryOrderController::class);
-Route::apiResource('purchase-orders', PurchaseOrderController::class);
+//d
+Route::get('/deliver_orders', [DeliveryOrderController::class, 'index'])->name('get.delivery_order');
+Route::post('/delivery_orders_code', [DeliveryOrderController::class, 'store'])->name('post.delivery_order');
+//e
+Route::get('/employees', [EmployeeController::class, 'index'])->name('get.employees');
+Route::post('/employees_code', [EmployeeController::class, 'index'])->name('post.employees');
+//f
+//g
+//h
+//i
+//k
+//l
+//m
+//n
+//o
+//p
+Route::get('/products', [ProductController::class, 'index'])->name('get.product');
+Route::post('/products_code', [ProductController::class, 'store'])->name('post.products');
+
+Route::get('/payment_types', [PaymentTypeController::class, 'index'])->name('get.payment_type');
+Route::post('/payment_types_code', [PaymentTypeController::class, 'store'])->name('post.payment_type');
+
+Route::get('/purchase_orders', [PurchaseOrderController::class, 'index'])->name('get.purchase_order');
+Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])->name('post.purchase_order');
+//q
+//r
+//s
+//t
+//u
+//v
+//w
+//x
+//y
+//z

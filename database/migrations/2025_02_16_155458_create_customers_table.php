@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('customer_phone');
             $table->string('customer_email')->unique();
             $table->text('customer_address');
-            $table->text('npwp');
+            $table->integer('npwp');
             $table->text('contact_person');
             $table->timestamps();
         });

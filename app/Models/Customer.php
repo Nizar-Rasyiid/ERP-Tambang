@@ -17,7 +17,7 @@ class Customer extends Model
         'customer_phone',
         'customer_email',
         'customer_address',
-        'bidang_usaha',
-        'pilihan',
+        'npwp',
+        'contact_person'
     ];
 }
