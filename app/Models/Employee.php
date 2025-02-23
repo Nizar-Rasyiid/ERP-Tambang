@@ -16,6 +16,7 @@ class Employee extends Model
         'employee_phone',
         'employee_email',
         'employee_address',
-        'status',
+        'nik',
+        'position',
     ];
 }

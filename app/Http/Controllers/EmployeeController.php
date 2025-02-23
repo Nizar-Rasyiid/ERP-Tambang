@@ -30,16 +30,27 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'employee_name' => 'required|string|max:255',
-            'employee_phone' => 'required|string|max:15',
-            'employee_email' => 'required|string|email|max:255|unique:employees',
+            'employee_name'    => 'required|string|max:255',
+            'employee_phone'   => 'required|string|max:15',
+            'employee_email'   => 'required|string|email|max:255|unique:employees',
             'employee_address' => 'required|string|max:255',
-            'status' => 'required|boolean',
+            'nik'              => 'required|integer',
+            'position'         => 'required|string|max:255',
         ]);
 
-        $employee = Employee::create($request->all());
+        $employee = Employee::create([
+            'employee_name' => $request->employee_name,
+            'employee_phone' => $request->employee_phone,
+            'employee_email' => $request->employee_email,
+            'employee_address' => $request->employee_address,
+            'nik' => $request->nik,
+            'position' => $request->position,
+        ]);
 
-        return response()->json($employee, 201);
+        return response()->json([
+            'message' => 'Employee Berhasil Dibuat',
+            'Employee' => $employee
+        ], 201);
     }
 
     /**

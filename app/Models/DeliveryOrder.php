@@ -16,7 +16,8 @@ class DeliveryOrder extends Model
         'id_employee',
         'id_bank_account',
         'id_po',
-        'issued_at',
+        'code_do',
+        'issue_at',
         'due_at',
     ];
 }

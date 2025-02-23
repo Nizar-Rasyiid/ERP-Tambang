@@ -107,9 +107,9 @@ class PurchaseOrderController extends Controller
         $currentYear = date('y');
 
         $nomor_invoice = sprintf(
-            "%d/AHM/%s/%s/%s",
-            $id_purchase_orders,
-            $customer->name,
+            "%s/AHM/%s/%s/%s",
+            $purchaseOrder->code_po,
+            $customer->customer_name,
             $currentMonth,
             $currentYear,
         );    

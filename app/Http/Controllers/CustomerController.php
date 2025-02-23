@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 use App\Models\Customer;
 
 class CustomerController extends Controller
@@ -12,8 +13,8 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = Customer::all();
-        return response()->json($customers);
+        $customer = Customer::all();
+        return response()->json($customer);
     }
 
     /**
