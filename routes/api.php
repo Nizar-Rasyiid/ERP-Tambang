@@ -29,8 +29,12 @@ Route::post('/assets_code', [AssetController::class, 'store'])->name('post.asset
 Route::get('/bank_accounts', [BankAccountController::class, 'index'])->name('get.bank_account');
 Route::post('/bank_accounts_code', [BankAccountController::class, 'store'])->name('post.bank_account');
 //c
-Route::apiResource('customers', CustomerController::class);
-// Route::get('/customers', [CustomerController::class, 'index'])->name('get.customer');   
+// Route::apiResource('customers', CustomerController::class);
+Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('show.customer');
+Route::get('/customers', [CustomerController::class, 'index'])->name('get.customer');
+Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('update.customer');
+Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('delete.customer');
+Route::post('/store-customers', [CustomerController::class, 'store'])->name('post.customer');
 // Route::post('/customers_code', [CustomerController::class, 'store'])->name('post.customer');
 
 
