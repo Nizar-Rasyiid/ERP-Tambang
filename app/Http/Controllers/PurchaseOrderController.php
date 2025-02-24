@@ -168,6 +168,8 @@ class PurchaseOrderController extends Controller
         return response()->json($purchaseOrder);
     }
 
+    //Show per ID
+
     // 🔴 DELETE: Hapus Purchase Order
     public function destroy($id)
     {

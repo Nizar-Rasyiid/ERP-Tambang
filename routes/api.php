@@ -10,6 +10,7 @@ use App\Http\Controllers\PaymentTypeController;
 use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\DeliveryOrderController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\InvoiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,7 @@ Route::post('/employees_code', [EmployeeController::class, 'store'])->name('post
 //g
 //h
 //i
+Route::get('/invoices', [InvoiceController::class, 'index'])->name('get.invoices');
 //k
 //l
 //m
@@ -62,6 +64,7 @@ Route::post('/payment_types_code', [PaymentTypeController::class, 'store'])->nam
 
 Route::get('/purchase_orders', [PurchaseOrderController::class, 'index'])->name('get.purchase_order');
 Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])->name('post.purchase_order');
+Route::get('/purchase_orders/{id}', [PurchaseOrderController::class, 'show'])->name('show.purchase_order');
 //q
 //r
 //s
