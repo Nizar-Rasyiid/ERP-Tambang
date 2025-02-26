@@ -45,20 +45,18 @@ class PurchaseOrderController extends Controller
         // ]);
 
         $lastPo = PurchaseOrder::latest()->first();
-        $lastIdPo = $lastPo ? intval(substr($lastPo->code_po, 5)) : 0;
-        $newIdPo = $lastIdPo + 1;
-        $id_purchase_orders = 'PO-'. str_pad($newIdPo, 6, '0', STR_PAD_LEFT);                     
+        $lastIdPo = $lastPo ? $lastPo->code_po : 1001;
+        $newIdPo = $lastIdPo + 1;        
 
         // Buat Purchase Order dengan PPN & Grand Total
-        $purchaseOrder = PurchaseOrder::create([
-            'code_po'         => $id_purchase_orders,
-            'id_customer'     => $request->id_customer,
-            'id_payment_type' => $request->id_payment_type,
-            'id_bank_account' => $request->id_bank_account,
-            'po_type'         => $request->po_type,
-            'status_payment'  => $request->status_payment,
-            'sub_total'       => 0,
+        $purchaseOrder = PurchaseOrder::create([            
+            'customer_id'     => $request->customer_id,
+            'employee_id'     => $request->employee_id,
+            'code_po'         => $newIdPo,
+            'termin'          => $request->termin,            
             'total_tax'       => $request->total_tax,
+            'status_payment'  => $request->status_payment,
+            'sub_total'       => 0,            
             'total_service'   => $request->total_service,
             'deposit'         => $request->deposit,
             'ppn'             => 0, // ✅ PPN otomatis dihitung
@@ -71,19 +69,18 @@ class PurchaseOrderController extends Controller
         $product = [];
         $sub_total = 0;        
 
-        foreach($request->id_product as $key => $pro){                       
-            $product_price = Product::where('id_product', $pro)->value('product_price');              
-            
+        foreach($request->product_id as $key => $pro){  
+            $product_price = $request->price;                                         
             $quantity = $request->input('quantity')[$key];
             $line_total = $product_price * $quantity;
 
             $sub_total += $line_total;
 
             $detailpo = DetailPO::insert([
-                'id_po' => $purchaseOrder->id_po,
-                'code_po' => $purchaseOrder->code_po,
+                'id_po' => $purchaseOrder->id_po,                
                 'id_product' => $pro,
                 'quantity' => $request->input('quantity')[$key],
+                'price' => $request->price,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);            
@@ -102,26 +99,26 @@ class PurchaseOrderController extends Controller
             'grand_total'     => $grand_total, // ✅ Grand Total otomatis dihitung
         ]);  
         
-        $customer = Customer::where('id_customer', $request->id_customer)->first();
-        $currentMonth = date('m');
-        $currentYear = date('y');
+        // $customer = Customer::where('id_customer', $request->id_customer)->first();
+        // $currentMonth = date('m');
+        // $currentYear = date('y');
 
-        $nomor_invoice = sprintf(
-            "%s/AHM/%s/%s/%s",
-            $purchaseOrder->code_po,
-            $customer->customer_name,
-            $currentMonth,
-            $currentYear,
-        );    
+        // $nomor_invoice = sprintf(
+        //     "%s/AHM/%s/%s/%s",
+        //     $purchaseOrder->code_po,
+        //     $customer->customer_name,
+        //     $currentMonth,
+        //     $currentYear,
+        // );    
     
-        // 2️⃣ Buat Invoice dari Purchase Order yang baru dibuat
-        $invoice = Invoice::create([            
-            'id_po'          => $purchaseOrder->id_po,
-            'id_customer'    => $purchaseOrder->id_customer,
-            'id_bank_account'=> $purchaseOrder->id_bank_account,
-            'id_payment_type'=> $purchaseOrder->id_payment_type,
-            'no_invoice'     => $nomor_invoice,
-        ]);        
+        // // 2️⃣ Buat Invoice dari Purchase Order yang baru dibuat
+        // $invoice = Invoice::create([            
+        //     'id_po'          => $purchaseOrder->id_po,
+        //     'id_customer'    => $purchaseOrder->id_customer,
+        //     'id_bank_account'=> $purchaseOrder->id_bank_account,
+        //     'id_payment_type'=> $purchaseOrder->id_payment_type,
+        //     'no_invoice'     => $nomor_invoice,
+        // ]);        
         return response()->json([
             'message'  => 'Purchase Order dan Invoice berhasil dibuat!',
             'purchase_order' => $purchaseOrder,
@@ -143,17 +140,16 @@ class PurchaseOrderController extends Controller
         $purchaseOrder = PurchaseOrder::findOrFail($id);
 
         $request->validate([
-            'id_customer' => 'sometimes|exists:customers,id_customer',
-            'id_payment_type' => 'sometimes|exists:payment_types,id_payment_type',
-            'id_bank_account' => 'sometimes|exists:bank_accounts,id_bank_account',
-            'po_type' => 'sometimes|in:type1,type2,type3',
+            'customer_id'    => 'sometimes|exists:customers,customer_id',
+            'employee_id'    => 'sometimes|exists:employees, employee_id',
+            'po_type'        => 'sometimes|in:type1,type2,type3',
             'status_payment' => 'sometimes|string',
-            'sub_total' => 'sometimes|integer',
-            'total_tax' => 'sometimes|integer',
-            'total_service' => 'sometimes|integer',
-            'deposit' => 'sometimes|integer',
-            'issue_at' => 'sometimes|date',
-            'due_at' => 'sometimes|date',
+            'sub_total'      => 'sometimes|integer',
+            'total_tax'      => 'sometimes|integer',
+            'total_service'  => 'sometimes|integer',
+            'deposit'        => 'sometimes|integer',
+            'issue_at'       => 'sometimes|date',
+            'due_at'         => 'sometimes|date',
         ]);
 
         // Hitung ulang PPN dan Grand Total jika nilai sub_total berubah

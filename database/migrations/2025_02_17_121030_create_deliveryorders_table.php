@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('deliveryorders', function (Blueprint $table) {
             $table->id('id_do');
-            $table->foreignId('id_customer')->constrained('customers', 'id_customer')->onDelete('cascade');
-            $table->foreignId('id_employee')->constrained('employees', 'id_employee')->onDelete('cascade');
-            $table->foreignId('id_bank_account')->constrained('bank_accounts', 'id_bank_account')->onDelete('cascade');
+            $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade');
+            $table->foreignId('employee_id')->constrained('employees', 'employee_id')->onDelete('cascade');            
             $table->foreignId('id_po')->constrained('purchaseorders', 'id_po')->onDelete('cascade');
-            $table->date('issued_at');
+            $table->integer('code_do');
+            $table->date('issue_at');
             $table->date('due_at');
             $table->timestamps();
         });

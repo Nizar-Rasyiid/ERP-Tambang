@@ -11,6 +11,7 @@ use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\DeliveryOrderController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\DetailPoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,7 @@ Route::get('/assets', [AssetController::class, 'index'])->name('get.asset');
 Route::post('/assets_code', [AssetController::class, 'store'])->name('post.asset');
 //b
 Route::get('/bank_accounts', [BankAccountController::class, 'index'])->name('get.bank_account');
+Route::get('/bank_accounts/{id}', [BankAccountController::class, 'show'])->name('show.bank_account');
 Route::post('/bank_accounts_code', [BankAccountController::class, 'store'])->name('post.bank_account');
 //c
 // Route::apiResource('customers', CustomerController::class);
@@ -42,6 +44,9 @@ Route::post('/store-customers', [CustomerController::class, 'store'])->name('pos
 //d
 Route::get('/deliver_orders', [DeliveryOrderController::class, 'index'])->name('get.delivery_order');
 Route::post('/delivery_orders_code', [DeliveryOrderController::class, 'store'])->name('post.delivery_order');
+
+Route::get('/details_po', [DetailPoController::class, 'index'])->name('get.detailpo');
+Route::get('/detail_po/{id}', [DetailPoController::class, 'show'])->name('show.detailpo');
 //e
 Route::get('/employees', [EmployeeController::class, 'index'])->name('get.employees');
 Route::post('/employees_code', [EmployeeController::class, 'store'])->name('post.employees');
@@ -57,6 +62,7 @@ Route::get('/invoices', [InvoiceController::class, 'index'])->name('get.invoices
 //o
 //p
 Route::get('/products', [ProductController::class, 'index'])->name('get.product');
+Route::get('/products/{id}', [ProductController::class, 'show'])->name('show.product');
 Route::post('/products_code', [ProductController::class, 'store'])->name('post.products');
 
 Route::get('/payment_types', [PaymentTypeController::class, 'index'])->name('get.payment_type');

@@ -5,18 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Invoice extends Model
+class Quatation extends Model
 {
     use HasFactory;
-    protected $table = 'invoices';
+    protected $table = 'quatations';
+    protected $primaryKey = 'id_quatation';
 
     protected $fillable = [
-        'id_po',
+        'id_do',
         'customer_id',
         'employee_id',
-        'code_invoice',
-        'no_invoice',
+        'code_quatation',
+        'no_quatation',
         'issue_at',
-        'due_at'
+        'due_at',
     ];
 }

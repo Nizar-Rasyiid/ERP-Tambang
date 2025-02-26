@@ -12,9 +12,8 @@ class DeliveryOrder extends Model
     protected $primaryKey = 'id_do';
 
     protected $fillable = [
-        'id_customer',
-        'id_employee',
-        'id_bank_account',
+        'customer_id',
+        'employee_id',        
         'id_po',
         'code_do',
         'issue_at',
