@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('id_invoice');
             
             $table->foreignId('id_do')
+                ->nullable()
                 ->references('id_do')
                 ->on('deliveryorders')
                 ->onDelete('cascade');

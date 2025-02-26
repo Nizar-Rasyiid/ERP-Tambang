@@ -44,7 +44,7 @@ class DeliveryOrderController extends Controller
             'id_bank_account' => $request->id_bank_account,
             'id_po'           => $request->id_po,
             'code_do'         => $code_do,
-            'issue_at'       => $request->issue_at,
+            'issued_at'       => $request->issued_at,
             'due_at'          => $request->due_at,
         ]);
 

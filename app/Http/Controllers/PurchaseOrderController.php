@@ -67,26 +67,41 @@ class PurchaseOrderController extends Controller
             'due_at'          => $request->due_at,
         ]); 
 
+        // Ambil id_product sebagai array atau kosongkan jika null
+        $id_products = $request->input('id_product', []);
+
+        if (!is_array($id_products) || empty($id_products)) {
+            return response()->json([
+                'message' => 'Produk tidak ditemukan atau kosong!',
+            ], 422);
+        }
+
         // variable total_biaya from product_price
         $product = [];
-        $sub_total = 0;        
+        $sub_total = 0;
 
-        foreach($request->id_product as $key => $pro){                       
-            $product_price = Product::where('id_product', $pro)->value('product_price');              
-            
-            $quantity = $request->input('quantity')[$key];
+        foreach ($id_products as $key => $pro) {
+            $product_price = Product::where('id_product', $pro)->value('product_price');
+
+            if (is_null($product_price)) {
+                return response()->json([
+                    'message' => "Produk dengan ID $pro tidak ditemukan!",
+                ], 404);
+            }
+
+            $quantity = $request->input('quantity')[$key] ?? 0; // Default ke 0 jika kosong
             $line_total = $product_price * $quantity;
 
             $sub_total += $line_total;
 
             $detailpo = DetailPO::insert([
                 'id_po' => $purchaseOrder->id_po,
-                'code_po' => $purchaseOrder->code_po,
                 'id_product' => $pro,
                 'quantity' => $request->input('quantity')[$key],
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);            
+            ]);
+            
         }             
     
         // ✅ Hitung PPN (11% dari sub_total)
@@ -117,6 +132,7 @@ class PurchaseOrderController extends Controller
         // 2️⃣ Buat Invoice dari Purchase Order yang baru dibuat
         $invoice = Invoice::create([            
             'id_po'          => $purchaseOrder->id_po,
+            'id_do'          => null,
             'id_customer'    => $purchaseOrder->id_customer,
             'id_bank_account'=> $purchaseOrder->id_bank_account,
             'id_payment_type'=> $purchaseOrder->id_payment_type,
@@ -128,7 +144,6 @@ class PurchaseOrderController extends Controller
             // 'invoice'  => $invoice
         ], 201);
     }
-    
 
     // 🟠 GET: Tampilkan Purchase Order berdasarkan ID
     public function show($id)

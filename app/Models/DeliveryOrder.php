@@ -17,7 +17,7 @@ class DeliveryOrder extends Model
         'id_bank_account',
         'id_po',
         'code_do',
-        'issue_at',
+        'issued_at',
         'due_at',
     ];
 }

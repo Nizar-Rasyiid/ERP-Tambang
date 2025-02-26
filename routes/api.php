@@ -40,7 +40,7 @@ Route::post('/store-customers', [CustomerController::class, 'store'])->name('pos
 
 
 //d
-Route::get('/deliver_orders', [DeliveryOrderController::class, 'index'])->name('get.delivery_order');
+Route::get('/delivery_orders', [DeliveryOrderController::class, 'index'])->name('get.delivery_order');
 Route::post('/delivery_orders_code', [DeliveryOrderController::class, 'store'])->name('post.delivery_order');
 //e
 Route::get('/employees', [EmployeeController::class, 'index'])->name('get.employees');

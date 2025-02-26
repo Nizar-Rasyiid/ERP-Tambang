@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('id_employee')->constrained('employees', 'id_employee')->onDelete('cascade');
             $table->foreignId('id_bank_account')->constrained('bank_accounts', 'id_bank_account')->onDelete('cascade');
             $table->foreignId('id_po')->constrained('purchaseorders', 'id_po')->onDelete('cascade');
+            $table->string('code_do');
             $table->date('issued_at');
             $table->date('due_at');
             $table->timestamps();
