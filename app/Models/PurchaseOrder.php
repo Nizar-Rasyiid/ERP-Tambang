@@ -12,20 +12,18 @@ class PurchaseOrder extends Model
     protected $primaryKey = 'id_po';
 
     protected $fillable = [
-        'id_customer',
-        'id_payment_type',
-        'id_bank_account',  
+        'customer_id',
+        'employee_id',
         'code_po',
-        'po_type',
+        'termin',
+        'total_tax',        
         'status_payment',
         'sub_total',
-        'total_tax',
-        'total_service',
         'deposit',
         'ppn',
         'grand_total',
         'issue_at',
-        'due_at'
+        'due_at',
     ];
 
         // Accessor untuk perhitungan PPN

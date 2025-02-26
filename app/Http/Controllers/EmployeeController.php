@@ -30,21 +30,26 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'employee_name'    => 'required|string|max:255',
-            'employee_phone'   => 'required|string|max:15',
-            'employee_email'   => 'required|string|email|max:255|unique:employees',
-            'employee_address' => 'required|string|max:255',
-            'nik'              => 'required|integer',
-            'position'         => 'required|string|max:255',
+            'employee_code'     => 'required|integer',
+            'employee_name'     => 'required|string|max:255',
+            'employee_phone'    => 'required|string|max:15',
+            'employee_email'    => 'required|string|email|max:255|unique:employees',
+            'employee_address'  => 'required|string|max:255',
+            'employee_nik'      => 'required|integer|max:16',
+            'employee_position' => 'required|string|max:255',
         ]);
+        $lastCode = Employee::latest()->first();
+        $lastCode = $lastCode ? $lastCode->employee : 1000;
+        $newCode = $lastCode + 1;
 
         $employee = Employee::create([
-            'employee_name' => $request->employee_name,
-            'employee_phone' => $request->employee_phone,
-            'employee_email' => $request->employee_email,
-            'employee_address' => $request->employee_address,
-            'nik' => $request->nik,
-            'position' => $request->position,
+            'employee_code'     => $newCode,
+            'employee_name'     => $request->employee_name,
+            'employee_phone'    => $request->employee_phone,
+            'employee_email'    => $request->employee_email,
+            'employee_address'  => $request->employee_address,
+            'employee_nik'      => $request->employee_nik,
+            'employee_position' => $request->employee_position,
         ]);
 
         return response()->json([

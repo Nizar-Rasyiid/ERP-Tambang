@@ -11,11 +11,12 @@ class Invoice extends Model
     protected $table = 'invoices';
 
     protected $fillable = [
-        'id_do',
         'id_po',
-        'id_customer',
-        'id_bank_account',
-        'id_payment_type',
+        'customer_id',
+        'employee_id',
+        'code_invoice',
         'no_invoice',
+        'issue_at',
+        'due_at'
     ];
 }

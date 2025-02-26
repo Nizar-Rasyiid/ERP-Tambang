@@ -21,15 +21,28 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'product_image' => 'required|string',
-            'product_name' => 'required|string',
-            'product_price' => 'required|integer',
-            'stock' => 'required|integer',
-            'status' => 'required|string',
+        $request->validate([            
+            'product_sn'    => 'required|string',
+            'product_desc'  => 'required|string',
+            'product_brand' => 'required|string',
+            'product_uom'   => 'required|string',
+            'product_stock' => 'required|integer',
+            'product_image' => 'string',            
         ]);
 
-        $product = Product::create($request->all());
+        $lastCode = Product::latest()->first();
+        $lastCodeProd = $lastCode ? $lastCode->product_code : 1000;
+        $newCodeProd = $lastCodeProd + 1;
+
+        $product = Product::create([  
+            'product_code'  => $newCodeProd,
+            'product_sn'    => $request->product_sn,         
+            'product_desc'  => $request->product_desc,
+            'product_brand' => $request->product_brand,
+            'product_uom'   => $request->product_uom,
+            'product_stock' => $request->product_stock,
+            'product_image' => $request->product_image,
+        ]);
         return response()->json($product, 201);
     }
 

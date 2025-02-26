@@ -12,35 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('invoices', function (Blueprint $table) {
-            $table->id('id_invoice');
-            
-            $table->foreignId('id_do')
-                ->nullable()
-                ->references('id_do')
-                ->on('deliveryorders')
-                ->onDelete('cascade');
-        
+            $table->id('id_invoice');                                
+
             $table->foreignId('id_po')
                 ->references('id_po')
                 ->on('purchaseorders')
                 ->onDelete('cascade');
         
-            $table->foreignId('id_customer')
-                ->references('id_customer')
+            $table->foreignId('customer_id')
+                ->references('customer_id')
                 ->on('customers')
                 ->onDelete('cascade');
-        
-            $table->foreignId('id_bank_account')
-                ->references('id_bank_account')
-                ->on('bank_accounts')
+
+            $table->foreignId('employee_id')
+                ->references('employee_id')
+                ->on('employees')
                 ->onDelete('cascade');
-        
-            $table->foreignId('id_payment_type')
-                ->references('id_payment_type')
-                ->on('payment_types')
-                ->onDelete('cascade');
-        
+
+            $table->integer('code_invoice');
             $table->string('no_invoice');
+            $table->date('issue_at');
+            $table->date('due_at');
             $table->timestamps();
         });
     }

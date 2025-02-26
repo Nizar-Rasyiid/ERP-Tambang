@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('purchaseorders', function (Blueprint $table) {
-            $table->id('id_po');            
-            $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade');                        
+        Schema::create('salesorders', function (Blueprint $table) {
+            $table->id('id_so');
+            $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade');            
             $table->foreignId('employee_id')->constrained('employees', 'employee_id')->onDelete('cascade');
-            $table->text('code_po');
+            $table->text('code_so');
             $table->text('termin');
             $table->integer('total_tax');            
             $table->string('status_payment');            
@@ -27,7 +27,6 @@ return new class extends Migration
             $table->date('due_at');
             $table->timestamps();
         });
-        
     }
 
     /**
@@ -35,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('purchaseorders');
+        Schema::dropIfExists('salesorders');
     }
 };

@@ -12,7 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('quatations', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_quatation');                                            
+    
+            $table->foreignId('id_po')
+                ->references('id_po')
+                ->on('purchaseorders')
+                ->onDelete('cascade');
+        
+            $table->foreignId('customer_id')
+                ->references('customer_id')
+                ->on('customers')
+                ->onDelete('cascade');
+
+            $table->foreignId('employee_id')
+                ->references('employee_id')
+                ->on('employees')
+                ->onDelete('cascade');
+
+            $table->integer('code_quatation');
+            $table->string('no_quatation');
+            $table->date('issue_at');
+            $table->date('due_at');
             $table->timestamps();
         });
     }
