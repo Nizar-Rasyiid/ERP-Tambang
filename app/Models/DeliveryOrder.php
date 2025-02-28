@@ -16,7 +16,7 @@ class DeliveryOrder extends Model
         'employee_id',        
         'id_po',
         'code_do',
-        'issue_at',
+        'issued_at',
         'due_at',
     ];
 }

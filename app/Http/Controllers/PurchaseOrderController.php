@@ -65,9 +65,18 @@ class PurchaseOrderController extends Controller
             'due_at'          => $request->due_at,
         ]); 
 
+        // Ambil id_product sebagai array atau kosongkan jika null
+        $id_products = $request->input('id_product', []);
+
+        if (!is_array($id_products) || empty($id_products)) {
+            return response()->json([
+                'message' => 'Produk tidak ditemukan atau kosong!',
+            ], 422);
+        }
+
         // variable total_biaya from product_price
         $product = [];
-        $sub_total = 0;        
+        $sub_total = 0;
 
         foreach($request->product_id as $key => $pro){  
             $product_price = $request->price;                                         
@@ -83,7 +92,8 @@ class PurchaseOrderController extends Controller
                 'price' => $request->price,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);            
+            ]);
+            
         }             
     
         // ✅ Hitung PPN (11% dari sub_total)
@@ -125,7 +135,6 @@ class PurchaseOrderController extends Controller
             // 'invoice'  => $invoice
         ], 201);
     }
-    
 
     // 🟠 GET: Tampilkan Purchase Order berdasarkan ID
     public function show($id)
