@@ -57,7 +57,7 @@ class PurchaseOrderController extends Controller
             'total_tax'       => $request->total_tax,
             'status_payment'  => $request->status_payment,
             'sub_total'       => 0,            
-            'total_service'   => $request->total_service,
+            'total_service'   => 0,
             'deposit'         => $request->deposit,
             'ppn'             => 0, // ✅ PPN otomatis dihitung
             'grand_total'     => 0, // ✅ Grand Total otomatis dihitung

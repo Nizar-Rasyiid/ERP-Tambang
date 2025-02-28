@@ -39,7 +39,7 @@ class DeliveryOrderController extends Controller
         // 1️⃣ Buat Delivery Order (DO)
         $deliveryOrder = DeliveryOrder::create([
             'customer_id'     => $request->id_customer,
-            'employee_id'     => $request->id_employee,            
+            'employee_id'     => $request->id_employee,
             'id_po'           => $request->id_po,
             'code_do'         => $code_do,
             'issue_at'        => $request->issue_at,
