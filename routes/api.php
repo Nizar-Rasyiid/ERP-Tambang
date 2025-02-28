@@ -12,6 +12,8 @@ use App\Http\Controllers\DeliveryOrderController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\DetailPoController;
+use App\Http\Controllers\VendorController;
+use App\Http\Controllers\OpexController;
 
 /*
 |--------------------------------------------------------------------------
