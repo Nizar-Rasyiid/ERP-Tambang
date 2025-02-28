@@ -14,7 +14,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\DetailPoController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\OpexController;
-
+use App\Http\Controllers\SalesOrderController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -43,26 +43,16 @@ Route::post('/store-customers', [CustomerController::class, 'store'])->name('pos
 // Route::post('/customers_code', [CustomerController::class, 'store'])->name('post.customer');
 
 
-//d
 Route::get('/delivery_orders', [DeliveryOrderController::class, 'index'])->name('get.delivery_order');
 Route::post('/delivery_orders_code', [DeliveryOrderController::class, 'store'])->name('post.delivery_order');
 
 Route::get('/details_po', [DetailPoController::class, 'index'])->name('get.detailpo');
 Route::get('/detail_po/{id}', [DetailPoController::class, 'show'])->name('show.detailpo');
-//e
 Route::get('/employees', [EmployeeController::class, 'index'])->name('get.employees');
 Route::post('/employees_code', [EmployeeController::class, 'store'])->name('post.employees');
-//f
-//g
-//h
-//i
+
 Route::get('/invoices', [InvoiceController::class, 'index'])->name('get.invoices');
-//k
-//l
-//m
-//n
-//o
-//p
+
 Route::get('/products', [ProductController::class, 'index'])->name('get.product');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('show.product');
 Route::post('/products_code', [ProductController::class, 'store'])->name('post.products');
@@ -73,6 +63,15 @@ Route::post('/payment_types_code', [PaymentTypeController::class, 'store'])->nam
 Route::get('/purchase_orders', [PurchaseOrderController::class, 'index'])->name('get.purchase_order');
 Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])->name('post.purchase_order');
 Route::get('/purchase_orders/{id}', [PurchaseOrderController::class, 'show'])->name('show.purchase_order');
+
+Route::get('/vendors', [VendorController::class, 'index'])->name('get.vendor');
+Route::post('/vendors_code', [VendorController::class, 'store'])->name('post.vendor');
+
+Route::get('/opex', [OpexController::class, 'index'])->name('get.opex');
+Route::post('/opex_code', [OpexController::class, 'store'])->name('post.opex');
+
+Route::get('/sales_orders', [SalesOrderController::class, 'index'])->name('get.sales_order');
+Route::post('/sales_orders_code', [SalesOrderController::class, 'store'])->name('post.sales_order');
 //q
 //r
 //s
