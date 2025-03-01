@@ -22,4 +22,12 @@ class Employee extends Model
         'employee_nik',
         'employee_position'
     ];
+
+    public function salesOrder(){
+        return $this->belongsTo(SalesOrder::class, 'employee_id', 'employee_id');
+    }
+
+    public function deliveryOrder(){
+        return $this->belongsTo(DeliveryOrder::class, 'employee_id');
+    }
 }

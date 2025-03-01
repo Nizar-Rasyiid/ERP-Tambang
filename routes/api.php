@@ -15,6 +15,8 @@ use App\Http\Controllers\DetailPoController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\OpexController;
 use App\Http\Controllers\SalesOrderController;
+use App\Http\Controllers\DetailSoController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -44,11 +46,20 @@ Route::post('/store-customers', [CustomerController::class, 'store'])->name('pos
 
 
 Route::get('/delivery_orders', [DeliveryOrderController::class, 'index'])->name('get.delivery_order');
-Route::post('/delivery_orders_code', [DeliveryOrderController::class, 'store'])->name('post.delivery_order');
+Route::get('/delivery_orders/{id}', [DeliveryOrderController::class, 'show'])->name('get.do');
+Route::get('/delivery_sales/{id}', [DeliveryOrderController::class, 'SoShow']);
+Route::post('/store-do', [DeliveryOrderController::class, 'store'])->name('store.do');
 
 Route::get('/details_po', [DetailPoController::class, 'index'])->name('get.detailpo');
 Route::get('/detail_po/{id}', [DetailPoController::class, 'show'])->name('show.detailpo');
+
+Route::get('/details_so', [DetailSoController::class, 'index'])->name('get.detailso');
+Route::get('/details_so/{id}', [DetailSoController::class, 'show'])->name('show.detailso');
+
+Route::get('/detail_do/{id}', [DetailSoController::class, 'DoShow'])->name('get.do');
+
 Route::get('/employees', [EmployeeController::class, 'index'])->name('get.employees');
+Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('show.employees');
 Route::post('/employees_code', [EmployeeController::class, 'store'])->name('post.employees');
 
 Route::get('/invoices', [InvoiceController::class, 'index'])->name('get.invoices');
@@ -71,6 +82,7 @@ Route::get('/opex', [OpexController::class, 'index'])->name('get.opex');
 Route::post('/opex_code', [OpexController::class, 'store'])->name('post.opex');
 
 Route::get('/sales_orders', [SalesOrderController::class, 'index'])->name('get.sales_order');
+Route::get('/sales_orders/{id}', [SalesOrderController::class, 'show'])->name('show.sales_order');
 Route::post('/sales_orders_code', [SalesOrderController::class, 'store'])->name('post.sales_order');
 //q
 //r

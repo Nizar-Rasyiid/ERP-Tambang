@@ -12,7 +12,7 @@ class SalesOrder extends Model
     protected $primaryKey = 'id_so';
 
     protected $fillable = [
-        'employee_id',
+        'customer_id',
         'employee_id',
         'code_so',
         'termin',
@@ -25,4 +25,8 @@ class SalesOrder extends Model
         'issue_at',
         'due_at'
     ];
+
+    public function customer(){
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
 }

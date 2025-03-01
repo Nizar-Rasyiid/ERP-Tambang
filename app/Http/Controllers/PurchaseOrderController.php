@@ -43,6 +43,9 @@ class PurchaseOrderController extends Controller
         //     'issue_at'        => 'required|date',
         //     'due_at'          => 'required|date',            
         // ]);
+        $request->validate([
+            'purchase_order_details' => 'required|array'
+        ]);
 
         $lastPo = PurchaseOrder::latest()->first();
         $lastIdPo = $lastPo ? $lastPo->code_po : 1001;
@@ -65,31 +68,21 @@ class PurchaseOrderController extends Controller
             'due_at'          => $request->due_at,
         ]); 
 
-        // Ambil id_product sebagai array atau kosongkan jika null
-        $id_products = $request->input('id_product', []);
-
-        if (!is_array($id_products) || empty($id_products)) {
-            return response()->json([
-                'message' => 'Produk tidak ditemukan atau kosong!',
-            ], 422);
-        }
-
+        // Ambil id_product sebagai array atau kosongkan jika null        
         // variable total_biaya from product_price
         $product = [];
         $sub_total = 0;
 
-        foreach($request->product_id as $key => $pro){  
-            $product_price = $request->price;                                         
-            $quantity = $request->input('quantity')[$key];
-            $line_total = $product_price * $quantity;
+        foreach($request->purchase_order_details as $key => $pro){                                                                
+            $line_total = $pro['price'] * $pro['quantity'];
 
             $sub_total += $line_total;
 
             $detailpo = DetailPO::insert([
                 'id_po' => $purchaseOrder->id_po,                
-                'id_product' => $pro,
-                'quantity' => $request->input('quantity')[$key],
-                'price' => $request->price,
+                'product_id' => $pro['product_id'],
+                'quantity' => $pro['quantity'],
+                'price' => $pro['price'],
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('deliveryorders', function (Blueprint $table) {
             $table->id('id_do');
             $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade');
-            $table->foreignId('employee_id')->constrained('employees', 'employee_id')->onDelete('cascade');            
-            $table->foreignId('id_po')->constrained('purchaseorders', 'id_po')->onDelete('cascade');
+            $table->foreignId('employee_id')->constrained('employees', 'employee_id')->onDelete('cascade');                    
+            $table->foreignId('id_so')->constrained('salesorders', 'id_so')->onDelete('cascade');
+            $table->integer('sub_total');
             $table->integer('code_do');
             $table->date('issue_at');
             $table->date('due_at');

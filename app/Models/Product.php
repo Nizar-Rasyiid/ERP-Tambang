@@ -19,4 +19,12 @@ class Product extends Model
         'product_stock',
         'product_image',
     ];
+
+    public function detailSo(){
+        return $this->belongsTo(DetailSo::class, 'product_id', 'product_id');
+    }
+
+    public function detailDo(){
+        return $this->belongsTo(DetailDo::class, 'product_id');
+    }
 }
