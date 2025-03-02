@@ -31,6 +31,9 @@ use App\Http\Controllers\DetailSoController;
 //a
 Route::get('/assets', [AssetController::class, 'index'])->name('get.asset');
 Route::post('/assets_code', [AssetController::class, 'store'])->name('post.asset');
+
+Route::get('/account_receivable', [SalesOrderController::class, 'getAR'])->name('get.ar');
+Route::get('/account_payable', [PurchaseOrderController::class, 'getAP'])->name('get.ap');
 //b
 Route::get('/bank_accounts', [BankAccountController::class, 'index'])->name('get.bank_account');
 Route::get('/bank_accounts/{id}', [BankAccountController::class, 'show'])->name('show.bank_account');
@@ -63,6 +66,7 @@ Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('show.e
 Route::post('/employees_code', [EmployeeController::class, 'store'])->name('post.employees');
 
 Route::get('/invoices', [InvoiceController::class, 'index'])->name('get.invoices');
+Route::post('/invoices_code', [InvoiceController::class, 'store'])->name('post.invoices');
 
 Route::get('/products', [ProductController::class, 'index'])->name('get.product');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('show.product');

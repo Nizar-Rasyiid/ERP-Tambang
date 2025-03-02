@@ -26,15 +26,23 @@ class PurchaseOrder extends Model
         'due_at',
     ];
 
-        // Accessor untuk perhitungan PPN
-        public function getCalculatedPpnAttribute()
-        {
-            return ($this->sub_total * $this->ppn) / 100;
-        }
+        // // Accessor untuk perhitungan PPN
+        // public function getCalculatedPpnAttribute()
+        // {
+        //     return ($this->sub_total * $this->ppn) / 100;
+        // }
     
-        // Accessor untuk perhitungan Grand Total
-        public function getCalculatedGrandTotalAttribute()
-        {
-            return $this->sub_total + $this->total_tax + $this->total_service - $this->deposit + $this->calculated_ppn;
+        // // Accessor untuk perhitungan Grand Total
+        // public function getCalculatedGrandTotalAttribute()
+        // {
+        //     return $this->sub_total + $this->total_tax + $this->total_service - $this->deposit + $this->calculated_ppn;
+        // }
+
+        public function customer(){
+            return $this->belongsTo(Customer::class, 'customer_id');
+        }
+
+        public function employee(){
+            return $this->belongsTo(Employee::class, 'employee_id');
         }
 }

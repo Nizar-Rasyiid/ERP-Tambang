@@ -176,4 +176,12 @@ class PurchaseOrderController extends Controller
 
         return response()->json(['message' => 'Purchase Order deleted successfully']);
     }
+
+    public function getAP(){
+        $purchaseOrder = PurchaseOrder::with(['customer', 'employee'])           
+            ->whereColumn('deposit', '<', 'grand_total')
+            ->get();
+        
+        return response()->json($purchaseOrder);
+    }
 }

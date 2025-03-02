@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
+use App\Models\DetailInvoice;
 
 class InvoiceController extends Controller
 {
@@ -33,17 +34,15 @@ class InvoiceController extends Controller
         $request->validate([
             'delivery_order_details' => 'required|array',
         ]);
-        $lastDo = DeliveryOrder::latest()->first();
-        $lastIdDo = $lastDo ? $lastDo->code_do : 0;
-        $newIdDo = $lastIdDo + 1;        
+        $last = Invoice::latest()->first();
+        $lastId = $last ? $last->code_invoice : 1001;
+        $newId = $lastId + 1;        
     
         // 1️⃣ Buat Delivery Order (DO)
-        $deliveryOrder = DeliveryOrder::create([
+        $deliveryOrder = Invoice::create([
             'customer_id'     => $request->customer_id,
             'employee_id'     => $request->employee_id,
-            'id_so'           => $request->id_so,
-            'code_do'         => $newIdDo, 
-            'sub_total'       => 0,          
+            'code_invoice'    => $newId,                
             'issue_at'        => $request->issue_at,
             'due_at'          => $request->due_at,
         ]);     
@@ -55,8 +54,9 @@ class InvoiceController extends Controller
             $line_total = $pro['price'] * $pro['quantity'];
             $sub_total += $line_total;
             
-            $detailso = DetailDo::create([
-                'id_do'         => $deliveryOrder->id_do,
+            $detailso = DetailInvoice::create([
+                'id_invoice'    => $deliveryOrder->id_invoice,
+                'id_do'         => $pro['id_do'],
                 'product_id'    => $pro['product_id'],
                 'quantity'      => $pro['quantity'],
                 'price'         => $pro['price'],
@@ -65,7 +65,7 @@ class InvoiceController extends Controller
             ]);
         }
 
-        $Do = DeliveryOrder::where('id_do', $deliveryOrder->id_do)->update([
+        $Do = Invoice::where('id_invoice', $deliveryOrder->id_invoice)->update([
             'sub_total'     => $sub_total,
         ]);
     

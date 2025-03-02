@@ -29,4 +29,12 @@ class SalesOrder extends Model
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
     }
+    
+    public function employee(){
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
+    public function deliveryorder(){
+        return $this->hasMany(DeliveryOrder::class, 'id_so');
+    }
 }

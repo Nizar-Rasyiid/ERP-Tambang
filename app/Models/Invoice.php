@@ -9,13 +9,15 @@ class Invoice extends Model
 {
     use HasFactory;
     protected $table = 'invoices';
+    protected $primaryKey = 'id_invoice';
 
-    protected $fillable = [
-        'id_po',
+    protected $fillable = [        
         'customer_id',
         'employee_id',
-        'code_invoice',
-        'no_invoice',
+        'sub_total',
+        'total_tax',
+        'ppn',
+        'code_invoice',                
         'issue_at',
         'due_at'
     ];

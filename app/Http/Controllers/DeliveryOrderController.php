@@ -13,8 +13,8 @@ class DeliveryOrderController extends Controller
      */
     public function index()
     {
-        $deliveryOrders = DeliveryOrder::all();
-        return response()->json($deliveryOrders);
+        $deliveryOrder = DeliveryOrder::with(['customer','employee','salesorder'])->get();
+        return response()->json($deliveryOrder);
     }
 
     /**
@@ -34,7 +34,7 @@ class DeliveryOrderController extends Controller
             'delivery_order_details' => 'required|array',
         ]);
         $lastDo = DeliveryOrder::latest()->first();
-        $lastIdDo = $lastDo ? $lastDo->code_do : 0;
+        $lastIdDo = $lastDo ? $lastDo->code_do : 1000;
         $newIdDo = $lastIdDo + 1;        
     
         // 1️⃣ Buat Delivery Order (DO)
@@ -80,7 +80,7 @@ class DeliveryOrderController extends Controller
      */
     public function show(string $id)
     {
-        $deliveryOrder = DeliveryOrder::with('customer')->find($id);
+        $deliveryOrder = DeliveryOrder::with(['customer','employee'])->find($id);
         return response()->json($deliveryOrder);
     }
 

@@ -14,5 +14,8 @@ class DetailInvoice extends Model
     protected $fillable = [
         'id_invoice',
         'id_do',
+        'product_id',
+        'quantity',
+        'price',
     ];
 }

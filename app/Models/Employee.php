@@ -24,10 +24,14 @@ class Employee extends Model
     ];
 
     public function salesOrder(){
-        return $this->belongsTo(SalesOrder::class, 'employee_id', 'employee_id');
+        return $this->belongsTo(SalesOrder::class, 'employee_id');
     }
 
     public function deliveryOrder(){
         return $this->belongsTo(DeliveryOrder::class, 'employee_id');
+    }
+
+    public function purchaseorder(){
+        return $this->belongsTo(PurchaseOrder::class, 'employee_id');
     }
 }
