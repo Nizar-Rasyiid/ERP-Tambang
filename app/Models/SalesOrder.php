@@ -22,6 +22,7 @@ class SalesOrder extends Model
         'deposit',
         'ppn',
         'grand_total',
+        'has_invoice',
         'issue_at',
         'due_at'
     ];

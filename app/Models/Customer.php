@@ -29,6 +29,9 @@ class Customer extends Model
         return $this->belongsTo(DeliveryOrder::class, 'customer_id');
     }
     public function purchaseorder(){
-        return $this0>belongsTo(PurchaseOrder::class, 'customer_id');
+        return $this->belongsTo(PurchaseOrder::class, 'customer_id');
+    }
+    public function invoice(){
+        return $this->belongsTo(Invoice::class, 'customer_id');
     }
 }

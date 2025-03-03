@@ -14,7 +14,7 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $invoice = Invoice::all();
+        $invoice = Invoice::with(['customer', 'employee'])->get();
         return response()->json($invoice);
     }
 
@@ -35,7 +35,7 @@ class InvoiceController extends Controller
             'delivery_order_details' => 'required|array',
         ]);
         $last = Invoice::latest()->first();
-        $lastId = $last ? $last->code_invoice : 1001;
+        $lastId = $last ? $last->code_invoice : 1000;
         $newId = $lastId + 1;        
     
         // 1️⃣ Buat Delivery Order (DO)

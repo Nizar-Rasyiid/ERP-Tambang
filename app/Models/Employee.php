@@ -34,4 +34,8 @@ class Employee extends Model
     public function purchaseorder(){
         return $this->belongsTo(PurchaseOrder::class, 'employee_id');
     }
+
+    public function invoice(){
+        return $this->belongsTo(Invoice::class, 'employee_id', 'employee_id');
+    }
 }
