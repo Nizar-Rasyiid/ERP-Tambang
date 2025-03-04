@@ -21,4 +21,17 @@ class Customer extends Model
         'customer_npwp',
         'customer_contact',
     ];
+
+    public function saledorder(){
+        return $this->belongsTo(SalesOrder::class, 'customer_id');
+    }
+    public function deliveryorder(){
+        return $this->belongsTo(DeliveryOrder::class, 'customer_id');
+    }
+    public function purchaseorder(){
+        return $this->belongsTo(PurchaseOrder::class, 'customer_id');
+    }
+    public function invoice(){
+        return $this->belongsTo(Invoice::class, 'customer_id');
+    }
 }

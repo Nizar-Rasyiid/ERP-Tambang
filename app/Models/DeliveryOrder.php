@@ -14,9 +14,20 @@ class DeliveryOrder extends Model
     protected $fillable = [
         'customer_id',
         'employee_id',        
-        'id_po',
+        'id_so',
+        'sub_total',
         'code_do',
-        'issued_at',
+        'issue_at',
         'due_at',
     ];
+
+    public function customer(){
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }    
+    public function employee(){
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+    public function salesorder(){
+        return $this->belongsTo(SalesOrder::class, 'id_so');
+    }
 }

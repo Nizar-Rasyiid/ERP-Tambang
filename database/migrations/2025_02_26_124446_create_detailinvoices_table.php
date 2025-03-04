@@ -17,13 +17,19 @@ return new class extends Migration
             $table->foreignId('id_invoice')
                 ->references('id_invoice')
                 ->on('invoices')
-                ->onDelete('cascade');            
+                ->onDelete('cascade');  
+            
+            $table->foreignId('product_id')
+                ->constrained('products', 'product_id')
+                ->onDelete('cascade');
 
             $table->foreignId('id_do')
                 ->references('id_do')
                 ->on('deliveryorders')
                 ->onDelete('cascade');
-                            
+            
+            $table->integer('price');
+            $table->integer('quantity');
             $table->timestamps();
         });
     }

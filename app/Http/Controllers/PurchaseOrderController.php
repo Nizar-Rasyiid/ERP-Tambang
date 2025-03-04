@@ -43,6 +43,9 @@ class PurchaseOrderController extends Controller
         //     'issue_at'        => 'required|date',
         //     'due_at'          => 'required|date',            
         // ]);
+        $request->validate([
+            'purchase_order_details' => 'required|array'
+        ]);
 
         $lastPo = PurchaseOrder::latest()->first();
         $lastIdPo = $lastPo ? $lastPo->code_po : 1001;
@@ -57,7 +60,7 @@ class PurchaseOrderController extends Controller
             'total_tax'       => $request->total_tax,
             'status_payment'  => $request->status_payment,
             'sub_total'       => 0,            
-            'total_service'   => $request->total_service,
+            'total_service'   => 0,
             'deposit'         => $request->deposit,
             'ppn'             => 0, // ✅ PPN otomatis dihitung
             'grand_total'     => 0, // ✅ Grand Total otomatis dihitung
@@ -65,31 +68,21 @@ class PurchaseOrderController extends Controller
             'due_at'          => $request->due_at,
         ]); 
 
-        // Ambil id_product sebagai array atau kosongkan jika null
-        $id_products = $request->input('id_product', []);
-
-        if (!is_array($id_products) || empty($id_products)) {
-            return response()->json([
-                'message' => 'Produk tidak ditemukan atau kosong!',
-            ], 422);
-        }
-
+        // Ambil id_product sebagai array atau kosongkan jika null        
         // variable total_biaya from product_price
         $product = [];
         $sub_total = 0;
 
-        foreach($request->product_id as $key => $pro){  
-            $product_price = $request->price;                                         
-            $quantity = $request->input('quantity')[$key];
-            $line_total = $product_price * $quantity;
+        foreach($request->purchase_order_details as $key => $pro){                                                                
+            $line_total = $pro['price'] * $pro['quantity'];
 
             $sub_total += $line_total;
 
             $detailpo = DetailPO::insert([
                 'id_po' => $purchaseOrder->id_po,                
-                'id_product' => $pro,
-                'quantity' => $request->input('quantity')[$key],
-                'price' => $request->price,
+                'product_id' => $pro['product_id'],
+                'quantity' => $pro['quantity'],
+                'price' => $pro['price'],
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -182,5 +175,13 @@ class PurchaseOrderController extends Controller
         $purchaseOrder->delete();
 
         return response()->json(['message' => 'Purchase Order deleted successfully']);
+    }
+
+    public function getAP(){
+        $purchaseOrder = PurchaseOrder::with(['customer', 'employee'])           
+            ->whereColumn('deposit', '<', 'grand_total')
+            ->get();
+        
+        return response()->json($purchaseOrder);
     }
 }

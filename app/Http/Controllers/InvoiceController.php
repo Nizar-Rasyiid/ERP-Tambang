@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
+use App\Models\DetailInvoice;
 
 class InvoiceController extends Controller
 {
@@ -13,7 +14,7 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $invoice = Invoice::all();
+        $invoice = Invoice::with(['customer', 'employee'])->get();
         return response()->json($invoice);
     }
 
@@ -30,7 +31,48 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'delivery_order_details' => 'required|array',
+        ]);
+        $last = Invoice::latest()->first();
+        $lastId = $last ? $last->code_invoice : 1000;
+        $newId = $lastId + 1;        
+    
+        // 1️⃣ Buat Delivery Order (DO)
+        $deliveryOrder = Invoice::create([
+            'customer_id'     => $request->customer_id,
+            'employee_id'     => $request->employee_id,
+            'code_invoice'    => $newId,                
+            'issue_at'        => $request->issue_at,
+            'due_at'          => $request->due_at,
+        ]);     
+        
+        $product = [];
+        $sub_total = 0;
+
+        foreach ($request->delivery_order_details as $key => $pro) {
+            $line_total = $pro['price'] * $pro['quantity'];
+            $sub_total += $line_total;
+            
+            $detailso = DetailInvoice::create([
+                'id_invoice'    => $deliveryOrder->id_invoice,
+                'id_do'         => $pro['id_do'],
+                'product_id'    => $pro['product_id'],
+                'quantity'      => $pro['quantity'],
+                'price'         => $pro['price'],
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ]);
+        }
+
+        $Do = Invoice::where('id_invoice', $deliveryOrder->id_invoice)->update([
+            'sub_total'     => $sub_total,
+        ]);
+    
+        return response()->json([
+            'message'       => 'Delivery Order dan Invoice berhasil dibuat atau diperbarui!',
+            'delivery_order'=> $deliveryOrder,            
+        ], 201);
     }
 
     /**

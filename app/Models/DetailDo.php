@@ -5,17 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DetailInvoice extends Model
+class DetailDo extends Model
 {
     use HasFactory;
-    protected $table = 'detailinvoices';
-    protected $primaryKey = 'id_detail_invoice';
-
+    protected $table = 'detail_do';
+    protected $primaryKey = 'id_detail_do';
     protected $fillable = [
-        'id_invoice',
         'id_do',
         'product_id',
         'quantity',
-        'price',
+        'price'
     ];
+
+    public function product(){
+        return $this->belongsTo(Product::class, 'product_id');
+    }
 }

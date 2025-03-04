@@ -12,7 +12,7 @@ class SalesOrder extends Model
     protected $primaryKey = 'id_so';
 
     protected $fillable = [
-        'employee_id',
+        'customer_id',
         'employee_id',
         'code_so',
         'termin',
@@ -22,7 +22,20 @@ class SalesOrder extends Model
         'deposit',
         'ppn',
         'grand_total',
+        'has_invoice',
         'issue_at',
         'due_at'
     ];
+
+    public function customer(){
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+    
+    public function employee(){
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
+    public function deliveryorder(){
+        return $this->hasMany(DeliveryOrder::class, 'id_so');
+    }
 }

@@ -10,13 +10,13 @@ class SalesOrderController extends Controller
 {
     public function index()
     {
-        $salesOrders = SalesOrder::all();
+        $salesOrders = SalesOrder::with(['customer', 'employee'])->get();
         return response()->json($salesOrders);
     }
 
     public function show($id)
     {
-        $salesOrder = SalesOrder::find($id);
+        $salesOrder = SalesOrder::with(['customer', 'employee'])->find($id);
         if (is_null($salesOrder)) {
             return response()->json(['message' => 'Sales Order not found'], 404);
         }
@@ -24,22 +24,9 @@ class SalesOrderController extends Controller
     }
 
     public function store(Request $request)
-    {
+    {        
         $request->validate([
-            'id_product'      => 'required|array|exists:products,id_product',
-            'quantity'        => 'required|array',
-            'id_customer'     => 'required|exists:customers,id_customer',
-            'id_payment_type' => 'required|exists:payment_types,id_payment_type',
-            'id_bank_account' => 'required|exists:bank_accounts,id_bank_account',
-            'code_so'         => 'required|string',              
-            'so_type'         => 'required|in:type1,type2,type3',
-            'status_payment'  => 'required|string',
-            'sub_total'       => 'required|integer',
-            'total_tax'       => 'required|integer',
-            'total_service'   => 'required|integer',
-            'deposit'         => 'required|integer',
-            'issue_at'        => 'required|date',
-            'due_at'          => 'required|date',            
+            'sales_order_details' => 'required|array'
         ]);
 
         $lastSo = SalesOrder::latest()->first();
@@ -61,33 +48,22 @@ class SalesOrderController extends Controller
             'grand_total'     => 0, // ✅ Grand Total otomatis dihitung
             'issue_at'        => $request->issue_at,
             'due_at'          => $request->due_at,
-        ]); 
-
-        // Ambil id_product sebagai array atau kosongkan jika null
-        $id_products = $request->input('id_product', []);
-
-        if (!is_array($id_products) || empty($id_products)) {
-            return response()->json([
-                'message' => 'Produk tidak ditemukan atau kosong!',
-            ], 422);
-        }
+        ]);         
 
         // variable total_biaya from product_price
         $product = [];
         $sub_total = 0;
 
-        foreach($request->id_product as $key => $pro){  
-            $product_price = $request->price[$key];                                         
-            $quantity = $request->input('quantity')[$key];
-            $line_total = $product_price * $quantity;
+        foreach($request->sales_order_details as $key => $pro){  
+            $line_total = $pro['price'] * $pro['quantity'];
 
             $sub_total += $line_total;
 
             $detailso = DetailSO::create([
             'id_so' => $salesOrder->id_so,                
-            'product_id' => $pro,
-            'quantity' => $quantity,
-            'price' => $product_price,
+            'product_id' => $pro['product_id'],
+            'quantity' => $pro['quantity'],
+            'price' => $pro['price'],
             'created_at' => now(),
             'updated_at' => now(),
             ]);
@@ -105,27 +81,7 @@ class SalesOrderController extends Controller
             'ppn'             => $ppn, // ✅ PPN otomatis dihitung
             'grand_total'     => $grand_total, // ✅ Grand Total otomatis dihitung
         ]);  
-        
-        // $customer = Customer::where('id_customer', $request->id_customer)->first();
-        // $currentMonth = date('m');
-        // $currentYear = date('y');
-
-        // $nomor_invoice = sprintf(
-        //     "%s/AHM/%s/%s/%s",
-        //     $salesOrder->code_so,
-        //     $customer->customer_name,
-        //     $currentMonth,
-        //     $currentYear,
-        // );    
-    
-        // // 2️⃣ Buat Invoice dari Sales Order yang baru dibuat
-        // $invoice = Invoice::create([            
-        //     'id_so'          => $salesOrder->id_so,
-        //     'id_customer'    => $salesOrder->id_customer,
-        //     'id_bank_account'=> $salesOrder->id_bank_account,
-        //     'id_payment_type'=> $salesOrder->id_payment_type,
-        //     'no_invoice'     => $nomor_invoice,
-        // ]);        
+              
         return response()->json([
             'message'  => 'Sales Order dan Invoice berhasil dibuat!',
             'sales_order' => $salesOrder,
@@ -167,5 +123,13 @@ class SalesOrderController extends Controller
 
         $salesOrder->delete();
         return response()->json(['message' => 'Sales Order deleted successfully']);
+    }
+
+    public function getAR(){
+        $salesOrder = SalesOrder::with(['customer','employee'])
+            ->whereColumn('deposit', '<', 'grand_total')
+            ->get();
+        
+        return response()->json($salesOrder);
     }
 }

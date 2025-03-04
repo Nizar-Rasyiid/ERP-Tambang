@@ -29,13 +29,13 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'employee_code'     => 'required|integer',
+        $request->validate([            
             'employee_name'     => 'required|string|max:255',
-            'employee_phone'    => 'required|string|max:15',
+            'employee_phone'    => 'required|string',
             'employee_email'    => 'required|string|email|max:255|unique:employees',
             'employee_address'  => 'required|string|max:255',
-            'employee_nik'      => 'required|integer|max:16',
+            'employee_nik'      => 'required|integer',
+            'employee_end_contract' => 'date',
             'employee_position' => 'required|string|max:255',
         ]);
         $lastCode = Employee::latest()->first();
@@ -48,6 +48,8 @@ class EmployeeController extends Controller
             'employee_phone'    => $request->employee_phone,
             'employee_email'    => $request->employee_email,
             'employee_address'  => $request->employee_address,
+            'employee_salary'   => $request->employee_salary,
+            'employee_end_contract' => now(),
             'employee_nik'      => $request->employee_nik,
             'employee_position' => $request->employee_position,
         ]);

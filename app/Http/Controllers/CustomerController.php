@@ -30,11 +30,24 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+        $validatedData = $request->validate([            
+            'customer_name'    => 'required|string|max:255',
+            'customer_phone'   => 'integer',
+            'customer_email'   => 'string|email|max:255',
+            'customer_address' => 'string|max:255',
+            'customer_npwp'    => 'integer',
+            'customer_contact' => 'string|max:255',
+        ]);
+
+        $lastCode = Customer::latest()->first();
+        $lastCode = $lastCode ? $lastCode->customer_code : 1000;
+        $newCode = $lastCode + 1;
 
         $customer = Customer::create([
-            'customer_name' => $request->customer_name,
-            'customer_phone' => $request->customer_phone,
-            'customer_email' => $request->customer_email,
+            'customer_code'    => $newCode,
+            'customer_name'    => $request->customer_name,
+            'customer_phone'   => $request->customer_phone,
+            'customer_email'   => $request->customer_email,
             'customer_address' => $request->customer_address,
             'npwp' => $request->npwp,
             'contact_person' => $request->contact_person,
