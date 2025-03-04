@@ -20,8 +20,6 @@ return new class extends Migration
             $table->string('vendor_phone');
             $table->string('vendor_address');
             $table->integer('tax_number');
-            
-
             $table->timestamps();
         });
     }
