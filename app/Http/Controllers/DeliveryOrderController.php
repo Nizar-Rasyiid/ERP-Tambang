@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DeliveryOrder;
 use App\Models\DetailDo;
+use App\Models\Customer;
+use App\Models\Employee;
 
 class DeliveryOrderController extends Controller
 {
@@ -16,6 +18,10 @@ class DeliveryOrderController extends Controller
         $deliveryOrder = DeliveryOrder::with(['customer','employee','salesorder'])->get();
         return response()->json($deliveryOrder);
     }
+
+    /**
+     * Search for customers by name.
+     */
 
     /**
      * Show the form for creating a new resource.
@@ -33,29 +39,44 @@ class DeliveryOrderController extends Controller
         $request->validate([
             'delivery_order_details' => 'required|array',
         ]);
-        $lastDo = DeliveryOrder::latest()->first();
-        $lastIdDo = $lastDo ? $lastDo->code_do : 1000;
-        $newIdDo = $lastIdDo + 1;        
     
-        // 1️⃣ Buat Delivery Order (DO)
+        // Ambil bulan & tahun saat ini
+        $currentMonth = date('m'); // 02
+        $currentYear  = date('Y'); // 2025
+        $monthRoman   = [
+            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
+            '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
+            '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
+        ];
+    
+        $lastDo = DeliveryOrder::whereYear('created_at', $currentYear)
+                               ->whereMonth('created_at', $currentMonth)
+                               ->latest('id_do')
+                               ->first();
+    
+        $lastIdDo = $lastDo ? intval(explode('/', $lastDo->code_do)[0]) : 0;
+        $newIdDo  = str_pad($lastIdDo + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
+    
+        // Format kode DO: 00ID/DO/II/2025
+        $formattedCodeDo = "{$newIdDo}/DO/{$monthRoman[$currentMonth]}/{$currentYear}";
+    
+        // Buat Delivery Order
         $deliveryOrder = DeliveryOrder::create([
             'customer_id'     => $request->customer_id,
             'employee_id'     => $request->employee_id,
             'id_so'           => $request->id_so,
-            'code_do'         => $newIdDo, 
+            'code_do'         => $formattedCodeDo,
             'sub_total'       => 0,          
             'issue_at'        => $request->issue_at,
             'due_at'          => $request->due_at,
-        ]);     
-        
-        $product = [];
+        ]);
+    
         $sub_total = 0;
-
-        foreach ($request->delivery_order_details as $key => $pro) {
+        foreach ($request->delivery_order_details as $pro) {
             $line_total = $pro['price'] * $pro['quantity'];
             $sub_total += $line_total;
             
-            $detailso = DetailDo::create([
+            DetailDo::create([
                 'id_do'         => $deliveryOrder->id_do,
                 'product_id'    => $pro['product_id'],
                 'quantity'      => $pro['quantity'],
@@ -64,16 +85,16 @@ class DeliveryOrderController extends Controller
                 'updated_at'    => now(),
             ]);
         }
-
-        $Do = DeliveryOrder::where('id_do', $deliveryOrder->id_do)->update([
-            'sub_total'     => $sub_total,
-        ]);
+    
+        // Update sub_total pada DO
+        $deliveryOrder->update(['sub_total' => $sub_total]);
     
         return response()->json([
-            'message'       => 'Delivery Order dan Invoice berhasil dibuat atau diperbarui!',
+            'message'       => 'Delivery Order berhasil dibuat!',
             'delivery_order'=> $deliveryOrder,            
         ], 201);
     }
+    
 
     /**
      * Display the specified resource.

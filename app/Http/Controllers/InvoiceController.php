@@ -34,28 +34,46 @@ class InvoiceController extends Controller
         $request->validate([
             'delivery_order_details' => 'required|array',
         ]);
-        $last = Invoice::latest()->first();
-        $lastId = $last ? $last->code_invoice : 1000;
-        $newId = $lastId + 1;        
     
-        // 1️⃣ Buat Delivery Order (DO)
-        $deliveryOrder = Invoice::create([
+        // Ambil bulan & tahun saat ini
+        $currentMonth = date('m'); // 02
+        $currentYear  = date('Y'); // 2025
+        $monthRoman   = [
+            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
+            '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
+            '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
+        ];
+    
+        // Cari invoice terakhir dalam bulan dan tahun yang sama
+        $lastInvoice = Invoice::whereYear('created_at', $currentYear)
+                              ->whereMonth('created_at', $currentMonth)
+                              ->latest('id_invoice')
+                              ->first();
+    
+        // Ambil ID terakhir & buat ID baru dengan format 2 digit
+        $lastIdInvoice = $lastInvoice ? intval(explode('/', $lastInvoice->code_invoice)[0]) : 0;
+        $newIdInvoice  = str_pad($lastIdInvoice + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
+    
+        // Format kode Invoice: 00ID/INV/II/2025
+        $formattedCodeInvoice = "{$newIdInvoice}/INV/{$monthRoman[$currentMonth]}/{$currentYear}";
+    
+        // Buat Invoice
+        $invoice = Invoice::create([
             'customer_id'     => $request->customer_id,
             'employee_id'     => $request->employee_id,
-            'code_invoice'    => $newId,                
+            'code_invoice'    => $formattedCodeInvoice,                
             'issue_at'        => $request->issue_at,
             'due_at'          => $request->due_at,
-        ]);     
-        
-        $product = [];
+        ]);
+    
         $sub_total = 0;
-
-        foreach ($request->delivery_order_details as $key => $pro) {
+    
+        foreach ($request->delivery_order_details as $pro) {
             $line_total = $pro['price'] * $pro['quantity'];
             $sub_total += $line_total;
-            
-            $detailso = DetailInvoice::create([
-                'id_invoice'    => $deliveryOrder->id_invoice,
+    
+            DetailInvoice::create([
+                'id_invoice'    => $invoice->id_invoice,
                 'id_do'         => $pro['id_do'],
                 'product_id'    => $pro['product_id'],
                 'quantity'      => $pro['quantity'],
@@ -64,16 +82,16 @@ class InvoiceController extends Controller
                 'updated_at'    => now(),
             ]);
         }
-
-        $Do = Invoice::where('id_invoice', $deliveryOrder->id_invoice)->update([
-            'sub_total'     => $sub_total,
-        ]);
+    
+        // Update sub_total pada Invoice
+        $invoice->update(['sub_total' => $sub_total]);
     
         return response()->json([
-            'message'       => 'Delivery Order dan Invoice berhasil dibuat atau diperbarui!',
-            'delivery_order'=> $deliveryOrder,            
+            'message'  => 'Invoice berhasil dibuat!',
+            'invoice'  => $invoice,            
         ], 201);
     }
+    
 
     /**
      * Display the specified resource.
