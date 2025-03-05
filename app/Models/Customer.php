@@ -34,4 +34,10 @@ class Customer extends Model
     public function invoice(){
         return $this->belongsTo(Invoice::class, 'customer_id');
     }
+    public function inqury(){
+        return $this->belongsTo(Inquiry::class, 'id_inquiry');
+    }
+    public function quatation(){
+        return $this->belognsTo(Quatation::class, 'customer_id');
+    }
 }

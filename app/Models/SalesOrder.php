@@ -16,6 +16,7 @@ class SalesOrder extends Model
         'employee_id',
         'code_so',
         'termin',
+        'payment_type',
         'total_tax',        
         'status_payment',
         'sub_total',

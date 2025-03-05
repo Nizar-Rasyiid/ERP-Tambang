@@ -38,4 +38,12 @@ class Employee extends Model
     public function invoice(){
         return $this->belongsTo(Invoice::class, 'employee_id', 'employee_id');
     }
+
+    public function inquiry(){
+        return $this->belongsTo(Inquiry::class, 'employee_id');
+    }
+
+    public function quotation(){
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
 }

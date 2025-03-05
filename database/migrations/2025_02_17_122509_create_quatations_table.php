@@ -13,11 +13,6 @@ return new class extends Migration
     {
         Schema::create('quatations', function (Blueprint $table) {
             $table->id('id_quatation');                                            
-    
-            $table->foreignId('id_po')
-                ->references('id_po')
-                ->on('purchaseorders')
-                ->onDelete('cascade');
         
             $table->foreignId('customer_id')
                 ->references('customer_id')
@@ -28,9 +23,9 @@ return new class extends Migration
                 ->references('employee_id')
                 ->on('employees')
                 ->onDelete('cascade');
-
-            $table->integer('code_quatation');
-            $table->string('no_quatation');
+            $table->text('termin');
+            $table->integer('code_quatation');            
+            $table->integer('sub_total');
             $table->date('issue_at');
             $table->date('due_at');
             $table->timestamps();

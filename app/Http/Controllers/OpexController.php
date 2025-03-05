@@ -27,7 +27,17 @@ class OpexController extends Controller
     // Create a new Opex record
     public function store(Request $request)
     {
-        $opex = Opex::create($request->all());
+        $last = Opex::latest()->first();
+        $lastId = $last ? $last->opex_code : 1000;
+        $newId = $lastId + 1; 
+
+        $opex = Opex::create([
+            'opex_code' => $newId,
+            'opex_name' => $request->opex_name,
+            'opex_type' => $request->opex_type,
+            'opex_price' => $request->opex_price,
+        ]);
+        
         return response()->json($opex, 201);
     }
 

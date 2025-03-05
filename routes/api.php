@@ -16,6 +16,8 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\OpexController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\DetailSoController;
+use App\Http\Controllers\InquiryController;
+use App\Http\Controllers\QuatationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,6 +70,9 @@ Route::post('/employees_code', [EmployeeController::class, 'store'])->name('post
 Route::get('/invoices', [InvoiceController::class, 'index'])->name('get.invoices');
 Route::post('/invoices_code', [InvoiceController::class, 'store'])->name('post.invoices');
 
+Route::get('/inquiry', [InquiryController::class, 'index'])->name('get.inquiry');
+Route::post('/inquiry_code', [InquiryController::class, 'store'])->name('store.inquiry');
+
 Route::get('/products', [ProductController::class, 'index'])->name('get.product');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('show.product');
 Route::post('/products_code', [ProductController::class, 'store'])->name('post.products');
@@ -78,6 +83,10 @@ Route::post('/payment_types_code', [PaymentTypeController::class, 'store'])->nam
 Route::get('/purchase_orders', [PurchaseOrderController::class, 'index'])->name('get.purchase_order');
 Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])->name('post.purchase_order');
 Route::get('/purchase_orders/{id}', [PurchaseOrderController::class, 'show'])->name('show.purchase_order');
+
+Route::get('/quatations', [QuatationController::class, 'index'])->name('get.quatation');
+Route::get('/quatations/{id}', [QuatationController::class, 'show'])->name('get.quatation');
+Route::post('/quatations_code', [QuatationController::class, 'store'])->name('post.quatation');
 
 Route::get('/vendors', [VendorController::class, 'index'])->name('get.vendor');
 Route::post('/vendors_code', [VendorController::class, 'store'])->name('post.vendor');
