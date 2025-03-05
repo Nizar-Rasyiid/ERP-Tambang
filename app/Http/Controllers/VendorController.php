@@ -19,6 +19,20 @@ class VendorController extends Controller
         return response()->json(['message' => 'Method not allowed'], 405);
     }
 
+    public function search(Request $request)
+    {
+        $request->validate([
+            'vendor_name' => 'required'
+        ]);
+
+        $vendors = Vendor::where('vendor_name', 'like', '%' . $request->vendor_name . '%')->get();
+
+        if ($vendors->isEmpty()) {
+            return response()->json(['error' => 'No vendors found'], 404);
+        }
+
+        return response()->json($vendors);
+    }
     public function store(Request $request)
     {
         $request->validate([

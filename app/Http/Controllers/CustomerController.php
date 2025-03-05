@@ -17,6 +17,17 @@ class CustomerController extends Controller
         return response()->json($customer);
     }
 
+    public function searchCustomer(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+        ]);
+
+        $customers = Customer::where('customer_name', 'like', '%' . $request->name . '%')->get();
+
+        return response()->json($customers);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -49,8 +60,8 @@ class CustomerController extends Controller
             'customer_phone'   => $request->customer_phone,
             'customer_email'   => $request->customer_email,
             'customer_address' => $request->customer_address,
-            'customer_npwp'    => $request->customer_npwp,
-            'customer_contact' => $request->customer_contact,
+            'npwp' => $request->npwp,
+            'contact_person' => $request->contact_person,
         ]);
 
         return response()->json($customer, 201);
