@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Customer;
+use App\Models\CustomerPoint;
 
 class CustomerController extends Controller
 {
@@ -45,9 +46,11 @@ class CustomerController extends Controller
             'customer_name'    => 'required|string|max:255',
             'customer_phone'   => 'integer',
             'customer_email'   => 'string|email|max:255',
+            'customer_singkatan' => 'required|string',
             'customer_address' => 'string|max:255',
             'customer_npwp'    => 'integer',
             'customer_contact' => 'string|max:255',
+            'customer_details' => 'array'
         ]);
 
         $lastCode = Customer::latest()->first();
@@ -58,11 +61,23 @@ class CustomerController extends Controller
             'customer_code'    => $newCode,
             'customer_name'    => $request->customer_name,
             'customer_phone'   => $request->customer_phone,
+            'customer_toko'    => $request->customer_toko,
+            'customer_singkatan' => $request->customer_singkatan,
             'customer_email'   => $request->customer_email,
             'customer_address' => $request->customer_address,
-            'npwp' => $request->npwp,
-            'contact_person' => $request->contact_person,
+            'customer_npwp' => $request->customer_npwp,
+            'customer_contact' => $request->customer_contact,
         ]);
+
+        foreach ($request->customer_details as $pro) {                                                                
+            CustomerPoint::create([
+                'customer_id'=> $customer->customer_id,                
+                'point' => $pro['point'],
+                'alamat'   => $pro['alamat'],                
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }  
 
         return response()->json($customer, 201);
     }

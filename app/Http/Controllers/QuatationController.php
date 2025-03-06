@@ -58,6 +58,7 @@ class QuatationController extends Controller
         return response()->json([
             'message' => 'Successfully to Save Quatation',
             'quatation' => $quatation,
+            'detail_quatation' => $detailso,
         ]);
     }
 }

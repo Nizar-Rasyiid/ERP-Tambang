@@ -19,13 +19,13 @@ class ProductController extends Controller
     /**
      * Search for products by brand.
      */
-    public function searchByBrand(Request $request)
+    public function search(Request $request)
     {
-        $request->validate([
-            'product_brand' => 'required|string',
-        ]);
+        // Validate the search query
+        $query = $request->query;
 
-        $products = Product::where('product_brand', 'like', '%' . $request->product_brand . '%')->get();
+        $product = Product::where('product_sn', 'like', "%{$query}%")->get();
+        // Return the results as JSON
         return response()->json($products);
     }
 

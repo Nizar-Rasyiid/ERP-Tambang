@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SalesOrder;
 use App\Models\DetailSO;
+use App\Models\Customer;
 
 class SalesOrderController extends Controller
 {
@@ -49,7 +50,7 @@ class SalesOrderController extends Controller
         $newIdSo   = str_pad($lastIdSo + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
     
         // Ambil Nama Customer dari tabel `customers` berdasarkan `customer_id`
-        $customer = Customer::where('id_customer', $request->customer_id)->value('customer_name') ?? 'Unknown';
+        $customer = Customer::where('customer_id', $request->customer_id)->value('customer_singkatan') ?? 'Unknown';
     
         // Format kode SO: 00(ID_SO)/SO/NamaCustomer/II/2025
         $formattedCodeSo = "{$newIdSo}/SO/{$customer}/{$monthRoman[$currentMonth]}/{$currentYear}";
@@ -82,6 +83,7 @@ class SalesOrderController extends Controller
                 'product_id' => $pro['product_id'],
                 'quantity'   => $pro['quantity'],
                 'price'      => $pro['price'],
+                'amount'     => $pro['amount'],
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -102,7 +104,7 @@ class SalesOrderController extends Controller
     
         return response()->json([
             'message'      => 'Sales Order berhasil dibuat!',
-            'sales_order'  => $salesOrder,
+            'sales_order'  => $salesOrder,            
         ], 201);
     }
     

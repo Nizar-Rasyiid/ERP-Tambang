@@ -27,4 +27,7 @@ class Product extends Model
     public function detailDo(){
         return $this->belongsTo(DetailDo::class, 'product_id');
     }
+    public function detailQuatation(){
+        return $this->belongsTo(DetailQuatation::class, 'product_id');
+    }
 }

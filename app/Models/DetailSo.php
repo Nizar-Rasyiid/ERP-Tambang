@@ -15,7 +15,8 @@ class DetailSo extends Model
         'id_so',
         'product_id',
         'quantity',
-        'price'
+        'price',
+        'amount'
     ];
 
     public function product(){

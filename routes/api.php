@@ -18,6 +18,7 @@ use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\DetailSoController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\QuatationController;
+use App\Http\Controllers\DetailQuatationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,6 +63,7 @@ Route::get('/details_so', [DetailSoController::class, 'index'])->name('get.detai
 Route::get('/details_so/{id}', [DetailSoController::class, 'show'])->name('show.detailso');
 
 Route::get('/detail_do/{id}', [DetailSoController::class, 'DoShow'])->name('get.do');
+Route::get('/detail_quatation/{id}', [DetailQuatationController::class, 'show'])->name('get.do');
 
 Route::get('/employees', [EmployeeController::class, 'index'])->name('get.employees');
 Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('show.employees');
@@ -75,6 +77,7 @@ Route::post('/inquiry_code', [InquiryController::class, 'store'])->name('store.i
 
 Route::get('/products', [ProductController::class, 'index'])->name('get.product');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('show.product');
+Route::get('/products/search', [ProductController::class, 'search'])->name('search.product');
 Route::post('/products_code', [ProductController::class, 'store'])->name('post.products');
 
 Route::get('/payment_types', [PaymentTypeController::class, 'index'])->name('get.payment_type');
