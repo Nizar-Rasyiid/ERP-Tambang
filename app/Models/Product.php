@@ -30,4 +30,11 @@ class Product extends Model
     public function detailQuatation(){
         return $this->belongsTo(DetailQuatation::class, 'product_id');
     }
+
+    public function detailinvoice(){
+        return $this->belongsTo(DetailInvoice::class, 'product_id');
+    }
+    public function detailpo(){
+        return $this->belongsTo(DetailPo::class, 'product_id');
+    }
 }

@@ -33,6 +33,7 @@ class InvoiceController extends Controller
     {
         $request->validate([
             'delivery_order_details' => 'required|array',
+            'due_at' => 'required|string',            
         ]);
     
         // Ambil bulan & tahun saat ini
@@ -90,6 +91,12 @@ class InvoiceController extends Controller
             'message'  => 'Invoice berhasil dibuat!',
             'invoice'  => $invoice,            
         ], 201);
+    }
+
+    public function detail( string $id){
+        $detail = DetailInvoice::with('product')->where('id_invoice', $id)->get();
+
+        return response()->json($detail);
     }
     
 

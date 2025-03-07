@@ -20,7 +20,7 @@ class PurchaseOrderController extends Controller
     // 🟢 GET: Tampilkan semua Purchase Orders
     public function index()
     {
-        $purchaseOrders = PurchaseOrder::all();
+        $purchaseOrders = PurchaseOrder::with(['customer', 'employee'])->get();
         return response()->json($purchaseOrders);
     }
 
@@ -112,7 +112,7 @@ class PurchaseOrderController extends Controller
     // 🟠 GET: Tampilkan Purchase Order berdasarkan ID
     public function show($id)
     {
-        $purchaseOrder = PurchaseOrder::findOrFail($id);
+        $purchaseOrder = PurchaseOrder::with(['customer', 'employee'])->find($id);
         return response()->json($purchaseOrder);
     }
 

@@ -19,6 +19,7 @@ use App\Http\Controllers\DetailSoController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\QuatationController;
 use App\Http\Controllers\DetailQuatationController;
+use App\Http\Controllers\TandaTerimaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,6 +72,7 @@ Route::post('/employees_code', [EmployeeController::class, 'store'])->name('post
 
 Route::get('/invoices', [InvoiceController::class, 'index'])->name('get.invoices');
 Route::post('/invoices_code', [InvoiceController::class, 'store'])->name('post.invoices');
+Route::get('/detail_invoices/{id}', [InvoiceController::class, 'detail'])->name('detail.invoices');
 
 Route::get('/inquiry', [InquiryController::class, 'index'])->name('get.inquiry');
 Route::post('/inquiry_code', [InquiryController::class, 'store'])->name('store.inquiry');
@@ -104,6 +106,7 @@ Route::post('/sales_orders_code', [SalesOrderController::class, 'store'])->name(
 //r
 //s
 //t
+Route::get('/tandater', [TandaTerimaController::class, 'index'])->name('get.tandater');
 //u
 //v
 //w

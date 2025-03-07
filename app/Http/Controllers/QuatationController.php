@@ -24,16 +24,34 @@ class QuatationController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $last = Quatation::latest()->first();
-        $lastId = $last ? $last->code_quatation : 1000;
-        $newId = $lastId + 1; 
+    {        
+        // Ambil bulan & tahun saat ini
+        $currentMonth = date('m'); // 02
+        $currentYear  = date('Y'); // 2025
+        $monthRoman   = [
+            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
+            '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
+            '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
+        ];
+    
+        // Cari invoice terakhir dalam bulan dan tahun yang sama
+        $lastQuatation = Quatation::whereYear('created_at', $currentYear)
+                              ->whereMonth('created_at', $currentMonth)
+                              ->latest('id_quatation')
+                              ->first();
+
+        // Ambil ID terakhir & buat ID baru dengan format 2 digit
+        $lastIdQuatation = $lastQuatation ? intval(explode('/', $lastQuatation->code_quatation)[0]) : 0;
+        $newIdQuatation  = str_pad($lastIdQuatation + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
+    
+        // Format kode Invoice: 00ID/INV/II/2025
+        $formattedCodeQuatation = "{$newIdQuatation}/QUO/{$monthRoman[$currentMonth]}/{$currentYear}";
 
         $quatation = Quatation::create([            
             'customer_id' => $request->customer_id,
             'employee_id' => $request->employee_id,
             'termin' => $request->termin,
-            'code_quatation' => $newId,
+            'code_quatation' => $formattedCodeQuatation,
             'sub_total' => $request->sub_total,
             'issue_at' => $request->issue_at,
             'due_at' => $request->due_at                        
@@ -58,7 +76,7 @@ class QuatationController extends Controller
         return response()->json([
             'message' => 'Successfully to Save Quatation',
             'quatation' => $quatation,
-            'detail_quatation' => $detailso,
+            'code_quatation' => $formattedCodeQuatation,            
         ]);
     }
 }

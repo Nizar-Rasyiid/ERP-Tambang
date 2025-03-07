@@ -14,9 +14,9 @@ class DeliveryOrder extends Model
     protected $fillable = [
         'customer_id',
         'employee_id',        
-        'id_so',
-        'sub_total',
+        'id_so',        
         'code_do',
+        'sub_total',
         'issue_at',
         'due_at',
     ];

@@ -38,7 +38,10 @@ class DetailPoController extends Controller
      */
     public function show(string $id)
     {
-        $detailPo = DetailPo::where('id_po', $id)->first();
+        $detailPo = DetailPo::with('product')
+            ->where('id_po', $id)
+            ->get();
+            
         return response()->json($detailPo);
     }
 
