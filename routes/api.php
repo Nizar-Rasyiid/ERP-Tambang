@@ -20,6 +20,7 @@ use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\QuatationController;
 use App\Http\Controllers\DetailQuatationController;
 use App\Http\Controllers\TandaTerimaController;
+use App\Http\Controllers\FakturPajakController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,8 +64,8 @@ Route::get('/detail_po/{id}', [DetailPoController::class, 'show'])->name('show.d
 Route::get('/details_so', [DetailSoController::class, 'index'])->name('get.detailso');
 Route::get('/details_so/{id}', [DetailSoController::class, 'show'])->name('show.detailso');
 
-Route::get('/detail_do/{id}', [DetailSoController::class, 'DoShow'])->name('get.do');
-Route::get('/detail_quatation/{id}', [DetailQuatationController::class, 'show'])->name('get.do');
+Route::get('/detail_do/{id}', [DetailSoController::class, 'DoShow'])->name('get.soDetail');
+Route::get('/detail_quatation/{id}', [DetailQuatationController::class, 'show'])->name('get.soFetailById');
 
 Route::get('/employees', [EmployeeController::class, 'index'])->name('get.employees');
 Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('show.employees');
@@ -90,7 +91,7 @@ Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])-
 Route::get('/purchase_orders/{id}', [PurchaseOrderController::class, 'show'])->name('show.purchase_order');
 
 Route::get('/quatations', [QuatationController::class, 'index'])->name('get.quatation');
-Route::get('/quatations/{id}', [QuatationController::class, 'show'])->name('get.quatation');
+Route::get('/quatations/{id}', [QuatationController::class, 'show'])->name('get.quatationById');
 Route::post('/quatations_code', [QuatationController::class, 'store'])->name('post.quatation');
 
 Route::get('/vendors', [VendorController::class, 'index'])->name('get.vendor');
@@ -107,6 +108,9 @@ Route::post('/sales_orders_code', [SalesOrderController::class, 'store'])->name(
 //s
 //t
 Route::get('/tandater', [TandaTerimaController::class, 'index'])->name('get.tandater');
+Route::get('/faktur-pajak', [FakturPajakController::class, 'index'])->name('get.fakturpajak');
+Route::post('/faktur-pajak-code', [FakturPajakController::class, 'store'])->name('post.fakturpajak');
+
 //u
 //v
 //w
