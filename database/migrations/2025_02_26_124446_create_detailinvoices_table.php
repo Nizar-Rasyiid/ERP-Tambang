@@ -30,6 +30,7 @@ return new class extends Migration
             
             $table->integer('price');
             $table->integer('quantity');
+            $table->integer('amount');
             $table->timestamps();
         });
     }

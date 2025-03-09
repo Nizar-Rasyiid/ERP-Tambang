@@ -9,6 +9,7 @@ use App\Models\PaymentType;
 use App\Models\BankAccount;
 use App\Models\Employee;
 use App\Models\DetailPo;
+use App\Models\Vendor;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 
@@ -20,7 +21,7 @@ class PurchaseOrderController extends Controller
     // 🟢 GET: Tampilkan semua Purchase Orders
     public function index()
     {
-        $purchaseOrders = PurchaseOrder::with(['customer', 'employee'])->get();
+        $purchaseOrders = PurchaseOrder::with(['vendor', 'employee'])->get();
         return response()->json($purchaseOrders);
     }
 
@@ -51,7 +52,7 @@ class PurchaseOrderController extends Controller
     $newIdPo   = str_pad($lastIdPo + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
 
     // Ambil Nama Vendor dari tabel `vendors` berdasarkan `vendor_id`
-    $vendor = Vendor::where('id_vendor', $request->vendor_id)->value('vendor_name') ?? 'Unknown';
+    $vendor = Vendor::where('vendor_id', $request->vendor_id)->value('vendor_singkatan') ?? 'Unknown';
 
     // Format kode PO: 00(ID_PO)/PO/NamaVendor/II/2025
     $formattedCodePo = "{$newIdPo}/PO/{$vendor}/{$monthRoman[$currentMonth]}/{$currentYear}";
@@ -84,10 +85,11 @@ class PurchaseOrderController extends Controller
             'product_id' => $pro['product_id'],
             'quantity'   => $pro['quantity'],
             'price'      => $pro['price'],
+            'amount'     => $pro['amount'],
             'created_at' => now(),
             'updated_at' => now(),
-        ]);
-    }             
+        ]);        
+    }            
 
     // ✅ Hitung PPN (11% dari sub_total)
     $ppn = $sub_total * 0.11;
@@ -112,7 +114,7 @@ class PurchaseOrderController extends Controller
     // 🟠 GET: Tampilkan Purchase Order berdasarkan ID
     public function show($id)
     {
-        $purchaseOrder = PurchaseOrder::with(['customer', 'employee'])->find($id);
+        $purchaseOrder = PurchaseOrder::with(['vendor', 'employee'])->find($id);
         return response()->json($purchaseOrder);
     }
 
@@ -157,8 +159,15 @@ class PurchaseOrderController extends Controller
         return response()->json(['message' => 'Purchase Order deleted successfully']);
     }
 
+    public function goodReceive(Request $request){         
+         foreach ($request->purchase_order_details as $pro) {                                                                            
+            $product = Product::findOrFail($pro['product_id']);
+            $product->increment('product_stock', $pro['quantity']);
+        } 
+    }
+
     public function getAP(){
-        $purchaseOrder = PurchaseOrder::with(['customer', 'employee'])           
+        $purchaseOrder = PurchaseOrder::with(['vendor', 'employee'])           
             ->whereColumn('deposit', '<', 'grand_total')
             ->get();
         

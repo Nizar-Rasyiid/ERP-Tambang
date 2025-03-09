@@ -37,6 +37,10 @@ class SalesOrder extends Model
     }
 
     public function deliveryorder(){
-        return $this->hasMany(DeliveryOrder::class, 'id_so');
+        return $this->belongsTo(DeliveryOrder::class, 'id_so');
+    }
+
+    public function detailso(){
+        return $this->hasMany(DetailSo::class, 'id_so');
     }
 }

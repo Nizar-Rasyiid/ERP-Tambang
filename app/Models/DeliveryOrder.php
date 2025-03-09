@@ -30,4 +30,8 @@ class DeliveryOrder extends Model
     public function salesorder(){
         return $this->belongsTo(SalesOrder::class, 'id_so');
     }
+
+    public function detailinvoice(){
+        return $this->belongsTo(DetailInvoice::class, 'id_do');
+    }
 }

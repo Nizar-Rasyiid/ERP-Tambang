@@ -38,11 +38,15 @@ class PurchaseOrder extends Model
         //     return $this->sub_total + $this->total_tax + $this->total_service - $this->deposit + $this->calculated_ppn;
         // }
 
-        public function customer(){
-            return $this->belongsTo(Customer::class, 'customer_id');
+        public function vendor(){
+            return $this->belongsTo(Vendor::class, 'vendor_id');
         }
 
         public function employee(){
             return $this->belongsTo(Employee::class, 'employee_id');
+        }
+
+        public function detailpo(){
+            return $this->hasMany(DetailPo::class, 'id_po');
         }
 }

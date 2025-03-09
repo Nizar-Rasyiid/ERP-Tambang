@@ -22,4 +22,12 @@ class DetailSo extends Model
     public function product(){
         return $this->belongsTo(Product::class, 'product_id', 'product_id');
     }
+
+    public function detailpo(){
+        return $this->belongsTo(DetailPo::class, 'product_id');
+    }
+
+    public function salesorders(){
+        return $this->belongsTo(SalesOrder::class, 'id_so');
+    }
 }

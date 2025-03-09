@@ -79,6 +79,7 @@ class InvoiceController extends Controller
                 'product_id'    => $pro['product_id'],
                 'quantity'      => $pro['quantity'],
                 'price'         => $pro['price'],
+                'amount'        => $pro['amount'],
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);
@@ -94,7 +95,7 @@ class InvoiceController extends Controller
     }
 
     public function detail( string $id){
-        $detail = DetailInvoice::with('product')->where('id_invoice', $id)->get();
+        $detail = DetailInvoice::with(['product', 'do'])->where('id_invoice', $id)->get();
 
         return response()->json($detail);
     }
@@ -105,7 +106,8 @@ class InvoiceController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $invoice = Invoice::with(['customer', 'employee'])->get();
+        return response()->json($invoice);
     }
 
     /**

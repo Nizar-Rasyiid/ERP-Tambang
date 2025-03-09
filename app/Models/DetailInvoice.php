@@ -17,9 +17,14 @@ class DetailInvoice extends Model
         'product_id',
         'quantity',
         'price',
+        'amount',
     ];
 
     public function product(){
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function do(){
+        return $this->belongsTo(DeliveryOrder::class, 'id_do');
     }
 }

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\SalesOrder;
 use App\Models\DetailSO;
 use App\Models\Customer;
+use App\Models\Product;
 
 class SalesOrderController extends Controller
 {
@@ -74,7 +76,7 @@ class SalesOrderController extends Controller
     
         $sub_total = 0;
     
-        foreach ($request->sales_order_details as $pro) {                                                                
+        foreach ($request->sales_order_details as $pro) {                                                                         
             $line_total = $pro['price'] * $pro['quantity'];
             $sub_total += $line_total;
     
@@ -87,20 +89,10 @@ class SalesOrderController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            $product = Product::findOrFail($pro['product_id']);   
+            $product->decrement('product_stock', $pro['quantity']);
         }             
-    
-        // ✅ Hitung PPN (11% dari sub_total)
-        $ppn = $sub_total * 0.11;
-    
-        // ✅ Hitung Grand Total
-        $grand_total = $sub_total + $ppn;        
-    
-        // Update Sales Order dengan PPN & Grand Total
-        $salesOrder->update([
-            'sub_total'   => $sub_total,
-            'ppn'         => $ppn, // ✅ PPN otomatis dihitung
-            'grand_total' => $grand_total, // ✅ Grand Total otomatis dihitung
-        ]);  
     
         return response()->json([
             'message'      => 'Sales Order berhasil dibuat!',
@@ -151,5 +143,30 @@ class SalesOrderController extends Controller
             ->get();
         
         return response()->json($salesOrder);
+    }
+    public function monthlySales()
+    {
+        // Ambil data penjualan per bulan
+        $monthlySales = SalesOrder::select(
+            DB::raw('YEAR(issue_at) as year'),
+            DB::raw('MONTH(issue_at) as month'),
+            DB::raw('SUM(grand_total) as total_sales')
+        )
+        ->groupBy('year', 'month')
+        ->orderBy('year', 'desc')
+        ->orderBy('month', 'desc')
+        ->get();
+
+        // Format data untuk response
+        $formattedSales = $monthlySales->map(function ($item) {
+            return [
+                'year' => $item->year,
+                'month' => $item->month,
+                'month_name' => date('F', mktime(0, 0, 0, $item->month, 10)), // Nama bulan
+                'total_sales' => (float) $item->total_sales, // Pastikan nilai numerik
+            ];
+        });
+
+        return response()->json($formattedSales);
     }
 }

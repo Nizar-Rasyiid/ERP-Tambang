@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('purchaseorders', function (Blueprint $table) {
             $table->id('id_po');            
             $table->foreignId('vendor_id')->constrained('vendors', 'vendor_id')->onDelete('cascade');                        
-            $table->foreignId('id_employee')->constrained('employees', 'id_employee')->onDelete('cascade');
+            $table->foreignId('employee_id')->constrained('employees', 'employee_id')->onDelete('cascade');
             $table->text('code_po');
             $table->text('termin');
             $table->integer('total_tax');            

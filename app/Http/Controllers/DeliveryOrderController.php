@@ -78,6 +78,7 @@ class DeliveryOrderController extends Controller
             
             DetailDo::create([
                 'id_do'         => $deliveryOrder->id_do,
+                'code_do'       => $deliveryOrder->code_do,
                 'product_id'    => $pro['product_id'],
                 'quantity'      => $pro['quantity'],
                 'price'         => $pro['price'],
