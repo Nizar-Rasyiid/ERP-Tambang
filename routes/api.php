@@ -71,6 +71,7 @@ Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('show.e
 Route::post('/employees_code', [EmployeeController::class, 'store'])->name('post.employees');
 
 Route::get('/invoices', [InvoiceController::class, 'index'])->name('get.invoices');
+Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('show.invoices');
 Route::post('/invoices_code', [InvoiceController::class, 'store'])->name('post.invoices');
 Route::get('/detail_invoices/{id}', [InvoiceController::class, 'detail'])->name('detail.invoices');
 
@@ -88,18 +89,21 @@ Route::post('/payment_types_code', [PaymentTypeController::class, 'store'])->nam
 Route::get('/purchase_orders', [PurchaseOrderController::class, 'index'])->name('get.purchase_order');
 Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])->name('post.purchase_order');
 Route::get('/purchase_orders/{id}', [PurchaseOrderController::class, 'show'])->name('show.purchase_order');
+Route::post('/purchase_orders/good-receive', [PurchaseOrderController::class, 'goodReceive'])->name('show.purchase_order');
 
 Route::get('/quatations', [QuatationController::class, 'index'])->name('get.quatation');
 Route::get('/quatations/{id}', [QuatationController::class, 'show'])->name('get.quatation');
 Route::post('/quatations_code', [QuatationController::class, 'store'])->name('post.quatation');
 
 Route::get('/vendors', [VendorController::class, 'index'])->name('get.vendor');
+Route::get('/vendors/{id}', [VendorController::class, 'show'])->name('show.vendor');
 Route::post('/vendors_code', [VendorController::class, 'store'])->name('post.vendor');
 
 Route::get('/opex', [OpexController::class, 'index'])->name('get.opex');
 Route::post('/opex_code', [OpexController::class, 'store'])->name('post.opex');
 
 Route::get('/sales_orders', [SalesOrderController::class, 'index'])->name('get.sales_order');
+Route::get('/sales_orders/monthly', [SalesOrderController::class, 'monthlySales']);
 Route::get('/sales_orders/{id}', [SalesOrderController::class, 'show'])->name('show.sales_order');
 Route::post('/sales_orders_code', [SalesOrderController::class, 'store'])->name('post.sales_order');
 //q
@@ -112,4 +116,5 @@ Route::get('/tandater', [TandaTerimaController::class, 'index'])->name('get.tand
 //w
 //x
 //y
+Route::get('/laporan_keuangan', [DetailPoController::class, 'laporan'])->name('get.laporan');
 //z

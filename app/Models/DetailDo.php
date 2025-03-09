@@ -12,6 +12,7 @@ class DetailDo extends Model
     protected $primaryKey = 'id_detail_do';
     protected $fillable = [
         'id_do',
+        'code_do',
         'product_id',
         'quantity',
         'price'
@@ -19,5 +20,9 @@ class DetailDo extends Model
 
     public function product(){
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function detailso(){
+        return $this->belongsTo(DetailSo::class, 'product_id');
     }
 }

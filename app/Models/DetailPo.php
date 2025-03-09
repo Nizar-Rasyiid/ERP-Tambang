@@ -14,10 +14,18 @@ class DetailPo extends Model
         'id_po',
         'product_id',
         'quantity',
-        'price',      
+        'price',
+        'amount'      
     ];
 
     public function product(){
         return $this->belongsTo(Product::class, 'product_id');
+    }
+    
+    public function detailso(){
+        return $this->hasMany(DetailSo::class, 'product_id');
+    }
+    public function purchaseorders(){
+        return $this->belongsTo(PurchaseOrder::class, 'id_po');
     }
 }
