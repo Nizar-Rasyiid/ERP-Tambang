@@ -13,13 +13,11 @@ return new class extends Migration
     {
         Schema::create('vendors', function (Blueprint $table) {
             $table->id('vendor_id');            
-            $table->string('vendor_name');
-            $table->string('vendor_type');
+            $table->string('vendor_name');            
             $table->string('vendor_email')->unique();
             $table->string('vendor_phone');
             $table->string('vendor_address');
-            $table->string('vendor_singkatan');  
-            $table->integer('tax_number');
+            $table->string('vendor_singkatan');              
             $table->timestamps();
         });
     }

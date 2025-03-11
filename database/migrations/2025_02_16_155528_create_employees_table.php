@@ -20,6 +20,8 @@ return new class extends Migration
                 $table->text('employee_address');
                 $table->integer('employee_salary');
                 $table->date('employee_end_contract');
+                $table->integer('bpjs_kesehatan')->length(17);
+                $table->integer('bpjs_ketenagakerjaan')->length(17);
                 $table->integer('employee_nik')->length(16);
                 $table->text('employee_position');
             $table->timestamps();

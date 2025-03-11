@@ -46,10 +46,10 @@ Route::post('/bank_accounts_code', [BankAccountController::class, 'store'])->nam
 // Route::apiResource('customers', CustomerController::class);
 Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('show.customer');
 Route::get('/customers', [CustomerController::class, 'index'])->name('get.customer');
+Route::get('/customers/point/{id}', [CustomerController::class, 'cusPoint'])->name('cuspoint.customer');
 Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('update.customer');
 Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('delete.customer');
 Route::post('/store-customers', [CustomerController::class, 'store'])->name('post.customer');
-// Route::post('/customers_code', [CustomerController::class, 'store'])->name('post.customer');
 
 
 Route::get('/delivery_orders', [DeliveryOrderController::class, 'index'])->name('get.delivery_order');
@@ -87,8 +87,9 @@ Route::get('/payment_types', [PaymentTypeController::class, 'index'])->name('get
 Route::post('/payment_types_code', [PaymentTypeController::class, 'store'])->name('post.payment_type');
 
 Route::get('/purchase_orders', [PurchaseOrderController::class, 'index'])->name('get.purchase_order');
-Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])->name('post.purchase_order');
+Route::get('/purchase_orders/monthly', [PurchaseOrderController::class, 'monthlyPurchase'])->name('monthly.purchase_order');
 Route::get('/purchase_orders/{id}', [PurchaseOrderController::class, 'show'])->name('show.purchase_order');
+Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])->name('post.purchase_order');
 Route::post('/purchase_orders/good-receive', [PurchaseOrderController::class, 'goodReceive'])->name('show.purchase_order');
 
 Route::get('/quatations', [QuatationController::class, 'index'])->name('get.quatation');
@@ -103,7 +104,7 @@ Route::get('/opex', [OpexController::class, 'index'])->name('get.opex');
 Route::post('/opex_code', [OpexController::class, 'store'])->name('post.opex');
 
 Route::get('/sales_orders', [SalesOrderController::class, 'index'])->name('get.sales_order');
-Route::get('/sales_ orders/monthly', [SalesOrderController::class, 'monthlySales']);
+Route::get('/sales_orders/monthly', [SalesOrderController::class, 'monthlySales']);
 Route::get('/sales_orders/{id}', [SalesOrderController::class, 'show'])->name('show.sales_order');
 Route::post('/sales_orders_code', [SalesOrderController::class, 'store'])->name('post.sales_order');
 //q

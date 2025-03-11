@@ -22,6 +22,7 @@ class PurchaseOrder extends Model
         'deposit',
         'ppn',
         'grand_total',
+        'has_gr',
         'issue_at',
         'due_at',
     ];

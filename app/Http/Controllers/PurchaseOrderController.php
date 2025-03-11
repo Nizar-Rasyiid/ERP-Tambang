@@ -84,6 +84,7 @@ class PurchaseOrderController extends Controller
             'id_po'      => $purchaseOrder->id_po,                
             'product_id' => $pro['product_id'],
             'quantity'   => $pro['quantity'],
+            'quantity_left' => $pro['quantity'],
             'price'      => $pro['price'],
             'amount'     => $pro['amount'],
             'created_at' => now(),
@@ -159,11 +160,31 @@ class PurchaseOrderController extends Controller
         return response()->json(['message' => 'Purchase Order deleted successfully']);
     }
 
-    public function goodReceive(Request $request){         
-         foreach ($request->purchase_order_details as $pro) {                                                                            
-            $product = Product::findOrFail($pro['product_id']);
-            $product->increment('product_stock', $pro['quantity']);
-        } 
+    public function goodReceive(Request $request)
+    {                      
+        foreach ($request->purchase_order_details as $pro) {                                                                                      
+            $detailPo = DetailPo::findOrFail($pro['id_detail_po']);
+
+            if ($pro['quantity_left'] != $detailPo->quantity_left) {
+
+                $leftQuantity = $pro['quantity'] - $pro['quantity_left']; 
+
+                $detailPo->update([
+                    'quantity_left' => $leftQuantity,
+                ]);
+                
+                if ($leftQuantity != 0) {
+                    $product = Product::findOrFail($pro['product_id']);
+                    $product->increment('product_stock', $pro['quantity_left']);      
+                }
+            }  
+            
+            if ($pro['quantity_left'] == 0) {
+                $has_gr = PurchaseOrder::where('id_po')->update([
+                    'has_gr' => 1,
+                ]);                
+            }
+        }         
     }
 
     public function getAP(){
@@ -172,5 +193,31 @@ class PurchaseOrderController extends Controller
             ->get();
         
         return response()->json($purchaseOrder);
+    }
+
+    public function monthlyPurchase()
+    {
+        // Ambil data penjualan per bulan
+        $monthlyPurchase = PurchaseOrder::select(
+            DB::raw('YEAR(issue_at) as year'),
+            DB::raw('MONTH(issue_at) as month'),
+            DB::raw('SUM(grand_total) as total_purchases')
+        )
+        ->groupBy('year', 'month')
+        ->orderBy('year', 'desc')
+        ->orderBy('month', 'desc')
+        ->get();
+
+        // Format data untuk response
+        $formattedPurchase = $monthlyPurchase->map(function ($item) {
+            return [
+                'year' => $item->year,
+                'month' => $item->month,
+                'month_name' => date('F', mktime(0, 0, 0, $item->month, 10)), // Nama bulan
+                'total_purchases' => (float) $item->total_purchases, // Pastikan nilai numerik
+            ];
+        });
+
+        return response()->json($formattedPurchase);
     }
 }

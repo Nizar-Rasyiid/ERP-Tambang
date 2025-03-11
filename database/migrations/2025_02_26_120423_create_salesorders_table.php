@@ -16,10 +16,9 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade');            
             $table->foreignId('employee_id')->constrained('employees', 'employee_id')->onDelete('cascade');
             $table->text('code_so');
-            $table->text('termin');
-            $table->text('payment_type');
-            $table->integer('total_tax');            
-            $table->string('status_payment');            
+            $table->text('po_number');
+            $table->text('termin');            
+            $table->integer('total_tax');                                 
             $table->integer('sub_total');                        
             $table->integer('deposit');
             $table->integer('ppn');

@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('assets', function (Blueprint $table) {
             $table->id('asset_id');
-            $table->integer('id_asset_type');
+            $table->foreignId('vendor_id')->constrained('vendors', 'vendor_id')->onDelete('cascade');                        
             $table->text('code');
-            $table->text('name');  
-            $table->bigInteger('qty');
-            $table->boolean('status');   
+            $table->text('assets_name');  
+            $table->integer('price');               
+            $table->integer('assets_life');      
+            $table->date('issue_at');                     
+            $table->date('due_at');                     
             $table->timestamps();
         });
     }

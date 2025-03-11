@@ -62,12 +62,14 @@ class SalesOrderController extends Controller
             'customer_id'    => $request->customer_id,
             'employee_id'    => $request->employee_id,
             'code_so'        => $formattedCodeSo,
+            'po_number'      => $request->po_number,
             'termin'         => $request->termin,            
             'total_tax'      => $request->total_tax,
             'status_payment' => $request->status_payment,
             'sub_total'      => 0,            
             'total_service'  => 0,
             'deposit'        => $request->deposit,
+            'has_invoice'    => $request->has_invoice,
             'ppn'            => 0, // ✅ PPN otomatis dihitung
             'grand_total'    => 0, // ✅ Grand Total otomatis dihitung
             'issue_at'       => $request->issue_at,
@@ -88,11 +90,16 @@ class SalesOrderController extends Controller
                 'amount'     => $pro['amount'],
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ]);    
+        }    
+        
+        $ppn = $sub_total * 0.11;
 
-            $product = Product::findOrFail($pro['product_id']);   
-            $product->decrement('product_stock', $pro['quantity']);
-        }             
+        $salesorder = SalesOrder::where('id_so', $salesOrder->id_so)->update([
+            'sub_total' => $sub_total,
+            'ppn' => $ppn,
+            'grand_total' => $sub_total + $ppn,
+        ]);
     
         return response()->json([
             'message'      => 'Sales Order berhasil dibuat!',

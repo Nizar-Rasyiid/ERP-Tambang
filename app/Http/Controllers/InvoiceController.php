@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
+use App\Models\DeliveryOrder;
 use App\Models\DetailInvoice;
 
 class InvoiceController extends Controller
@@ -14,7 +15,7 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $invoice = Invoice::with(['customer', 'employee'])->get();
+        $invoice = Invoice::with(['customer', 'employee', 'salesorder'])->get();
         return response()->json($invoice);
     }
 
@@ -60,6 +61,7 @@ class InvoiceController extends Controller
     
         // Buat Invoice
         $invoice = Invoice::create([
+            'id_so'           => $request->id_so,
             'customer_id'     => $request->customer_id,
             'employee_id'     => $request->employee_id,
             'code_invoice'    => $formattedCodeInvoice,                
@@ -83,6 +85,7 @@ class InvoiceController extends Controller
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);
+            DeliveryOrder::findOrFail($pro['id_do'])->update(['has_inv' => 1]);
         }
     
         // Update sub_total pada Invoice

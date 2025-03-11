@@ -12,7 +12,8 @@ class Invoice extends Model
     protected $primaryKey = 'id_invoice';
 
     protected $fillable = [        
-        'customer_id',
+        'id_so',
+        'customer_id',        
         'employee_id',
         'sub_total',
         'total_tax',
@@ -28,5 +29,9 @@ class Invoice extends Model
 
     public function employee(){
         return $this->belongsTo(Employee::class, 'employee_id', 'employee_id');
+    }
+    
+    public function salesorder(){
+        return $this->belongsTo(SalesOrder::class, 'id_so');
     }
 }

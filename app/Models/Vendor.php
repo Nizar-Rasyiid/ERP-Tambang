@@ -22,4 +22,8 @@ class Vendor extends Model
     public function purchaseorder(){
         return $this->belongsTo(PurchaseOrder::class, 'vendor_id');
     }
+
+    public function asset(){
+        return $this->belongsTo(Asset::class, 'vendor_id');
+    }
 }

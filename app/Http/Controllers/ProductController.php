@@ -55,6 +55,7 @@ class ProductController extends Controller
             'product_uom'   => $request->product_uom,
             'product_stock' => $request->product_stock,
             'product_image' => $request->product_image,
+            'product_category_id' => $request->product_category_id,
         ]);
         return response()->json($product, 201);
     }

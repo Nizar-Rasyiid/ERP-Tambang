@@ -11,10 +11,16 @@ class Asset extends Model
     protected $table = 'assets';
     protected $primaryKey = 'asset_id';
     protected $fillable = [
-        'id_asset_type',
+        'vendor_id',        
         'code',
-        'name',
-        'qty',
-        'status',
+        'assets_name',
+        'price',
+        'assets_life', 
+        'issue_at',
+        'due_at',       
     ];
+
+    public function vendor(){
+        return $this->belongsTo(Vendor::class, 'vendor_id');
+    }
 }

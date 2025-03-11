@@ -15,6 +15,8 @@ class DetailSo extends Model
         'id_so',
         'product_id',
         'quantity',
+        'quantity_left',
+        'has_do',
         'price',
         'amount'
     ];

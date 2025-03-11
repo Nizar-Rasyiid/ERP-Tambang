@@ -31,7 +31,7 @@ class EmployeeController extends Controller
     {
         $request->validate([            
             'employee_name'     => 'required|string|max:255',
-            'employee_phone'    => 'required|string',
+            'employee_phone'    => 'required|integer',
             'employee_email'    => 'required|string|email|max:255|unique:employees',
             'employee_address'  => 'required|string|max:255',
             'employee_nik'      => 'required|integer',
@@ -52,6 +52,8 @@ class EmployeeController extends Controller
             'employee_end_contract' => now(),
             'employee_nik'      => $request->employee_nik,
             'employee_position' => $request->employee_position,
+            'bpjs_kesehatan'    => $request->bpjs_kesehatan,
+            'bpjs_ketenagakerjaan' => $request->bpjs_ketenagakerjaan,
         ]);
 
         return response()->json([

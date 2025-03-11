@@ -12,7 +12,7 @@ class AssetController extends Controller
      */
     public function index()
     {
-        $assets = Asset::all();
+        $assets = Asset::with('vendor')->get();
         return response()->json($assets);
     }
 
@@ -28,17 +28,22 @@ class AssetController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'id_asset_type' => 'required|integer',
-            'code' => 'required|string',
-            'name' => 'required|string',
-            'qty' => 'required|integer',
-            'status' => 'required|boolean',
+    {        
+        $lastCode = Asset::latest()->first();
+        $lastCode = $lastCode ? $lastCode->code : 1000;
+        $newCode = $lastCode + 1;
+
+        $assets = Asset::create([
+            'vendor_id' => $request->vendor_id,
+            'code' => $newCode,
+            'assets_name' => $request->assets_name,
+            'price' => $request->price,
+            'assets_life' => $request->assets_life,            
+            'issue_at' => $request->issue_at,
+            'due_at' => $request->due_at,
         ]);
 
-        $asset = Asset::create($request->all());
-        return response()->json($asset, 201);
+        return response()->json($assets);
     }
 
     /**

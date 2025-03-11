@@ -20,7 +20,9 @@ class Employee extends Model
         'employee_salary',
         'employee_end_contract',
         'employee_nik',
-        'employee_position'
+        'employee_position',
+        'bpjs_kesehatan',
+        'bpjs_ketenagakerjaan',
     ];
 
     public function salesOrder(){
