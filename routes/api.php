@@ -20,6 +20,8 @@ use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\QuatationController;
 use App\Http\Controllers\DetailQuatationController;
 use App\Http\Controllers\TandaTerimaController;
+use App\Http\Controllers\FakturPajakController;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -112,6 +114,13 @@ Route::post('/sales_orders_code', [SalesOrderController::class, 'store'])->name(
 //s
 //t
 Route::get('/tandater', [TandaTerimaController::class, 'index'])->name('get.tandater');
+Route::get('/faktur-pajak', [FakturPajakController::class, 'index'])->name('get.fakturpajak');
+Route::post('/faktur-pajak-code', [FakturPajakController::class, 'store'])->name('post.fakturpajak');
+
+Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+
+
 //u
 //v
 //w
