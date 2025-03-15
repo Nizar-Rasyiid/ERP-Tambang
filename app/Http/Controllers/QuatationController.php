@@ -11,7 +11,11 @@ class QuatationController extends Controller
 {
     public function index()
     {
-        $quatation = Quatation::with(['customer', 'employee'])->get();
+        $quatation = Quatation::with([
+            'customer', 
+            'detailQuo',
+            'detailQuo.product'            
+            ])->get();
         return response()->json($quatation);
     }
 
@@ -78,5 +82,28 @@ class QuatationController extends Controller
             'quatation' => $quatation,
             'code_quatation' => $formattedCodeQuatation,            
         ]);
+    }
+    public function put(Request $request, $id){
+        $quatation = Quatation::findOrFail($id)->update([            
+            'customer_id' => $request->customer_id,
+            'employee_id' => $request->employee_id,
+            'termin' => $request->termin,
+            'code_quatation' => $request->code_quatation,
+            'sub_total' => $request->sub_total,
+            'issue_at' => $request->issue_at,
+            'due_at' => $request->due_at                        
+        ]);
+
+        foreach($request->inquiry_details as $key => $pro){                          
+            $detailso = DetailQuatation::findOrFail($pro['id_detail_quatation'])->update([                           
+            'product_id' => $pro['product_id'],
+            'quantity' => $pro['quantity'],
+            'price' => $pro['price'],
+            'amount' => $pro['amount'],
+            'created_at' => now(),
+            'updated_at' => now(),
+            ]);
+
+        } 
     }
 }

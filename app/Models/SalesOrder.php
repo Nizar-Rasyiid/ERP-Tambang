@@ -20,8 +20,9 @@ class SalesOrder extends Model
         'total_tax',            
         'sub_total',
         'deposit',
-        'ppn',
+        'ppn',        
         'grand_total',
+        'has_do',
         'has_invoice',
         'issue_at',
         'due_at'

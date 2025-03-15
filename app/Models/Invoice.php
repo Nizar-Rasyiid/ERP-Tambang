@@ -18,6 +18,8 @@ class Invoice extends Model
         'sub_total',
         'total_tax',
         'ppn',
+        'approved',
+        'has_tandater',
         'code_invoice',                
         'issue_at',
         'due_at'
@@ -33,5 +35,9 @@ class Invoice extends Model
     
     public function salesorder(){
         return $this->belongsTo(SalesOrder::class, 'id_so');
+    }
+
+    public function detailInv(){
+        return $this->hasMany(DetailInvoice::class, 'id_invoice');
     }
 }

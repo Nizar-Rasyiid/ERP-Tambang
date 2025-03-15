@@ -13,7 +13,16 @@ class TandaTerima extends Model
 
     protected $fillable = [
         'customer_id',
+        'id_so',
         'code_tandater',
         'resi',
+        'issue_at',
+        'due_at',
     ];
+    public function so(){
+        return $this->belongsTo(SalesOrder::class, 'id_so');
+    }
+    public function customer(){
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
 }

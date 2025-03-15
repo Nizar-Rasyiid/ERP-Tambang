@@ -23,7 +23,9 @@ return new class extends Migration
             $table->integer('deposit');
             $table->integer('ppn');
             $table->integer('grand_total');
-            $table->integer('has_gr')->default(0);
+            $table->integer('has_gr')->default(0);            
+            $table->integer('approved')->default(0);   
+            $table->text('desc')->nullable();
             $table->date('issue_at');
             $table->date('due_at');
             $table->timestamps();

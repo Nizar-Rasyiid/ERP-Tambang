@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DeliveryOrder;
+use App\Models\SalesOrder;
 use App\Models\DetailDo;
 use App\Models\DetailSo;
 use App\Models\Customer;
@@ -17,7 +18,13 @@ class DeliveryOrderController extends Controller
      */
     public function index()
     {
-        $deliveryOrder = DeliveryOrder::with(['customer','employee','salesorder'])->get();
+        $deliveryOrder = DeliveryOrder::with([
+            'customer',
+            'salesorder',
+            'point',
+            'detailDo',
+            'detailDo.product',            
+            ])->get();
         return response()->json($deliveryOrder);
     }
 
@@ -75,49 +82,58 @@ class DeliveryOrderController extends Controller
         ]);
     
         $sub_total = 0;
-        foreach ($request->delivery_order_details as $pro) {
-            $product = Product::findOrFail($pro['product_id']);   
-            $detailSo = DetailSo::findOrFail($pro['id_detail_so']);
-
+        $allDelivered = true;
+        foreach ($request->delivery_order_details as $pro) { 
+            foreach($request->delivery_order_details as $pro)
+            {            
+                if ($pro['quantity_left']) {
+                    DetailSo::findOrFail($pro['id_detail_so'])
+                    ->increment('quantity_left', $pro['quantity_left']);
+                    
+                    Product::findOrFail($pro['product_id'])
+                        ->decrement('product_stock', $pro['quantity_left']);
+                    
+                    DetailDo::create([
+                        'id_do'         => $deliveryOrder->id_do,
+                        'code_do'       => $deliveryOrder->code_do,
+                        'product_id'    => $pro['product_id'],
+                        'quantity'      => $pro['quantity_left'], // Gunakan quantity_left sebagai jumlah yang dikirim
+                        'price'         => $pro['price'],
+                        'created_at'    => now(),
+                        'updated_at'    => now(),
+                    ]);
+                }
+            }            
             //bikin total price untuk sales-ordernya
             $line_total = $pro['price'] * $pro['quantity_left'];
-            $sub_total += $line_total;
+            $sub_total += $line_total;            
+        }        
 
-            //validasi jika nilai quantity yang dikirim tidak sama dengan quantity yang ada di detail sales order
-            if ($pro['quantity_left'] != $detailSo->quantity_left) {
-                // vaviable untuk ngurangin si inputan awok
-                $leftQuantity = $pro['quantity'] - $pro['quantity_left'];
-
-                $detailSo->update([
-                    'quantity_left' => $leftQuantity,
-                ]);
-
-                //mengurangi product stock
-                if ($leftQuantity != 0) {
-                    $product->decrement('product_stock', $pro['quantity_left']);
-                }                
-
-                // Simpan detail DO
-                DetailDo::create([
-                    'id_do'         => $deliveryOrder->id_do,
-                    'code_do'       => $deliveryOrder->code_do,
-                    'product_id'    => $pro['product_id'],
-                    'quantity'      => $pro['quantity_left'], // Gunakan quantity_left sebagai jumlah yang dikirim
-                    'price'         => $pro['price'],
-                    'created_at'    => now(),
-                    'updated_at'    => now(),
-                ]);            
-                                                
-            }
-            
-            if ($pro['quantity_left'] == 0) {
-                $detailSo->update([
+        foreach($request->delivery_order_details as $det)
+        {
+            $detailSo = DetailSo::findOrFail($det['id_detail_so']);
+            if ($pro['quantity'] == $detailSo->quantity_left) {
+                DetailSo::findOrFail($det['id_detail_so'])->update([
                     'has_do' => 1,
-                ]);                
+                ]);
+            }            
+        }        
+        $detailSo = DetailSo::where('id_so', $request->id_so)->get();              
+
+        foreach($detailSo as $pro)
+        {
+            if ($pro->quantity != $pro->quantity_left) {
+                $allDelivered = false; 
+                break;                       
             }
         }
-        
-        // Update sub_total pada DO
+
+        if ($allDelivered) {
+            $id_so = $request->id_so;
+            $has_do = SalesOrder::findOrFail($id_so)->update([
+                'has_do' => 1,
+            ]);
+        }
         $deliveryOrder->update(['sub_total' => $sub_total]);
         
         return response()->json([

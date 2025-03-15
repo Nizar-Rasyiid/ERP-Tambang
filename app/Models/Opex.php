@@ -15,6 +15,11 @@ class Opex extends Model
         'opex_name',
         'opex_type',
         'opex_price',
+        'customer_id',
     ];
+
+    public function customer(){
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
 }
     

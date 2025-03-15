@@ -9,7 +9,7 @@ class FakturPajakController extends Controller
 {
     public function index()
     {
-        $fakturpajaks = FakturPajak::all();
+        $fakturpajaks = FakturPajak::with(['customer', 'invoice', 'so'])->get();
         return response()->json($fakturpajaks);
     }
 
@@ -21,8 +21,15 @@ class FakturPajakController extends Controller
             'code_faktur_pajak' => 'required',
         ]);
 
-        $fakturpajak = FakturPajak::create($request->all());
-        return response()->json($fakturpajak, 201);
+        FakturPajak::create([
+            'id_so' => $request->id_so,
+            'id_invoice' => $request->id_invoice,
+            'customer_id' => $request->customer_id,
+            'code_faktur_pajak' => $request->code_faktur_pajak,
+        ]);
+        return response()->json([
+            'message' => 'Berhasil Membuat Faktur pajak',
+        ]);
     }
 
     public function show($id)

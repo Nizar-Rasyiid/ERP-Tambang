@@ -28,6 +28,8 @@ return new class extends Migration
             $table->integer('sub_total')->nullable();
             $table->integer('total_tax')->nullable();
             $table->integer('ppn')->nullable();
+            $table->tinyInteger('approved')->default(0);
+            $table->tinyInteger('has_tandater')->default(0);
             $table->integer('code_invoice');            
             $table->date('issue_at');
             $table->date('due_at');

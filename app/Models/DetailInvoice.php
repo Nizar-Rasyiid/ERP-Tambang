@@ -27,4 +27,9 @@ class DetailInvoice extends Model
     public function do(){
         return $this->belongsTo(DeliveryOrder::class, 'id_do');
     }
+
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class, 'id_invoice');
+    }
 }

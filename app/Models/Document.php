@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DetailTandater extends Model
+class Document extends Model
 {
     use HasFactory;
-    protected $table = 'detailtandater';
-    protected $primaryKey = 'id_detail_tandater';
-
+    protected $table = 'document';
+    protected $primaryKey = 'document_id';
     protected $fillable = [
-        'id_invoice',
-        'id_tandater'
+        'document_path',
+        'document_file',
+        'document_name',
     ];
 }

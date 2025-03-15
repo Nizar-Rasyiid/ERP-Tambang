@@ -23,6 +23,7 @@ return new class extends Migration
             $table->integer('deposit');
             $table->integer('ppn');
             $table->integer('grand_total');
+            $table->integer('has_do');
             $table->integer('has_invoice');
             $table->date('issue_at');
             $table->date('due_at');

@@ -5,17 +5,19 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\TandaTerima;
+use App\Models\Invoice;
+use App\Models\DetailTandater;
 
 class TandaTerimaController extends Controller
 {
     public function index(){
-        $tandater = TandaTerima::all();
+        $tandater = TandaTerima::with(['so','customer'])->get();
         return response()->json($tandater);
     }
     public function store(Request $request)
 {
     $request->validate([
-        'purchase_order_details' => 'required|array',
+        'tandaterima_details' => 'required|array',
     ]);
 
     // Ambil bulan & tahun saat ini
@@ -42,23 +44,26 @@ class TandaTerimaController extends Controller
 
     // Buat Purchase Order
     $purchaseOrder = Tandaterima::create([        
-        'code_tandater'  => $formattedCodePo,
-        'resi'         => $request->resi,                    
+        'code_tandater' => $formattedCodePo,
+        'id_so'         => $request->id_so,
+        'customer_id'   => $request->customer_id,
+        'resi'          => $request->resi,   
+        'issue_at'      => $request->issue_at,
+        'due_at'        => $request->due_at,                 
     ]);
 
-    $sub_total = 0;
-
-    foreach ($request->tanda_terima_details as $pro) {                                                                
-        $line_total = $pro['price'] * $pro['quantity'];
-        $sub_total += $line_total;
-
-        DetailPO::create([
-            'id_tandater'=> $purchaseOrder->id_tandater,                
-            'id_do'      => $pro['id_do'],
+    foreach ($request->tandaterima_details as $pro) {                                                                
+        DetailTandater::create([
+            'id_invoice'=> $pro['id_invoice'], 
+            'id_tandater' => $purchaseOrder->id_tandater,                           
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-    }                  
+
+        Invoice::findOrFail($pro['id_invoice'])->update([
+            'has_tandater' => 1,
+        ]);
+    }       
 
     return response()->json([
         'message'        => 'Purchase Order berhasil dibuat!',

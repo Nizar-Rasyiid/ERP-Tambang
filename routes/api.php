@@ -22,6 +22,7 @@ use App\Http\Controllers\DetailQuatationController;
 use App\Http\Controllers\TandaTerimaController;
 use App\Http\Controllers\FakturPajakController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +54,8 @@ Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('upda
 Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('delete.customer');
 Route::post('/store-customers', [CustomerController::class, 'store'])->name('post.customer');
 
+Route::get('/file', [DocumentController::class, 'index'])->name('get.file');
+Route::post('/file-upload', [DocumentController::class, 'uploadFile'])->name('get.doc');
 
 Route::get('/delivery_orders', [DeliveryOrderController::class, 'index'])->name('get.delivery_order');
 Route::get('/delivery_orders/{id}', [DeliveryOrderController::class, 'show'])->name('get.do');
@@ -74,7 +77,10 @@ Route::post('/employees_code', [EmployeeController::class, 'store'])->name('post
 
 Route::get('/invoices', [InvoiceController::class, 'index'])->name('get.invoices');
 Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('show.invoices');
+Route::get('/invoices/code/{id}', [InvoiceController::class, 'InvoiceSo'])->name('show.invoices');
 Route::post('/invoices_code', [InvoiceController::class, 'store'])->name('post.invoices');
+Route::post('/invoices_code/appr/{id}', [InvoiceController::class, 'store'])->name('post.invoices');
+Route::put('/invoices_code/{id}', [InvoiceController::class, 'update'])->name('put.invoices');
 Route::get('/detail_invoices/{id}', [InvoiceController::class, 'detail'])->name('detail.invoices');
 
 Route::get('/inquiry', [InquiryController::class, 'index'])->name('get.inquiry');
@@ -97,6 +103,7 @@ Route::post('/purchase_orders/good-receive', [PurchaseOrderController::class, 'g
 Route::get('/quatations', [QuatationController::class, 'index'])->name('get.quatation');
 Route::get('/quatations/{id}', [QuatationController::class, 'show'])->name('get.quatation');
 Route::post('/quatations_code', [QuatationController::class, 'store'])->name('post.quatation');
+Route::put('/quatations_code/{id}', [QuatationController::class, 'put'])->name('post.quatation');
 
 Route::get('/vendors', [VendorController::class, 'index'])->name('get.vendor');
 Route::get('/vendors/{id}', [VendorController::class, 'show'])->name('show.vendor');
@@ -114,6 +121,7 @@ Route::post('/sales_orders_code', [SalesOrderController::class, 'store'])->name(
 //s
 //t
 Route::get('/tandater', [TandaTerimaController::class, 'index'])->name('get.tandater');
+Route::post('/addTandater', [TandaTerimaController::class, 'store'])->name('post.tandater');
 Route::get('/faktur-pajak', [FakturPajakController::class, 'index'])->name('get.fakturpajak');
 Route::post('/faktur-pajak-code', [FakturPajakController::class, 'store'])->name('post.fakturpajak');
 

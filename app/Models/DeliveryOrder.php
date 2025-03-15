@@ -39,4 +39,8 @@ class DeliveryOrder extends Model
     public function point(){
         return $this->belongsTo(CustomerPoint::class, 'id_customer_point');
     }
+
+    public function detailDo(){
+        return $this->hasMany(DetailDo::class, 'id_do');
+    }
 }

@@ -21,7 +21,7 @@ class PurchaseOrderController extends Controller
     // 🟢 GET: Tampilkan semua Purchase Orders
     public function index()
     {
-        $purchaseOrders = PurchaseOrder::with(['vendor', 'employee'])->get();
+        $purchaseOrders = PurchaseOrder::with(['vendor', 'detailPo', 'detailPo.product'])->get();
         return response()->json($purchaseOrders);
     }
 
@@ -161,30 +161,36 @@ class PurchaseOrderController extends Controller
     }
 
     public function goodReceive(Request $request)
-    {                      
-        foreach ($request->purchase_order_details as $pro) {                                                                                      
-            $detailPo = DetailPo::findOrFail($pro['id_detail_po']);
+    {             
+        $allItemsReceived = true;         
+        foreach($request->purchase_order_details as $pro) 
+        {
+            if ($pro['quantity'] != $pro['quantity_left']) {
+                DetailPo::findOrFail($pro['id_detail_po'])
+                    ->increment('quantity_left', $pro['quantity_left']);
 
-            if ($pro['quantity_left'] != $detailPo->quantity_left) {
-
-                $leftQuantity = $pro['quantity'] - $pro['quantity_left']; 
-
-                $detailPo->update([
-                    'quantity_left' => $leftQuantity,
-                ]);
-                
-                if ($leftQuantity != 0) {
-                    $product = Product::findOrFail($pro['product_id']);
-                    $product->increment('product_stock', $pro['quantity_left']);      
-                }
-            }  
-            
-            if ($pro['quantity_left'] == 0) {
-                $has_gr = PurchaseOrder::where('id_po')->update([
-                    'has_gr' => 1,
-                ]);                
+                Product::findOrFail($pro['product_id'])
+                    ->increment('product_stock', $pro['quantity_left']);                
+            }                                   
+        }    
+        foreach($request->purchase_order_details as $pro)
+        {
+            $detailPro = DetailPo::findOrFail($pro['id_detail_po']);            
+            if ($pro['quantity'] != $detailPro->quantity_left) {
+                $allItemsReceived = false;
+                break;
             }
-        }         
+        }
+        if ($allItemsReceived) {
+            $has_gr = PurchaseOrder::findOrFail($request->id_po)->update([
+                'has_gr' => 1,
+            ]); 
+        }  
+                        
+        return response()->json([   
+            'validate' => $allItemsReceived,         
+            'message' => 'Good Receive berhasil dilakukan!',
+        ]) ;       
     }
 
     public function getAP(){

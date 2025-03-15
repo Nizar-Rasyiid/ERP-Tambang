@@ -14,7 +14,12 @@ class DetailQuatationController extends Controller
     }
 
     public function show(string $id){
-        $detailQuatation = DetailQuatation::with(['product'])
+        $detailQuatation = DetailQuatation::with(
+            [
+                'product', 
+                'quo',
+                'quo.customer',
+            ])
             ->where('id_quatation', $id)
             ->get();
 

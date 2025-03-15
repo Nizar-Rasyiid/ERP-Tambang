@@ -17,9 +17,16 @@ return new class extends Migration
                 ->references('customer_id')
                 ->on('customers')
                 ->onDelete('cascade');
+                
+            $table->foreignId('id_so')
+                ->references('id_so')
+                ->on('salesorders')
+                ->onDelete('cascade');
 
             $table->text('code_tandater');
             $table->text('resi');
+            $table->date('issue_at');
+            $table->date('due_at');
             $table->timestamps();
         });
     }

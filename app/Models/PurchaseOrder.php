@@ -23,21 +23,11 @@ class PurchaseOrder extends Model
         'ppn',
         'grand_total',
         'has_gr',
+        'approved',
+        'desc',
         'issue_at',
         'due_at',
     ];
-
-        // // Accessor untuk perhitungan PPN
-        // public function getCalculatedPpnAttribute()
-        // {
-        //     return ($this->sub_total * $this->ppn) / 100;
-        // }
-    
-        // // Accessor untuk perhitungan Grand Total
-        // public function getCalculatedGrandTotalAttribute()
-        // {
-        //     return $this->sub_total + $this->total_tax + $this->total_service - $this->deposit + $this->calculated_ppn;
-        // }
 
         public function vendor(){
             return $this->belongsTo(Vendor::class, 'vendor_id');
@@ -49,5 +39,5 @@ class PurchaseOrder extends Model
 
         public function detailpo(){
             return $this->hasMany(DetailPo::class, 'id_po');
-        }
+        }        
 }
