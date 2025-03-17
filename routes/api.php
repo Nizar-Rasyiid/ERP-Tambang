@@ -34,7 +34,6 @@ use App\Http\Controllers\DocumentController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
 //a
 Route::get('/assets', [AssetController::class, 'index'])->name('get.asset');
 Route::post('/assets_code', [AssetController::class, 'store'])->name('post.asset');
@@ -97,6 +96,7 @@ Route::post('/payment_types_code', [PaymentTypeController::class, 'store'])->nam
 Route::get('/purchase_orders', [PurchaseOrderController::class, 'index'])->name('get.purchase_order');
 Route::get('/purchase_orders/monthly', [PurchaseOrderController::class, 'monthlyPurchase'])->name('monthly.purchase_order');
 Route::get('/purchase_orders/{id}', [PurchaseOrderController::class, 'show'])->name('show.purchase_order');
+Route::post('/purchase_orders/approve/{id}', [PurchaseOrderController::class, 'approved'])->name('approve.purchase_order');
 Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])->name('post.purchase_order');
 Route::post('/purchase_orders/good-receive', [PurchaseOrderController::class, 'goodReceive'])->name('show.purchase_order');
 
@@ -126,6 +126,7 @@ Route::get('/faktur-pajak', [FakturPajakController::class, 'index'])->name('get.
 Route::post('/faktur-pajak-code', [FakturPajakController::class, 'store'])->name('post.fakturpajak');
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/regis', [AuthController::class, 'Register']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
 

@@ -24,7 +24,7 @@ return new class extends Migration
                 ->on('employees')
                 ->onDelete('cascade');
             $table->text('termin');
-            $table->integer('code_quatation');            
+            $table->text('code_quatation');            
             $table->integer('sub_total');
             $table->date('issue_at');
             $table->date('due_at');

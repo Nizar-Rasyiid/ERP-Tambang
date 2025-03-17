@@ -30,7 +30,7 @@ return new class extends Migration
             $table->integer('ppn')->nullable();
             $table->tinyInteger('approved')->default(0);
             $table->tinyInteger('has_tandater')->default(0);
-            $table->integer('code_invoice');            
+            $table->text('code_invoice');            
             $table->date('issue_at');
             $table->date('due_at');
             $table->timestamps();

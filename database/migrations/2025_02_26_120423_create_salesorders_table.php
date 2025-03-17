@@ -25,6 +25,7 @@ return new class extends Migration
             $table->integer('grand_total');
             $table->integer('has_do');
             $table->integer('has_invoice');
+            $table->tinyInteger('has_tandater')->default(0);
             $table->date('issue_at');
             $table->date('due_at');
             $table->timestamps();

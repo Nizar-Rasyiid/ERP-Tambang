@@ -84,7 +84,7 @@ class PurchaseOrderController extends Controller
             'id_po'      => $purchaseOrder->id_po,                
             'product_id' => $pro['product_id'],
             'quantity'   => $pro['quantity'],
-            'quantity_left' => $pro['quantity'],
+            'quantity_left' => 0,
             'price'      => $pro['price'],
             'amount'     => $pro['amount'],
             'created_at' => now(),
@@ -165,13 +165,11 @@ class PurchaseOrderController extends Controller
         $allItemsReceived = true;         
         foreach($request->purchase_order_details as $pro) 
         {
-            if ($pro['quantity'] != $pro['quantity_left']) {
-                DetailPo::findOrFail($pro['id_detail_po'])
-                    ->increment('quantity_left', $pro['quantity_left']);
+            DetailPo::findOrFail($pro['id_detail_po'])
+                ->increment('quantity_left', $pro['quantity_left']);
 
-                Product::findOrFail($pro['product_id'])
-                    ->increment('product_stock', $pro['quantity_left']);                
-            }                                   
+            Product::findOrFail($pro['product_id'])
+                ->increment('product_stock', $pro['quantity_left']);                                                
         }    
         foreach($request->purchase_order_details as $pro)
         {
@@ -199,6 +197,16 @@ class PurchaseOrderController extends Controller
             ->get();
         
         return response()->json($purchaseOrder);
+    }
+
+    public function approved($id){
+        $approve = PurchaseOrder::findOrFail($id)->update([
+            'approved' => 1,
+        ]);
+
+        return response()->json([
+            'approved' => 'Purchase Order been Approved',
+        ]);
     }
 
     public function monthlyPurchase()

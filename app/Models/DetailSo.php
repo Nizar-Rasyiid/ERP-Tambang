@@ -17,6 +17,7 @@ class DetailSo extends Model
         'quantity',
         'quantity_left',
         'has_do',
+        'discount',
         'price',
         'amount'
     ];

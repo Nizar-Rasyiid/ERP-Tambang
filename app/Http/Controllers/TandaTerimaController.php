@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\TandaTerima;
 use App\Models\Invoice;
+use App\Models\SalesOrder;
 use App\Models\DetailTandater;
 
 class TandaTerimaController extends Controller
@@ -62,8 +63,23 @@ class TandaTerimaController extends Controller
 
         Invoice::findOrFail($pro['id_invoice'])->update([
             'has_tandater' => 1,
-        ]);
-    }       
+        ]);        
+    }      
+    $allInvoice = Invoice::where('id_so', $request->id_so)->get();
+
+    $allHasTandaterima = true;
+    foreach($allInvoice as $inv)
+    {
+        if ($inv->has_tandater != 1) {
+            $allHasTandaterima = false;
+            break;
+        }
+    }
+
+    if ($allHasTandaterima) {
+        SalesOrder::findOrFail($request->id_so)->update(['has_tandater' => 1]);
+    }
+
 
     return response()->json([
         'message'        => 'Purchase Order berhasil dibuat!',

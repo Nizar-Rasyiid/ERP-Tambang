@@ -24,6 +24,7 @@ class SalesOrder extends Model
         'grand_total',
         'has_do',
         'has_invoice',
+        'has_tandater',
         'issue_at',
         'due_at'
     ];

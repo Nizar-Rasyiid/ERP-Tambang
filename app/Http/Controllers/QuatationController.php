@@ -69,6 +69,7 @@ class QuatationController extends Controller
             'id_quatation' => $quatation->id_quatation,                
             'product_id' => $pro['product_id'],
             'quantity' => $pro['quantity'],
+            'discount' => $pro['discount'],
             'price' => $pro['price'],
             'amount' => $pro['amount'],
             'created_at' => now(),

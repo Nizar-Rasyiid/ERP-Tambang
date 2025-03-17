@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
 use App\Models\DeliveryOrder;
+use App\Models\SalesOrder;
+use App\Models\DetailDO;
 use App\Models\DetailInvoice;
 
 class InvoiceController extends Controller
@@ -74,7 +76,8 @@ class InvoiceController extends Controller
             'issue_at'        => $request->issue_at,
             'due_at'          => $request->due_at,            
         ]);
-    
+
+        $detailDo = DetailDo::findOrFail($request->id_so)->get();
         $sub_total = 0;
     
         foreach ($request->delivery_order_details as $pro) {
@@ -91,8 +94,24 @@ class InvoiceController extends Controller
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);
+
             DeliveryOrder::findOrFail($pro['id_do'])->update(['has_inv' => 1]);
+        }        
+        $allDeliveryOrders = DeliveryOrder::where('id_so', $request->id_so)->get();
+        
+        $allHasInvoice = true;
+
+        foreach ($allDeliveryOrders as $do) {
+            if ($do->has_inv != 1) {
+                $allHasInvoice = false;
+                break;
+            }
         }
+        
+        if ($allHasInvoice) {
+            SalesOrder::findOrFail($request->id_so)->update(['has_invoice' => 1]);
+        }
+        
     
         // Update sub_total pada Invoice
         $invoice->update(['sub_total' => $sub_total]);
