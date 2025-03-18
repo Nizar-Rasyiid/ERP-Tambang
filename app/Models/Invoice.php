@@ -18,6 +18,7 @@ class Invoice extends Model
         'sub_total',
         'total_tax',
         'ppn',
+        'grand_total',
         'approved',
         'has_tandater',
         'code_invoice',                

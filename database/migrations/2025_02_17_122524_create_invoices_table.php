@@ -28,6 +28,7 @@ return new class extends Migration
             $table->integer('sub_total')->nullable();
             $table->integer('total_tax')->nullable();
             $table->integer('ppn')->nullable();
+            $table->integer('grand_total')->nullable();
             $table->tinyInteger('approved')->default(0);
             $table->tinyInteger('has_tandater')->default(0);
             $table->text('code_invoice');            

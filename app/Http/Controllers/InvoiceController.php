@@ -114,7 +114,11 @@ class InvoiceController extends Controller
         
     
         // Update sub_total pada Invoice
-        $invoice->update(['sub_total' => $sub_total]);
+        $invoice->update([
+            'sub_total' => $sub_total,
+            'ppn' => $sub_total * 0.11,
+            'grand_total' => $sub_total * 0.11 + $sub_total,    
+        ]);
     
         return response()->json([
             'message'  => 'Invoice berhasil dibuat!',

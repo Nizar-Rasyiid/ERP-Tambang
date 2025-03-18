@@ -54,6 +54,7 @@ Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('
 Route::post('/store-customers', [CustomerController::class, 'store'])->name('post.customer');
 
 Route::get('/file', [DocumentController::class, 'index'])->name('get.file');
+Route::get('/documents/{filename}', [DocumentController::class, 'show'])->name('show.file');
 Route::post('/file-upload', [DocumentController::class, 'uploadFile'])->name('get.doc');
 
 Route::get('/delivery_orders', [DeliveryOrderController::class, 'index'])->name('get.delivery_order');
@@ -101,6 +102,7 @@ Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])-
 Route::post('/purchase_orders/good-receive', [PurchaseOrderController::class, 'goodReceive'])->name('show.purchase_order');
 
 Route::get('/quatations', [QuatationController::class, 'index'])->name('get.quatation');
+Route::get('/quatations/monthly', [QuatationController::class, 'monthlyQuo'])->name('get.quatation');
 Route::get('/quatations/{id}', [QuatationController::class, 'show'])->name('get.quatation');
 Route::post('/quatations_code', [QuatationController::class, 'store'])->name('post.quatation');
 Route::put('/quatations_code/{id}', [QuatationController::class, 'put'])->name('post.quatation');

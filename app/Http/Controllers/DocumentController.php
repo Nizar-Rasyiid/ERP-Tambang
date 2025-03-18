@@ -16,7 +16,7 @@ class DocumentController extends Controller
     {
         // Validasi file dan input lainnya
         $request->validate([
-            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048', // Sesuaikan dengan kebutuhan
+            // 'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048', // Sesuaikan dengan kebutuhan
             'document_name' => 'required|string', // Nama dokumen
         ]);
 
@@ -43,5 +43,16 @@ class DocumentController extends Controller
         return response()->json([
             'message' => 'File gagal diunggah!',
         ], 400);
+    }
+
+    public function show($filename) 
+    {
+        $path = storage_path('app/public/invoice/' . $filename);
+
+        if (!file_exists($path)) {
+            abort(404, 'file not found');
+        }
+
+        return response()->file($path);
     }
 }
