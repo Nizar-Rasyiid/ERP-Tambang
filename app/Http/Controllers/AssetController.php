@@ -51,7 +51,7 @@ class AssetController extends Controller
      */
     public function show(string $id)
     {
-        $asset = Asset::findOrFail($id);
+        $asset = Asset::with('vendor')->where('asset_id', $id)->get();
         return response()->json($asset);
     }
 
@@ -77,7 +77,14 @@ class AssetController extends Controller
         ]);
 
         $asset = Asset::findOrFail($id);
-        $asset->update($request->all());
+        $asset->update([
+            'vendor_id' => $request->vendor_id,            
+            'assets_name' => $request->assets_name,
+            'price' => $request->price,
+            'assets_life' => $request->assets_life,            
+            'issue_at' => $request->issue_at,
+            'due_at' => $request->due_at,
+        ]);
         return response()->json($asset);
     }
 

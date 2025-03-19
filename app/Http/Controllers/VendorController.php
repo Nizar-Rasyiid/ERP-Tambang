@@ -40,7 +40,9 @@ class VendorController extends Controller
             'vendor_email' => $request->vendor_email,
             'vendor_phone' => $request->vendor_phone,
             'vendor_address' => $request->vendor_address,
-            'vendor_singkatan' => $request->vendor_singkatan,              
+            'vendor_singkatan' => $request->vendor_singkatan,
+            'vendor_npwp' => $request->vendor_npwp,
+            'vendor_contact' => $request->vendor_contact,                      
         ]);        
 
         return response()->json(['success' => 'Vendor created successfully.', 'vendor' => $vendor], 201);
@@ -65,15 +67,6 @@ class VendorController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'account_name' => 'required',
-            'vendor_name' => 'required',
-            'vendor_type' => 'required',
-            'vendor_email' => 'required|email',
-            'vendor_phone' => 'required',
-            'vendor_address' => 'required',
-            'tax_number' => 'required',
-        ]);
 
         $vendor = Vendor::find($id);
 
@@ -81,7 +74,15 @@ class VendorController extends Controller
             return response()->json(['error' => 'Vendor not found'], 404);
         }
 
-        $vendor->update($request->all());
+        $vendor->update([
+            'vendor_name' => $request->vendor_name,            
+            'vendor_email' => $request->vendor_email,
+            'vendor_phone' => $request->vendor_phone,
+            'vendor_address' => $request->vendor_address,
+            'vendor_singkatan' => $request->vendor_singkatan,
+            'vendor_npwp' => $request->vendor_npwp,
+            'vendor_contact' => $request->vendor_contact,                      
+        ]);
 
         return response()->json(['success' => 'Vendor updated successfully.', 'vendor' => $vendor]);
     }

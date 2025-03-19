@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->tinyInteger('has_do');
             $table->integer('quantity_left');
-            $tbale->integer('discount');
+            $table->integer('discount');
             $table->integer('price');
             $table->integer('amount');
             $table->timestamps();

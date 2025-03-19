@@ -41,4 +41,7 @@ class Customer extends Model
     public function quatation(){
         return $this->belognsTo(Quatation::class, 'customer_id');
     }
+    public function point(){
+        return $this->hasMany(CustomerPoint::class, 'customer_id');
+    }
 }

@@ -16,7 +16,9 @@ class Vendor extends Model
         'vendor_email',
         'vendor_phone',
         'vendor_address',        
-        'vendor_singkatan',        
+        'vendor_singkatan', 
+        'vendor_npwp',
+        'vendor_contact',       
     ];
 
     public function purchaseorder(){

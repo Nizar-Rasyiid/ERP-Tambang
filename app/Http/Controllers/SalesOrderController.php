@@ -120,21 +120,18 @@ class SalesOrderController extends Controller
             return response()->json(['message' => 'Sales Order not found'], 404);
         }
 
-        $validatedData = $request->validate([
-            'employee_id' => 'required|integer',
-            'code_so' => 'required|string|max:255',
-            'termin' => 'required|string|max:255',
-            'total_tax' => 'required|numeric',
-            'status_payment' => 'required|string|max:255',
-            'sub_total' => 'required|numeric',
-            'deposit' => 'required|numeric',
-            'ppn' => 'required|numeric',
-            'grand_total' => 'required|numeric',
-            'issue_at' => 'required|date',
-            'due_at' => 'required|date',
-        ]);
-
-        $salesOrder->update($validatedData);
+        $salesOrder->update([
+            'customer_id'    => $request->customer_id,
+            'employee_id'    => $request->employee_id,            
+            'po_number'      => $request->po_number,
+            'termin'         => $request->termin,            
+            'total_tax'      => $request->total_tax,
+            'status_payment' => $request->status_payment,
+            'deposit'        => $request->deposit,
+            'has_invoice'    => $request->has_invoice,
+            'issue_at'       => $request->issue_at,
+            'due_at'         => $request->due_at,
+        ]);;
         return response()->json($salesOrder);
     }
 

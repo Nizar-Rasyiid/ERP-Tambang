@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('id_customer_point')->constrained('customerpoints', 'id_customer_point')->onDelete('cascade');
             $table->integer('sub_total');
             $table->tinyInteger('has_inv')->default(0);
-            $table->integer('code_do');
+            $table->text('code_do');
             $table->date('issue_at');
             $table->date('due_at');
             $table->timestamps();

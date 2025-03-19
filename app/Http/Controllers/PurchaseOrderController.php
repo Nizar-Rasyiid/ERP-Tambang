@@ -60,8 +60,7 @@ class PurchaseOrderController extends Controller
     // Buat Purchase Order
     $purchaseOrder = PurchaseOrder::create([
         'vendor_id'      => $request->vendor_id, // ✅ Vendor, bukan Customer
-        'employee_id'    => $request->employee_id,
-        'code_po'        => $formattedCodePo,
+        'employee_id'    => $request->employee_id,        
         'termin'         => $request->termin,            
         'total_tax'      => $request->total_tax,
         'status_payment' => $request->status_payment,
@@ -124,27 +123,16 @@ class PurchaseOrderController extends Controller
     {
         $purchaseOrder = PurchaseOrder::findOrFail($id);
 
-        $request->validate([
-            'customer_id'    => 'sometimes|exists:customers,customer_id',
-            'employee_id'    => 'sometimes|exists:employees, employee_id',
-            'po_type'        => 'sometimes|in:type1,type2,type3',
-            'status_payment' => 'sometimes|string',
-            'sub_total'      => 'sometimes|integer',
-            'total_tax'      => 'sometimes|integer',
-            'total_service'  => 'sometimes|integer',
-            'deposit'        => 'sometimes|integer',
-            'issue_at'       => 'sometimes|date',
-            'due_at'         => 'sometimes|date',
+        $purchaseOrder->update([
+            'vendor_id'      => $request->vendor_id, // ✅ Vendor, bukan Customer
+            'employee_id'    => $request->employee_id,            
+            'termin'         => $request->termin,            
+            'total_tax'      => $request->total_tax,
+            'status_payment' => $request->status_payment,
+            'deposit'        => $request->deposit,
+            'issue_at'       => $request->issue_at,
+            'due_at'         => $request->due_at,
         ]);
-
-        // Hitung ulang PPN dan Grand Total jika nilai sub_total berubah
-        if ($request->has('sub_total')) {
-            $ppn = $request->sub_total * 0.11;
-            $grand_total = $request->sub_total + $request->total_tax + $request->total_service + $ppn - $request->deposit;
-            $request->merge(['ppn' => $ppn, 'grand_total' => $grand_total]);
-        }
-
-        $purchaseOrder->update($request->all());
 
         return response()->json($purchaseOrder);
     }

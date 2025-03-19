@@ -194,19 +194,7 @@ class InvoiceController extends Controller
             'issue_at'        => $request->issue_at,
             'due_at'          => $request->due_at,
             'sub_total'       => $request->sub_total,
-        ]);
-        foreach ($request->delivery_order_details as $pro) {
-            DetailInvoice::findOrFail($pro['id_detail_invoice'])->update([                
-                'id_do'         => $pro['id_do'],
-                'product_id'    => $pro['product_id'],
-                'quantity'      => $pro['quantity'],
-                'price'         => $pro['price'],
-                'amount'        => $pro['amount'],
-                'created_at'    => now(),
-                'updated_at'    => now(),
-            ]);
-            DeliveryOrder::findOrFail($pro['id_do'])->update(['has_inv' => 1]);
-        }
+        ]);        
     }
 
     /**

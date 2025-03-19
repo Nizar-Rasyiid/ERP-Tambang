@@ -86,4 +86,11 @@ class TandaTerimaController extends Controller
         'purchase_order' => $purchaseOrder,
     ], 201);
 }
+    public function show($id){
+        $tandater = Tandaterima::with(['customer', 'so'])
+            ->where('id_tandater', $id)
+            ->get();
+
+        return response()->json($tandater);
+    }
 }
