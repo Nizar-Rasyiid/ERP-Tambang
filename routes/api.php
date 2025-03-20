@@ -130,7 +130,11 @@ Route::put('/sales_orders_code/{id}', [SalesOrderController::class, 'update'])->
 //t
 Route::get('/tandater', [TandaTerimaController::class, 'index'])->name('get.tandater');
 Route::get('/tandater/{id}', [TandaTerimaController::class, 'show'])->name('get.tandater');
+Route::get('/detail_tandater/{id}', [TandaTerimaController::class, 'detail'])->name('detail.tandater');
 Route::post('/addTandater', [TandaTerimaController::class, 'store'])->name('post.tandater');
+Route::put('/addTandater/{id}', [TandaTerimaController::class, 'update'])->name('post.tandater');
+
+
 Route::get('/faktur-pajak', [FakturPajakController::class, 'index'])->name('get.fakturpajak');
 Route::post('/faktur-pajak-code', [FakturPajakController::class, 'store'])->name('post.fakturpajak');
 

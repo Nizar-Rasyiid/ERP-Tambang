@@ -13,6 +13,14 @@ class DetailTandater extends Model
 
     protected $fillable = [
         'id_invoice',
+        'id_so',
         'id_tandater'
     ];
+
+    public function so(){
+        return $this->belongsTo(SalesOrder::class, 'id_so');
+    }
+    public function invoice(){
+        return $this->belongsTo(Invoice::class, 'id_invoice');
+    }
 }

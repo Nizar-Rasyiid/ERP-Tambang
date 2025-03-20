@@ -56,6 +56,7 @@ class TandaTerimaController extends Controller
     foreach ($request->tandaterima_details as $pro) {                                                                
         DetailTandater::create([
             'id_invoice'=> $pro['id_invoice'], 
+            'id_so' => $pro['id_so'],
             'id_tandater' => $purchaseOrder->id_tandater,                           
             'created_at' => now(),
             'updated_at' => now(),
@@ -86,11 +87,32 @@ class TandaTerimaController extends Controller
         'purchase_order' => $purchaseOrder,
     ], 201);
 }
+
     public function show($id){
         $tandater = Tandaterima::with(['customer', 'so'])
             ->where('id_tandater', $id)
             ->get();
 
         return response()->json($tandater);
+    }
+
+    public function detail($id) {
+        $detail = DetailTandater::with(['so', 'invoice'])
+            ->where('id_detail_tandater',$id)
+            ->get();
+
+        return response()->json($detail);
+    }
+
+    public function update(Request $request, string $id){
+        $purchaseOrder = Tandaterima::findOrFail($id);
+
+        $purchaseOrder->update([                    
+            'id_so'         => $request->id_so,
+            'customer_id'   => $request->customer_id,
+            'resi'          => $request->resi,   
+            'issue_at'      => $request->issue_at,
+            'due_at'        => $request->due_at,                 
+        ]);
     }
 }
