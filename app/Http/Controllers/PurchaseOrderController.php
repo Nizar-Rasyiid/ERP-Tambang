@@ -11,6 +11,7 @@ use App\Models\Employee;
 use App\Models\DetailPo;
 use App\Models\Vendor;
 use App\Models\Product;
+use App\Models\StockHistory;
 use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
@@ -63,6 +64,7 @@ class PurchaseOrderController extends Controller
         'employee_id'    => $request->employee_id,        
         'termin'         => $request->termin,            
         'total_tax'      => $request->total_tax,
+        'code_po'        => $formattedCodePo,
         'status_payment' => $request->status_payment,
         'sub_total'      => 0,            
         'total_service'  => 0,
@@ -79,7 +81,7 @@ class PurchaseOrderController extends Controller
         $line_total = $pro['price'] * $pro['quantity'];
         $sub_total += $line_total;
 
-        DetailPO::create([
+        $detailpo = DetailPO::create([
             'id_po'      => $purchaseOrder->id_po,                
             'product_id' => $pro['product_id'],
             'quantity'   => $pro['quantity'],
@@ -88,7 +90,16 @@ class PurchaseOrderController extends Controller
             'amount'     => $pro['amount'],
             'created_at' => now(),
             'updated_at' => now(),
-        ]);        
+        ]);  
+        
+        StockHistory::create([
+            'id_po'         => $purchaseOrder->id_po,
+            'product_id'    => $pro['product_id'],
+            'id_detail_po'  => $detailpo->id_detail_po,
+            'price'         => $pro['price'],
+            'quantity'      => $pro['quantity'],
+            'quantity_left' => $pro['quantity'],
+        ]);
     }            
 
     // ✅ Hitung PPN (11% dari sub_total)
@@ -105,8 +116,7 @@ class PurchaseOrderController extends Controller
     ]);  
 
     return response()->json([
-        'message'        => 'Purchase Order berhasil dibuat!',
-        'purchase_order' => $purchaseOrder,
+        'message'        => 'Purchase Order berhasil dibuat!',        
     ], 201);
 }
 
