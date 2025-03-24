@@ -14,7 +14,7 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $invoice = Invoice::with(['customer', 'employee'])->get();
+        $invoice = Invoice::with(['customer','deliveryorder','employee','SalesOrder','detailinvoice','PurchaseOrder'])->get();
         return response()->json($invoice);
     }
 
