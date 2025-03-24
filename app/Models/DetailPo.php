@@ -14,6 +14,7 @@ class DetailPo extends Model
         'id_po',
         'product_id',
         'quantity',
+        'quantity_left',
         'price',
         'amount'      
     ];

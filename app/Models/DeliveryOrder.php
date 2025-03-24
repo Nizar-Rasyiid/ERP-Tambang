@@ -14,8 +14,10 @@ class DeliveryOrder extends Model
     protected $fillable = [
         'customer_id',
         'employee_id',        
-        'id_so',        
+        'id_so',  
+        'id_customer_point',      
         'code_do',
+        'has_inv',
         'sub_total',
         'issue_at',
         'due_at',
@@ -34,8 +36,11 @@ class DeliveryOrder extends Model
     public function detailinvoice(){
         return $this->belongsTo(DetailInvoice::class, 'id_do');
     }
-    public function Invoice(){
-        return $this->belongsTo(Invoice::class, 'id_do');
+    public function point(){
+        return $this->belongsTo(CustomerPoint::class, 'id_customer_point');
     }
 
+    public function detailDo(){
+        return $this->hasMany(DetailDo::class, 'id_do');
+    }
 }

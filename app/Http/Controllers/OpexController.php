@@ -10,7 +10,7 @@ class OpexController extends Controller
     // Get all Opex records
     public function index()
     {
-        $opexes = Opex::all();
+        $opexes = Opex::with('customer')->get();
         return response()->json($opexes);
     }
 
@@ -36,6 +36,7 @@ class OpexController extends Controller
             'opex_name' => $request->opex_name,
             'opex_type' => $request->opex_type,
             'opex_price' => $request->opex_price,
+            'customer_id' => $request->customer_id,
         ]);
         
         return response()->json($opex, 201);

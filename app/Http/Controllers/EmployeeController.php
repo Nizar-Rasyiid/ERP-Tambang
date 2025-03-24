@@ -31,7 +31,7 @@ class EmployeeController extends Controller
     {
         $request->validate([            
             'employee_name'     => 'required|string|max:255',
-            'employee_phone'    => 'required|string',
+            'employee_phone'    => 'required|integer',
             'employee_email'    => 'required|string|email|max:255|unique:employees',
             'employee_address'  => 'required|string|max:255',
             'employee_nik'      => 'required|integer',
@@ -52,6 +52,8 @@ class EmployeeController extends Controller
             'employee_end_contract' => now(),
             'employee_nik'      => $request->employee_nik,
             'employee_position' => $request->employee_position,
+            'bpjs_kesehatan'    => $request->bpjs_kesehatan,
+            'bpjs_ketenagakerjaan' => $request->bpjs_ketenagakerjaan,
         ]);
 
         return response()->json([
@@ -82,16 +84,19 @@ class EmployeeController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
-            'employee_name' => 'sometimes|required|string|max:255',
-            'employee_phone' => 'sometimes|required|string|max:15',
-            'employee_email' => 'sometimes|required|string|email|max:255|unique:employees,employee_email,' . $id . ',id_employee',
-            'employee_address' => 'sometimes|required|string|max:255',
-            'status' => 'sometimes|required|boolean',
-        ]);
-
         $employee = Employee::findOrFail($id);
-        $employee->update($request->all());
+        $employee->update([            
+            'employee_name'     => $request->employee_name,
+            'employee_phone'    => $request->employee_phone,
+            'employee_email'    => $request->employee_email,
+            'employee_address'  => $request->employee_address,
+            'employee_salary'   => $request->employee_salary,
+            'employee_end_contract' => now(),
+            'employee_nik'      => $request->employee_nik,
+            'employee_position' => $request->employee_position,
+            'bpjs_kesehatan'    => $request->bpjs_kesehatan,
+            'bpjs_ketenagakerjaan' => $request->bpjs_ketenagakerjaan,
+        ]);
 
         return response()->json($employee);
     }

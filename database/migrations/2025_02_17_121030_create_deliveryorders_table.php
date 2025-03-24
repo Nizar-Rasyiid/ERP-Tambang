@@ -16,8 +16,10 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade');
             $table->foreignId('employee_id')->constrained('employees', 'employee_id')->onDelete('cascade');                    
             $table->foreignId('id_so')->constrained('salesorders', 'id_so')->onDelete('cascade');
+            $table->foreignId('id_customer_point')->constrained('customerpoints', 'id_customer_point')->onDelete('cascade');
             $table->integer('sub_total');
-            $table->integer('code_do');
+            $table->tinyInteger('has_inv')->default(0);
+            $table->text('code_do');
             $table->date('issue_at');
             $table->date('due_at');
             $table->timestamps();

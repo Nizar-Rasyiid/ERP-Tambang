@@ -5,17 +5,20 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\TandaTerima;
+use App\Models\Invoice;
+use App\Models\SalesOrder;
+use App\Models\DetailTandater;
 
 class TandaTerimaController extends Controller
 {
     public function index(){
-        $tandater = TandaTerima::all();
+        $tandater = TandaTerima::with(['so','customer'])->get();
         return response()->json($tandater);
     }
     public function store(Request $request)
 {
     $request->validate([
-        'purchase_order_details' => 'required|array',
+        'tandaterima_details' => 'required|array',
     ]);
 
     // Ambil bulan & tahun saat ini
@@ -42,27 +45,74 @@ class TandaTerimaController extends Controller
 
     // Buat Purchase Order
     $purchaseOrder = Tandaterima::create([        
-        'code_tandater'  => $formattedCodePo,
-        'resi'         => $request->resi,                    
+        'code_tandater' => $formattedCodePo,
+        'id_so'         => $request->id_so,
+        'customer_id'   => $request->customer_id,
+        'resi'          => $request->resi,   
+        'issue_at'      => $request->issue_at,
+        'due_at'        => $request->due_at,                 
     ]);
 
-    $sub_total = 0;
-
-    foreach ($request->tanda_terima_details as $pro) {                                                                
-        $line_total = $pro['price'] * $pro['quantity'];
-        $sub_total += $line_total;
-
-        DetailPO::create([
-            'id_tandater'=> $purchaseOrder->id_tandater,                
-            'id_do'      => $pro['id_do'],
+    foreach ($request->tandaterima_details as $pro) {                                                                
+        DetailTandater::create([
+            'id_invoice'=> $pro['id_invoice'], 
+            'id_so' => $pro['id_so'],
+            'id_tandater' => $purchaseOrder->id_tandater,                           
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-    }                  
+
+        Invoice::findOrFail($pro['id_invoice'])->update([
+            'has_tandater' => 1,
+        ]);        
+    }      
+    $allInvoice = Invoice::where('id_so', $request->id_so)->get();
+
+    $allHasTandaterima = true;
+    foreach($allInvoice as $inv)
+    {
+        if ($inv->has_tandater != 1) {
+            $allHasTandaterima = false;
+            break;
+        }
+    }
+
+    if ($allHasTandaterima) {
+        SalesOrder::findOrFail($request->id_so)->update(['has_tandater' => 1]);
+    }
+
 
     return response()->json([
         'message'        => 'Purchase Order berhasil dibuat!',
         'purchase_order' => $purchaseOrder,
     ], 201);
 }
+
+    public function show($id){
+        $tandater = Tandaterima::with(['customer', 'so'])
+            ->where('id_tandater', $id)
+            ->get();
+
+        return response()->json($tandater);
+    }
+
+    public function detail($id) {
+        $detail = DetailTandater::with(['so', 'invoice'])
+            ->where('id_detail_tandater',$id)
+            ->get();
+
+        return response()->json($detail);
+    }
+
+    public function update(Request $request, string $id){
+        $purchaseOrder = Tandaterima::findOrFail($id);
+
+        $purchaseOrder->update([                    
+            'id_so'         => $request->id_so,
+            'customer_id'   => $request->customer_id,
+            'resi'          => $request->resi,   
+            'issue_at'      => $request->issue_at,
+            'due_at'        => $request->due_at,                 
+        ]);
+    }
 }

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
+use App\Models\DeliveryOrder;
+use App\Models\SalesOrder;
+use App\Models\DetailDO;
 use App\Models\DetailInvoice;
 
 class InvoiceController extends Controller
@@ -14,7 +17,13 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $invoice = Invoice::with(['customer','deliveryorder','employee','SalesOrder','detailinvoice','PurchaseOrder'])->get();
+        $invoice = Invoice::with(
+            [
+                'customer',                  
+                'salesorder',
+                'detailInv',
+                'detailInv.product'
+            ])->get();
         return response()->json($invoice);
     }
 
@@ -60,13 +69,15 @@ class InvoiceController extends Controller
     
         // Buat Invoice
         $invoice = Invoice::create([
+            'id_so'           => $request->id_so,
             'customer_id'     => $request->customer_id,
             'employee_id'     => $request->employee_id,
             'code_invoice'    => $formattedCodeInvoice,                
             'issue_at'        => $request->issue_at,
-            'due_at'          => $request->due_at,
+            'due_at'          => $request->due_at,            
         ]);
-    
+
+        $detailDo = DetailDo::findOrFail($request->id_so)->get();
         $sub_total = 0;
     
         foreach ($request->delivery_order_details as $pro) {
@@ -83,10 +94,31 @@ class InvoiceController extends Controller
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);
+
+            DeliveryOrder::findOrFail($pro['id_do'])->update(['has_inv' => 1]);
+        }        
+        $allDeliveryOrders = DeliveryOrder::where('id_so', $request->id_so)->get();
+        
+        $allHasInvoice = true;
+
+        foreach ($allDeliveryOrders as $do) {
+            if ($do->has_inv != 1) {
+                $allHasInvoice = false;
+                break;
+            }
         }
+        
+        if ($allHasInvoice) {
+            SalesOrder::findOrFail($request->id_so)->update(['has_invoice' => 1]);
+        }
+        
     
         // Update sub_total pada Invoice
-        $invoice->update(['sub_total' => $sub_total]);
+        $invoice->update([
+            'sub_total' => $sub_total,
+            'ppn' => $sub_total * 0.11,
+            'grand_total' => $sub_total * 0.11 + $sub_total,    
+        ]);
     
         return response()->json([
             'message'  => 'Invoice berhasil dibuat!',
@@ -95,9 +127,20 @@ class InvoiceController extends Controller
     }
 
     public function detail( string $id){
-        $detail = DetailInvoice::with(['product', 'do'])->where('id_invoice', $id)->get();
+        $detail = DetailInvoice::with([
+            'product', 
+            'do', 
+            'invoice'
+            ])
+            ->where('id_invoice', $id)->get();
 
         return response()->json($detail);
+    }
+
+    public function approved(Request $request) {
+        $approved = Invoice::findOrFail($request->id_invoice)->update([
+            'approved' => 1,
+        ]);
     }
     
 
@@ -106,7 +149,27 @@ class InvoiceController extends Controller
      */
     public function show(string $id)
     {
-        $invoice = Invoice::with(['customer', 'employee'])->get();
+        $invoice = Invoice::with([
+            'customer', 
+            'employee', 
+            'salesorder',
+            'salesorder.detailSo',            
+            ])
+            ->where('id_invoice', $id)
+            ->get();
+        return response()->json($invoice);
+    }
+    
+    public function InvoiceSo(string $id)
+    {
+        $invoice = Invoice::with([
+            'customer', 
+            'employee', 
+            'salesorder',
+            'salesorder.detailSo',            
+            ])
+            ->where('id_so', $id)
+            ->get();
         return response()->json($invoice);
     }
 
@@ -123,7 +186,15 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $invoice = Invoice::findOrFail($id)->update([
+            'id_so'           => $request->id_so,
+            'customer_id'     => $request->customer_id,
+            'employee_id'     => $request->employee_id,
+            'code_invoice'    => $request->code_invoice,                
+            'issue_at'        => $request->issue_at,
+            'due_at'          => $request->due_at,
+            'sub_total'       => $request->sub_total,
+        ]);        
     }
 
     /**

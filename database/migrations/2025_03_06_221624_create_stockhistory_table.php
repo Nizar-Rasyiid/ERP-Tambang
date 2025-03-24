@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('stockhistory', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained('products', 'product_id')->onDelete('cascade');
-            $table->string('transaction_id');
-            $table->enum('type', ['SO', 'DO']);
+            $table->foreignId('id_detail_po')->constrained('detailpo', 'id_detail_po')->onDelete('cascade');
+            $table->foreignId('id_po')->constrained('purchaseorders', 'id_po')->onDelete('cascade');
+            $table->foreignId('product_id')->constrained('products', 'product_id')->onDelete('cascade');           
             $table->integer('quantity');
-            $table->integer('stock_after');            
+            $table->decimal('price', 10, 2); 
+            $table->integer('quantity_left'); 
             $table->timestamps();
         });
     }

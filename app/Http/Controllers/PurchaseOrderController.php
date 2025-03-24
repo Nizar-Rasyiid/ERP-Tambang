@@ -11,6 +11,7 @@ use App\Models\Employee;
 use App\Models\DetailPo;
 use App\Models\Vendor;
 use App\Models\Product;
+use App\Models\StockHistory;
 use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class PurchaseOrderController extends Controller
     // 🟢 GET: Tampilkan semua Purchase Orders
     public function index()
     {
-        $purchaseOrders = PurchaseOrder::with(['vendor', 'employee'])->get();
+        $purchaseOrders = PurchaseOrder::with(['vendor', 'detailPo', 'detailPo.product'])->get();
         return response()->json($purchaseOrders);
     }
 
@@ -60,10 +61,10 @@ class PurchaseOrderController extends Controller
     // Buat Purchase Order
     $purchaseOrder = PurchaseOrder::create([
         'vendor_id'      => $request->vendor_id, // ✅ Vendor, bukan Customer
-        'employee_id'    => $request->employee_id,
-        'code_po'        => $formattedCodePo,
+        'employee_id'    => $request->employee_id,        
         'termin'         => $request->termin,            
         'total_tax'      => $request->total_tax,
+        'code_po'        => $formattedCodePo,
         'status_payment' => $request->status_payment,
         'sub_total'      => 0,            
         'total_service'  => 0,
@@ -80,15 +81,25 @@ class PurchaseOrderController extends Controller
         $line_total = $pro['price'] * $pro['quantity'];
         $sub_total += $line_total;
 
-        DetailPO::create([
+        $detailpo = DetailPO::create([
             'id_po'      => $purchaseOrder->id_po,                
             'product_id' => $pro['product_id'],
             'quantity'   => $pro['quantity'],
+            'quantity_left' => 0,
             'price'      => $pro['price'],
             'amount'     => $pro['amount'],
             'created_at' => now(),
             'updated_at' => now(),
-        ]);        
+        ]);  
+        
+        StockHistory::create([
+            'id_po'         => $purchaseOrder->id_po,
+            'product_id'    => $pro['product_id'],
+            'id_detail_po'  => $detailpo->id_detail_po,
+            'price'         => $pro['price'],
+            'quantity'      => $pro['quantity'],
+            'quantity_left' => $pro['quantity'],
+        ]);
     }            
 
     // ✅ Hitung PPN (11% dari sub_total)
@@ -105,8 +116,7 @@ class PurchaseOrderController extends Controller
     ]);  
 
     return response()->json([
-        'message'        => 'Purchase Order berhasil dibuat!',
-        'purchase_order' => $purchaseOrder,
+        'message'        => 'Purchase Order berhasil dibuat!',        
     ], 201);
 }
 
@@ -123,27 +133,16 @@ class PurchaseOrderController extends Controller
     {
         $purchaseOrder = PurchaseOrder::findOrFail($id);
 
-        $request->validate([
-            'customer_id'    => 'sometimes|exists:customers,customer_id',
-            'employee_id'    => 'sometimes|exists:employees, employee_id',
-            'po_type'        => 'sometimes|in:type1,type2,type3',
-            'status_payment' => 'sometimes|string',
-            'sub_total'      => 'sometimes|integer',
-            'total_tax'      => 'sometimes|integer',
-            'total_service'  => 'sometimes|integer',
-            'deposit'        => 'sometimes|integer',
-            'issue_at'       => 'sometimes|date',
-            'due_at'         => 'sometimes|date',
+        $purchaseOrder->update([
+            'vendor_id'      => $request->vendor_id, // ✅ Vendor, bukan Customer
+            'employee_id'    => $request->employee_id,            
+            'termin'         => $request->termin,            
+            'total_tax'      => $request->total_tax,
+            'status_payment' => $request->status_payment,
+            'deposit'        => $request->deposit,
+            'issue_at'       => $request->issue_at,
+            'due_at'         => $request->due_at,
         ]);
-
-        // Hitung ulang PPN dan Grand Total jika nilai sub_total berubah
-        if ($request->has('sub_total')) {
-            $ppn = $request->sub_total * 0.11;
-            $grand_total = $request->sub_total + $request->total_tax + $request->total_service + $ppn - $request->deposit;
-            $request->merge(['ppn' => $ppn, 'grand_total' => $grand_total]);
-        }
-
-        $purchaseOrder->update($request->all());
 
         return response()->json($purchaseOrder);
     }
@@ -159,11 +158,35 @@ class PurchaseOrderController extends Controller
         return response()->json(['message' => 'Purchase Order deleted successfully']);
     }
 
-    public function goodReceive(Request $request){         
-         foreach ($request->purchase_order_details as $pro) {                                                                            
-            $product = Product::findOrFail($pro['product_id']);
-            $product->increment('product_stock', $pro['quantity']);
-        } 
+    public function goodReceive(Request $request)
+    {             
+        $allItemsReceived = true;         
+        foreach($request->purchase_order_details as $pro) 
+        {
+            DetailPo::findOrFail($pro['id_detail_po'])
+                ->increment('quantity_left', $pro['quantity_left']);
+
+            Product::findOrFail($pro['product_id'])
+                ->increment('product_stock', $pro['quantity_left']);                                                
+        }    
+        foreach($request->purchase_order_details as $pro)
+        {
+            $detailPro = DetailPo::findOrFail($pro['id_detail_po']);            
+            if ($pro['quantity'] != $detailPro->quantity_left) {
+                $allItemsReceived = false;
+                break;
+            }
+        }
+        if ($allItemsReceived) {
+            $has_gr = PurchaseOrder::findOrFail($request->id_po)->update([
+                'has_gr' => 1,
+            ]); 
+        }  
+                        
+        return response()->json([   
+            'validate' => $allItemsReceived,         
+            'message' => 'Good Receive berhasil dilakukan!',
+        ]) ;       
     }
 
     public function getAP(){
@@ -172,5 +195,41 @@ class PurchaseOrderController extends Controller
             ->get();
         
         return response()->json($purchaseOrder);
+    }
+
+    public function approved($id){
+        $approve = PurchaseOrder::findOrFail($id)->update([
+            'approved' => 1,
+        ]);
+
+        return response()->json([
+            'approved' => 'Purchase Order been Approved',
+        ]);
+    }
+
+    public function monthlyPurchase()
+    {
+        // Ambil data penjualan per bulan
+        $monthlyPurchase = PurchaseOrder::select(
+            DB::raw('YEAR(issue_at) as year'),
+            DB::raw('MONTH(issue_at) as month'),
+            DB::raw('SUM(grand_total) as total_purchases')
+        )
+        ->groupBy('year', 'month')
+        ->orderBy('year', 'desc')
+        ->orderBy('month', 'desc')
+        ->get();
+
+        // Format data untuk response
+        $formattedPurchase = $monthlyPurchase->map(function ($item) {
+            return [
+                'year' => $item->year,
+                'month' => $item->month,
+                'month_name' => date('F', mktime(0, 0, 0, $item->month, 10)), // Nama bulan
+                'total_purchases' => (float) $item->total_purchases, // Pastikan nilai numerik
+            ];
+        });
+
+        return response()->json($formattedPurchase);
     }
 }

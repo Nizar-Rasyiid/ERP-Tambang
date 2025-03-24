@@ -17,11 +17,17 @@ class Vendor extends Model
         'vendor_type',
         'vendor_email',
         'vendor_phone',
-        'vendor_address',
-        'tax_number',
+        'vendor_address',        
+        'vendor_singkatan', 
+        'vendor_npwp',
+        'vendor_contact',       
     ];
 
     public function purchaseorder(){
         return $this->belongsTo(PurchaseOrder::class, 'vendor_id');
+    }
+
+    public function asset(){
+        return $this->belongsTo(Asset::class, 'vendor_id');
     }
 }

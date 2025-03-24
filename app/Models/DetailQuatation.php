@@ -14,11 +14,16 @@ class DetailQuatation extends Model
     Protected $fillable = [
         'id_quatation',
         'product_id',
+        'discount',
         'quantity',
         'price',
         'amount',
     ];
     public function product(){
         return $this->belongsTo(Product::class, 'product_id');
-    }    
+    }  
+    
+    public function quo(){
+        return $this->belongsTo(Quatation::class, 'id_quatation');
+    }
 }

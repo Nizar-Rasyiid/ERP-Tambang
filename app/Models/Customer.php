@@ -13,9 +13,8 @@ class Customer extends Model
     protected $primaryKey = 'customer_id';
 
     protected $fillable = [
-        'customer_code',
+        'customer_code',        
         'customer_name',
-        'customer_toko',
         'customer_singkatan',
         'customer_phone',
         'customer_email',
@@ -41,5 +40,8 @@ class Customer extends Model
     }
     public function quatation(){
         return $this->belognsTo(Quatation::class, 'customer_id');
+    }
+    public function point(){
+        return $this->hasMany(CustomerPoint::class, 'customer_id');
     }
 }

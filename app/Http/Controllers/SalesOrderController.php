@@ -62,12 +62,16 @@ class SalesOrderController extends Controller
             'customer_id'    => $request->customer_id,
             'employee_id'    => $request->employee_id,
             'code_so'        => $formattedCodeSo,
+            'po_number'      => $request->po_number,
             'termin'         => $request->termin,            
             'total_tax'      => $request->total_tax,
             'status_payment' => $request->status_payment,
             'sub_total'      => 0,            
             'total_service'  => 0,
+            'has_do'         => 0,
+            'has_invoice'    => 0,
             'deposit'        => $request->deposit,
+            'has_invoice'    => $request->has_invoice,
             'ppn'            => 0, // ✅ PPN otomatis dihitung
             'grand_total'    => 0, // ✅ Grand Total otomatis dihitung
             'issue_at'       => $request->issue_at,
@@ -84,15 +88,23 @@ class SalesOrderController extends Controller
                 'id_so'      => $salesOrder->id_so,                
                 'product_id' => $pro['product_id'],
                 'quantity'   => $pro['quantity'],
+                'quantity_left' => 0,
+                'has_do'     => 0,
                 'price'      => $pro['price'],
+                'discount'   => $pro['discount'],
                 'amount'     => $pro['amount'],
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ]);    
+        }    
+        
+        $ppn = $sub_total * 0.11;
 
-            $product = Product::findOrFail($pro['product_id']);   
-            $product->decrement('product_stock', $pro['quantity']);
-        }             
+        $salesorder = SalesOrder::where('id_so', $salesOrder->id_so)->update([
+            'sub_total' => $sub_total,
+            'ppn' => $ppn,
+            'grand_total' => $sub_total + $ppn,
+        ]);
     
         return response()->json([
             'message'      => 'Sales Order berhasil dibuat!',
@@ -108,21 +120,18 @@ class SalesOrderController extends Controller
             return response()->json(['message' => 'Sales Order not found'], 404);
         }
 
-        $validatedData = $request->validate([
-            'employee_id' => 'required|integer',
-            'code_so' => 'required|string|max:255',
-            'termin' => 'required|string|max:255',
-            'total_tax' => 'required|numeric',
-            'status_payment' => 'required|string|max:255',
-            'sub_total' => 'required|numeric',
-            'deposit' => 'required|numeric',
-            'ppn' => 'required|numeric',
-            'grand_total' => 'required|numeric',
-            'issue_at' => 'required|date',
-            'due_at' => 'required|date',
-        ]);
-
-        $salesOrder->update($validatedData);
+        $salesOrder->update([
+            'customer_id'    => $request->customer_id,
+            'employee_id'    => $request->employee_id,            
+            'po_number'      => $request->po_number,
+            'termin'         => $request->termin,            
+            'total_tax'      => $request->total_tax,
+            'status_payment' => $request->status_payment,
+            'deposit'        => $request->deposit,
+            'has_invoice'    => $request->has_invoice,
+            'issue_at'       => $request->issue_at,
+            'due_at'         => $request->due_at,
+        ]);;
         return response()->json($salesOrder);
     }
 

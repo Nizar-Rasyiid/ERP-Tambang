@@ -12,6 +12,7 @@ class AuthController extends Controller
 {
     public function Register(Request $request){
         $user = User::create([
+            'employee_id' => $request->employee_id,
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password)
@@ -33,7 +34,7 @@ class AuthController extends Controller
         // Buat token untuk pengguna
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
+        return response()->json([   
             'message' => 'Login successful',
             'token' => $token,
             'user' => $user

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('fakturpajak', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('id_so')->references('id_so')->on('salesorders')->onDelete('cascade');
             $table->foreignId('id_invoice')->constrained('invoices', 'id_invoice')->onDelete('cascade');
             $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade');
             $table->text('code_faktur_pajak');            

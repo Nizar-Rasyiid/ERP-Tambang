@@ -28,4 +28,8 @@ class Quatation extends Model
     public function employee(){
         return $this->belongsTo(Employee::class, 'employee_id');
     }
+
+    public function detailQuo(){
+        return $this->hasMany(DetailQuatation::class, 'id_quatation');
+    }
 }

@@ -12,11 +12,15 @@ class Invoice extends Model
     protected $primaryKey = 'id_invoice';
 
     protected $fillable = [        
-        'customer_id',
+        'id_so',
+        'customer_id',        
         'employee_id',
         'sub_total',
         'total_tax',
         'ppn',
+        'grand_total',
+        'approved',
+        'has_tandater',
         'code_invoice',                
         'issue_at',
         'due_at'
@@ -29,17 +33,12 @@ class Invoice extends Model
     public function employee(){
         return $this->belongsTo(Employee::class, 'employee_id', 'employee_id');
     }
-    public function detailinvoice(){
+    
+    public function salesorder(){
+        return $this->belongsTo(SalesOrder::class, 'id_so');
+    }
+
+    public function detailInv(){
         return $this->hasMany(DetailInvoice::class, 'id_invoice');
-    }
-    //Delivery order
-    public function deliveryorder()  {
-        return $this->belongsTo(DeliveryOrder::class, 'id_do');
-    }
-    public function SalesOrder()  {
-        return $this->belongsTo(SalesOrder::class, 'id_so' , 'id_so');
-    }
-    public function PurchaseOrder(){
-        return $this->belongsTo(PurchaseOrder::class,'id_po','id_po');
     }
 }
