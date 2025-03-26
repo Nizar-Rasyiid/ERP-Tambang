@@ -34,9 +34,21 @@ class VendorController extends Controller
         return response()->json($vendors);
     }
     public function store(Request $request)
-    {        
+    {
+        $request->validate([
+            'account_name' => 'required',
+            'vendor_name' => 'required',
+            'vendor_type' => 'required',
+            'vendor_email' => 'required|email',
+            'vendor_phone' => 'required',
+            'vendor_address' => 'required',
+            'tax_number' => 'required',
+        ]);
+
         $vendor = Vendor::create([
-            'vendor_name' => $request->vendor_name,            
+            'account_name' => $request->account_name,
+            'vendor_name' => $request->vendor_name,
+            'vendor_type' => $request->vendor_type,
             'vendor_email' => $request->vendor_email,
             'vendor_phone' => $request->vendor_phone,
             'vendor_address' => $request->vendor_address,

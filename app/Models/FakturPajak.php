@@ -26,4 +26,5 @@ class FakturPajak extends Model
     public function so(){
         return $this->belongsTo(SalesOrder::class, 'id_so');
     }
-}
+}       
+    

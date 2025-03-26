@@ -70,8 +70,8 @@ Route::get('/detail_po/{id}', [DetailPoController::class, 'show'])->name('show.d
 Route::get('/details_so', [DetailSoController::class, 'index'])->name('get.detailso');
 Route::get('/details_so/{id}', [DetailSoController::class, 'show'])->name('show.detailso');
 
-Route::get('/detail_do/{id}', [DetailSoController::class, 'DoShow'])->name('get.do');
-Route::get('/detail_quatation/{id}', [DetailQuatationController::class, 'show'])->name('get.do');
+Route::get('/detail_do/{id}', [DetailSoController::class, 'DoShow'])->name('get.doDetail');
+Route::get('/detail_quatation/{id}', [DetailQuatationController::class, 'show'])->name('get.quatationDetail');
 
 Route::get('/employees', [EmployeeController::class, 'index'])->name('get.employees');
 Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('show.employees');
