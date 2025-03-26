@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Employee;
+use App\Models\User;
 
 class EmployeeController extends Controller
 {
@@ -39,7 +40,7 @@ class EmployeeController extends Controller
             'employee_position' => 'required|string|max:255',
         ]);
         $lastCode = Employee::latest()->first();
-        $lastCode = $lastCode ? $lastCode->employee : 1000;
+        $lastCode = $lastCode ? $lastCode->employee_code : 1000;
         $newCode = $lastCode + 1;
 
         $employee = Employee::create([
@@ -54,6 +55,13 @@ class EmployeeController extends Controller
             'employee_position' => $request->employee_position,
             'bpjs_kesehatan'    => $request->bpjs_kesehatan,
             'bpjs_ketenagakerjaan' => $request->bpjs_ketenagakerjaan,
+        ]);
+
+        $user = User::create([
+            'employee_id'       => $employee->employee_id,
+            'name'              => $employee->employee_name,
+            'email'             => $employee->employee_email,
+            'password'          => $request->password,
         ]);
 
         return response()->json([
@@ -97,6 +105,8 @@ class EmployeeController extends Controller
             'bpjs_kesehatan'    => $request->bpjs_kesehatan,
             'bpjs_ketenagakerjaan' => $request->bpjs_ketenagakerjaan,
         ]);
+
+
 
         return response()->json($employee);
     }

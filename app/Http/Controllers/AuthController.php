@@ -15,22 +15,19 @@ class AuthController extends Controller
             'employee_id' => $request->employee_id,
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password)
+            'password' => $request->password,
         ]);
     }
 
     public function login(Request $request) {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
-
-        // Cek kredensial
-        $user = User::where('email', $credentials['email'])->first();
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
+        $data = $request->only('email', 'password');    
+        
+        if (!Auth::attempt($data)) {
+            return response()->json([
+                'message' => 'Invalid Login',
+            ]);
+        }                
+        $user = User::where('email', $request->email)->firstOrFail();
         // Buat token untuk pengguna
         $token = $user->createToken('auth_token')->plainTextToken;
 

@@ -93,6 +93,7 @@ Route::get('/products', [ProductController::class, 'index'])->name('get.product'
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('show.product');
 Route::get('/products/search', [ProductController::class, 'search'])->name('search.product');
 Route::post('/products_code', [ProductController::class, 'store'])->name('post.products');
+Route::put('/products_code/{id}', [ProductController::class, 'update'])->name('post.products');
 
 Route::get('/payment_types', [PaymentTypeController::class, 'index'])->name('get.payment_type');
 Route::post('/payment_types_code', [PaymentTypeController::class, 'store'])->name('post.payment_type');
