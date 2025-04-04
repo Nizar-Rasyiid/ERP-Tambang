@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Controller;
+use Spatie\Permission\Models\Permission;
 
 class AuthController extends Controller
 {
@@ -36,6 +38,21 @@ class AuthController extends Controller
             'token' => $token,
             'user' => $user
         ]);
+    }
+    public function assignRole(Request $request, User $user){        
+        $user->syncRoles([$request->role]);
+        return response()->json(['message' => 'Role assigned successfully']);
+    }    
+
+    public function assignPermissions(Request $request, User $user)
+    {
+        $user->syncPermissions($request->permissions);
+        return response()->json(['message' => 'Permissions updated successfully']);
+    }
+
+    public function getPermissions(User $user)
+    {
+        return response()->json($user->permissions);
     }
 
     // Logout Function

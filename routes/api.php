@@ -34,6 +34,16 @@ use App\Http\Controllers\DocumentController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/regis', [AuthController::class, 'Register']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/users/{user}/assign-role', [AuthController::class, 'assignRole']);
+    Route::post('/users/{user}/assign-permissions', [AuthController::class, 'assignPermissions']);
+    Route::get('/users/{user}/permissions', [AuthController::class, 'getPermissions']);
+    Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+});
+
 //a
 Route::get('/assets', [AssetController::class, 'index'])->name('get.asset');
 Route::get('/assets/{id}', [AssetController::class, 'show'])->name('get.asset');
@@ -138,11 +148,6 @@ Route::put('/addTandater/{id}', [TandaTerimaController::class, 'update'])->name(
 
 Route::get('/faktur-pajak', [FakturPajakController::class, 'index'])->name('get.fakturpajak');
 Route::post('/faktur-pajak-code', [FakturPajakController::class, 'store'])->name('post.fakturpajak');
-
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/regis', [AuthController::class, 'Register']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
-
 
 //u
 //v
