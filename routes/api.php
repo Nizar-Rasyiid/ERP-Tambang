@@ -154,5 +154,5 @@ Route::post('/faktur-pajak-code', [FakturPajakController::class, 'store'])->name
 //w
 //x
 //y
-Route::get('/laporan_keuangan', [DetailPoController::class, 'laporan'])->name('get.laporan');
+Route::get('/report_management', [DetailPoController::class, 'laporan'])->name('get.laporan');
 //z
