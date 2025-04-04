@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\SalesOrder;
-use App\Models\DetailSO;
+use App\Models\DetailSo;
 use App\Models\Customer;
 use App\Models\Product;
 
@@ -84,7 +84,7 @@ class SalesOrderController extends Controller
             $line_total = $pro['price'] * $pro['quantity'];
             $sub_total += $line_total;
     
-            DetailSO::create([
+            DetailSo::create([
                 'id_so'      => $salesOrder->id_so,                
                 'product_id' => $pro['product_id'],
                 'quantity'   => $pro['quantity'],

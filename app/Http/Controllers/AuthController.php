@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Controller;
+use Spatie\Permission\Models\Permission;
 
 class AuthController extends Controller
 {
@@ -15,22 +17,19 @@ class AuthController extends Controller
             'employee_id' => $request->employee_id,
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password)
+            'password' => $request->password,
         ]);
     }
 
     public function login(Request $request) {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
-
-        // Cek kredensial
-        $user = User::where('email', $credentials['email'])->first();
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
+        $data = $request->only('email', 'password');    
+        
+        if (!Auth::attempt($data)) {
+            return response()->json([
+                'message' => 'Invalid Login',
+            ]);
+        }                
+        $user = User::where('email', $request->email)->firstOrFail();
         // Buat token untuk pengguna
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -39,6 +38,21 @@ class AuthController extends Controller
             'token' => $token,
             'user' => $user
         ]);
+    }
+    public function assignRole(Request $request, User $user){        
+        $user->syncRoles([$request->role]);
+        return response()->json(['message' => 'Role assigned successfully']);
+    }    
+
+    public function assignPermissions(Request $request, User $user)
+    {
+        $user->syncPermissions($request->permissions);
+        return response()->json(['message' => 'Permissions updated successfully']);
+    }
+
+    public function getPermissions(User $user)
+    {
+        return response()->json($user->permissions);
     }
 
     // Logout Function
