@@ -39,5 +39,10 @@ class PurchaseOrder extends Model
 
         public function detailpo(){
             return $this->hasMany(DetailPo::class, 'id_po');
-        }        
+        }    
+        
+        public function salesorder() {
+            return $this->hasOne(SalesOrder::class, 'po_number', 'code_po');
+        }
+        
 }

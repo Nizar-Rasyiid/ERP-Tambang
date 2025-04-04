@@ -44,4 +44,7 @@ class SalesOrder extends Model
     public function detailso(){
         return $this->hasMany(DetailSo::class, 'id_so');
     }
+    public function purchaseorder() {
+        return $this->belongsTo(PurchaseOrder::class, 'po_number', 'code_po');
+    }
 }
