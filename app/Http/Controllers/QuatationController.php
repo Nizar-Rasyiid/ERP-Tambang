@@ -86,7 +86,9 @@ class QuatationController extends Controller
         ]);
     }
     public function put(Request $request, $id){
-        $quatation = Quatation::findOrFail($id)->update([            
+        $quatation = Quatation::findOrFail($id);
+        
+        $quatation->update([            
             'customer_id' => $request->customer_id,
             'employee_id' => $request->employee_id,
             'termin' => $request->termin,
@@ -95,19 +97,51 @@ class QuatationController extends Controller
             'issue_at' => $request->issue_at,
             'due_at' => $request->due_at                        
         ]);
-
-        foreach($request->inquiry_details as $key => $pro){                          
-            $detailso = DetailQuatation::findOrFail($pro['id_detail_quatation'])->update([                           
-            'product_id' => $pro['product_id'],
-            'quantity' => $pro['quantity'],
-            'price' => $pro['price'],
-            'discount' => $pro['discount'],
-            'amount' => $pro['amount'],
-            'created_at' => now(),
-            'updated_at' => now(),
-            ]);
-
-        } 
+    
+        // Get all current detail IDs
+        $existingDetailIds = DetailQuatation::where('id_quatation', $id)->pluck('id_detail_quatation')->toArray();
+        
+        // Track which IDs we've processed 
+        $processedIds = [];
+        
+        foreach($request->inquiry_details as $key => $pro){
+            if(isset($pro['id_detail_quatation'])) {
+                // Update existing item
+                DetailQuatation::findOrFail($pro['id_detail_quatation'])->update([
+                    'product_id' => $pro['product_id'],
+                    'quantity' => $pro['quantity'],
+                    'price' => $pro['price'],
+                    'discount' => $pro['discount'],
+                    'amount' => $pro['amount'],
+                    'updated_at' => now(),
+                ]);
+                
+                $processedIds[] = $pro['id_detail_quatation'];
+            } else {
+                // Create new item
+                DetailQuatation::create([
+                    'id_quatation' => $id,
+                    'product_id' => $pro['product_id'],
+                    'quantity' => $pro['quantity'],
+                    'price' => $pro['price'],
+                    'discount' => $pro['discount'],
+                    'amount' => $pro['amount'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+        
+        // Delete details that weren't in the request (they were removed)
+        $detailsToDelete = array_diff($existingDetailIds, $processedIds);
+        if (!empty($detailsToDelete)) {
+            DetailQuatation::whereIn('id_detail_quatation', $detailsToDelete)->delete();
+        }
+        
+        return response()->json([
+            'message' => 'Successfully to Update Quatation',
+            'id_quatation' => $quatation->id_quatation,
+        ]);
     }
 
     public function monthlyQuo() {
@@ -133,5 +167,14 @@ class QuatationController extends Controller
         });
 
         return response()->json($formattedSales);
+    }
+    public function destroy($id)
+    {
+        $quatation = Quatation::findOrFail($id);
+        $quatation->delete();
+
+        return response()->json([
+            'message' => 'Quatation deleted successfully',
+        ]);
     }
 }

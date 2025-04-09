@@ -104,7 +104,7 @@ Route::get('/products', [ProductController::class, 'index'])->name('get.product'
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('show.product');
 Route::get('/products/search', [ProductController::class, 'search'])->name('search.product');
 Route::post('/products_code', [ProductController::class, 'store'])->name('post.products');
-Route::put('/products_code/{id}', [ProductController::class, 'update'])->name('post.products');
+Route::put('/products_code/{id}', [ProductController::class, 'update'])->name('update.products');
 
 Route::get('/payment_types', [PaymentTypeController::class, 'index'])->name('get.payment_type');
 Route::post('/payment_types_code', [PaymentTypeController::class, 'store'])->name('post.payment_type');
@@ -122,6 +122,7 @@ Route::get('/quatations/monthly', [QuatationController::class, 'monthlyQuo'])->n
 Route::get('/quatations/{id}', [QuatationController::class, 'show'])->name('get.quatationById');
 Route::post('/quatations_code', [QuatationController::class, 'store'])->name('post.quatation');
 Route::put('/quatations_code/{id}', [QuatationController::class, 'put'])->name('put.quatation');
+Route::delete('/quatations_delete/{id}', [QuatationController::class, 'destroy'])->name('delete.quatation');
 
 Route::get('/vendors', [VendorController::class, 'index'])->name('get.vendor');
 Route::get('/vendors/{id}', [VendorController::class, 'show'])->name('show.vendor');
@@ -136,6 +137,7 @@ Route::get('/sales_orders/monthly', [SalesOrderController::class, 'monthlySales'
 Route::get('/sales_orders/{id}', [SalesOrderController::class, 'show'])->name('show.sales_order');
 Route::post('/sales_orders_code', [SalesOrderController::class, 'store'])->name('post.sales_order');
 Route::put('/sales_orders_code/{id}', [SalesOrderController::class, 'update'])->name('put.sales_order');
+Route::delete('/sales_orders_delete/{id}', [SalesOrderController::class, 'destroy'])->name('delete.sales_order');
 //q
 //r
 //s

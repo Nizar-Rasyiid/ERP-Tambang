@@ -28,9 +28,9 @@ class SalesOrderController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'sales_order_details' => 'required|array',
-        ]);
+        // $request->validate([
+        //     'sales_order_details' => 'required|array',
+        // ]);
     
         // Ambil bulan & tahun saat ini
         $currentMonth = date('m'); // 02
@@ -115,24 +115,104 @@ class SalesOrderController extends Controller
 
     public function update(Request $request, $id)
     {
-        $salesOrder = SalesOrder::find($id);
-        if (is_null($salesOrder)) {
+        try {
+            // Proses update dasar
+            $salesOrder = SalesOrder::find($id);
+            if (is_null($salesOrder)) {
             return response()->json(['message' => 'Sales Order not found'], 404);
-        }
+            }
 
-        $salesOrder->update([
+            $salesOrder->update([
             'customer_id'    => $request->customer_id,
             'employee_id'    => $request->employee_id,            
             'po_number'      => $request->po_number,
             'termin'         => $request->termin,            
             'total_tax'      => $request->total_tax,
-            'status_payment' => $request->status_payment,
+            'status_payment' => $request->status_payment ?? "Hasn't Payed",
             'deposit'        => $request->deposit,
             'has_invoice'    => $request->has_invoice,
             'issue_at'       => $request->issue_at,
             'due_at'         => $request->due_at,
-        ]);;
-        return response()->json($salesOrder);
+            ]);
+
+            // Proses detail
+            if ($request->has('sales_order_details')) {
+            $sub_total = 0;
+            $existingDetailIds = DetailSo::where('id_so', $id)
+                ->pluck('id_detail_so')->toArray();
+            $processedIds = [];
+
+            foreach ($request->sales_order_details as $detail) {
+                $quantity = $detail['quantity'] ?? 0;
+                $price = $detail['price'] ?? 0;
+                $discount = $detail['discount'] ?? 0;
+                $amount = isset($detail['amount']) ? $detail['amount'] : 
+                      $price * $quantity * (1 - ($discount / 100));
+                
+                $sub_total += $amount;
+
+                if (isset($detail['id_detail_so']) && in_array($detail['id_detail_so'], $existingDetailIds)) {
+                DetailSo::where('id_detail_so', $detail['id_detail_so'])->update([
+                    'product_id'    => $detail['product_id'],
+                    'quantity'      => $quantity,
+                    'quantity_left' => $detail['quantity_left'] ?? 0,
+                    'has_do'        => $detail['has_do'] ?? 0,
+                    'price'         => $price,
+                    'discount'      => $discount,
+                    'amount'        => $amount,
+                ]);
+                $processedIds[] = $detail['id_detail_so'];
+                } else {
+                $newDetail = DetailSo::create([
+                    'id_so'         => $id,
+                    'product_id'    => $detail['product_id'],
+                    'quantity'      => $quantity,
+                    'quantity_left' => $detail['quantity_left'] ?? 0,
+                    'has_do'        => $detail['has_do'] ?? 0,
+                    'price'         => $price,
+                    'discount'      => $discount,
+                    'amount'        => $amount,
+                ]);
+                if ($newDetail) {
+                    $processedIds[] = $newDetail->id_detail_so;
+                }
+                }
+            }
+
+            $detailsToDelete = array_diff($existingDetailIds, $processedIds);
+            if (!empty($detailsToDelete)) {
+                DetailSo::whereIn('id_detail_so', $detailsToDelete)->delete();
+            }
+
+            $ppn = $sub_total * 0.11;
+            $salesOrder->update([
+                'sub_total'   => $sub_total,
+                'ppn'         => $ppn,
+                'grand_total' => $sub_total + $ppn,
+            ]);
+            }
+
+            // Tangkap error loading relasi dengan try-catch terpisah
+            try {
+            $salesOrder = SalesOrder::with('salesOrderDetails')->find($id);
+            return response()->json([
+                'message'     => 'Sales Order updated successfully',
+                'sales_order' => $salesOrder,
+            ]);
+            } catch (\Exception $e) {
+            \Log::error('Error loading related data: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Sales Order updated but error loading details',
+                'error' => $e->getMessage()
+            ], 500);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Sales Order Update Error: ' . $e->getMessage());
+            return response()->json([
+            'message' => 'Error updating Sales Order',
+            'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroy($id)
