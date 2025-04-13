@@ -116,6 +116,7 @@ Route::post('/purchase_orders/approve/{id}', [PurchaseOrderController::class, 'a
 Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])->name('post.purchase_order');
 Route::put('/purchase_orders_code/{id}', [PurchaseOrderController::class, 'update'])->name('put.purchase_order');
 Route::post('/purchase_orders/good-receive', [PurchaseOrderController::class, 'goodReceive'])->name('show.purchase_orderReceive');
+Route::delete('/purchase_orders_delete/{id}', [PurchaseOrderController::class, 'destroy'])->name('delete.purchase_order');
 
 Route::get('/quatations', [QuatationController::class, 'index'])->name('get.quatation');
 Route::get('/quatations/monthly', [QuatationController::class, 'monthlyQuo'])->name('get.quatationMonthly');

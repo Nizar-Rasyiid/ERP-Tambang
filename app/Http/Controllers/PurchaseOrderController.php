@@ -14,6 +14,7 @@ use App\Models\Product;
 use App\Models\StockHistory;
 use Illuminate\Support\Facades\DB;
 
+
 use Illuminate\Http\Request;
 
 
@@ -131,20 +132,96 @@ class PurchaseOrderController extends Controller
     // 🟡 PUT: Update Purchase Order
     public function update(Request $request, $id)
     {
-        $purchaseOrder = PurchaseOrder::findOrFail($id);
+        try {
+            // Proses update dasar
+            $purchaseOrder = PurchaseOrder::find($id);
+            if (is_null($purchaseOrder)) {
+                return response()->json(['message' => 'Purchase Order not found'], 404);
+            }
 
-        $purchaseOrder->update([
-            'vendor_id'      => $request->vendor_id, // ✅ Vendor, bukan Customer
-            'employee_id'    => $request->employee_id,            
-            'termin'         => $request->termin,            
-            'total_tax'      => $request->total_tax,
-            'status_payment' => $request->status_payment,
-            'deposit'        => $request->deposit,
-            'issue_at'       => $request->issue_at,
-            'due_at'         => $request->due_at,
-        ]);
+            $purchaseOrder->update([
+                'vendor_id'      => $request->vendor_id,
+                'employee_id'    => $request->employee_id,
+                'termin'         => $request->termin,
+                'total_tax'      => $request->total_tax,
+                'status_payment' => $request->status_payment ?? "Hasn't Paid",
+                'deposit'        => $request->deposit,
+                'issue_at'       => $request->issue_at,
+                'due_at'         => $request->due_at,
+            ]);
 
-        return response()->json($purchaseOrder);
+            // Proses detail
+            if ($request->has('purchase_order_details')) {
+                $sub_total = 0;
+                $existingDetailIds = DetailPo::where('id_po', $id)
+                    ->pluck('id_detail_po')->toArray();
+                $processedIds = [];
+
+                foreach ($request->purchase_order_details as $detail) {
+                    $quantity = $detail['quantity'] ?? 0;
+                    $price = $detail['price'] ?? 0;
+                    $amount = $detail['amount'] ?? ($price * $quantity);
+
+                    $sub_total += $amount;
+
+                    if (isset($detail['id_detail_po']) && in_array($detail['id_detail_po'], $existingDetailIds)) {
+                        DetailPo::where('id_detail_po', $detail['id_detail_po'])->update([
+                            'product_id'    => $detail['product_id'],
+                            'quantity'      => $quantity,
+                            'quantity_left' => $detail['quantity_left'] ?? 0,
+                            'price'         => $price,
+                            'amount'        => $amount,
+                        ]);
+                        $processedIds[] = $detail['id_detail_po'];
+                    } else {
+                        $newDetail = DetailPo::create([
+                            'id_po'         => $id,
+                            'product_id'    => $detail['product_id'],
+                            'quantity'      => $quantity,
+                            'quantity_left' => $detail['quantity_left'] ?? 0,
+                            'price'         => $price,
+                            'amount'        => $amount,
+                        ]);
+                        if ($newDetail) {
+                            $processedIds[] = $newDetail->id_detail_po;
+                        }
+                    }
+                }
+
+                $detailsToDelete = array_diff($existingDetailIds, $processedIds);
+                if (!empty($detailsToDelete)) {
+                    DetailPo::whereIn('id_detail_po', $detailsToDelete)->delete();
+                }
+
+                $ppn = $sub_total * 0.11;
+                $purchaseOrder->update([
+                    'sub_total'   => $sub_total,
+                    'ppn'         => $ppn,
+                    'grand_total' => $sub_total + $ppn,
+                ]);
+            }
+
+            // Tangkap error loading relasi dengan try-catch terpisah
+            try {
+                $purchaseOrder = PurchaseOrder::with('detailPo')->find($id);
+                return response()->json([
+                    'message'        => 'Purchase Order updated successfully',
+                    'purchase_order' => $purchaseOrder,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Error loading related data: ' . $e->getMessage());
+                return response()->json([
+                    'message' => 'Purchase Order updated but error loading details',
+                    'error'   => $e->getMessage()
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Purchase Order Update Error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error updating Purchase Order',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 
     //Show per ID
@@ -232,4 +309,5 @@ class PurchaseOrderController extends Controller
 
         return response()->json($formattedPurchase);
     }
+
 }
