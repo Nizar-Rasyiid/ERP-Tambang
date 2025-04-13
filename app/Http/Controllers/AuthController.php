@@ -27,7 +27,7 @@ class AuthController extends Controller
         if (!Auth::attempt($data)) {
             return response()->json([
                 'message' => 'Invalid Login',
-            ]);
+            ], 401);
         }                
         $user = User::where('email', $request->email)->firstOrFail();
         // Buat token untuk pengguna
