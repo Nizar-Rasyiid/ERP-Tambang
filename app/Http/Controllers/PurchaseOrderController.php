@@ -274,6 +274,18 @@ class PurchaseOrderController extends Controller
         return response()->json($purchaseOrder);
     }
 
+    public function updateDeposit(Request $request, $id)
+    {
+        $purchaseOrder = PurchaseOrder::findOrFail($id);
+        $purchaseOrder->update([
+            'deposit' => $request->deposit,
+        ]);
+
+        return response()->json([
+            'message' => 'Deposit updated successfully',
+        ]);
+    }
+
     public function approved($id){
         $approve = PurchaseOrder::findOrFail($id)->update([
             'approved' => 1,
