@@ -52,6 +52,9 @@ Route::post('/assets_code', [AssetController::class, 'store'])->name('post.asset
 Route::put('/assets_code/{id}', [AssetController::class, 'update'])->name('put.asset');
 
 Route::get('/account_receivable', [SalesOrderController::class, 'getAR'])->name('get.ar');
+Route::put('/account_receivable_deposit/{id}', [SalesOrderController::class, 'updateDeposit'])->name('put.ar');
+
+
 Route::get('/account_payable', [PurchaseOrderController::class, 'getAP'])->name('get.ap');
 //b
 Route::get('/bank_accounts', [BankAccountController::class, 'index'])->name('get.bank_account');
