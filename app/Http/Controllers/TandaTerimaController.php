@@ -97,9 +97,24 @@ class TandaTerimaController extends Controller
     }
 
     public function detail($id) {
-        $detail = DetailTandater::with(['so', 'invoice'])
-            ->where('id_detail_tandater',$id)
-            ->get();
+        $detail = DetailTandater::with([
+            'so',
+            'invoice'
+        ])
+        ->where('id_tandater', $id)
+        ->get();        
+
+        return response()->json($detail);
+    }
+
+    public function getDetail() {
+        $detail = DetailTandater::with([
+            'so',
+            'so.customer',
+            'invoice',
+            'tandater'
+        ])    
+        ->get();        
 
         return response()->json($detail);
     }

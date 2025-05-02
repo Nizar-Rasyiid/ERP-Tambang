@@ -23,4 +23,7 @@ class DetailTandater extends Model
     public function invoice(){
         return $this->belongsTo(Invoice::class, 'id_invoice');
     }
+    public function tandater(){
+        return $this->belongsTo(TandaTerima::class, 'id_tandater');
+    }
 }

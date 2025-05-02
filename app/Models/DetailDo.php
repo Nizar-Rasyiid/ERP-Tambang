@@ -26,4 +26,8 @@ class DetailDo extends Model
     public function detailso(){
         return $this->belongsTo(DetailSo::class, 'product_id');
     }
+
+    public function do(){
+        return $this->belongsTo(DeliveryOrder::class, 'id_do');
+    }
 }

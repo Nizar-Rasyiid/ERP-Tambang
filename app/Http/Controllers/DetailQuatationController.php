@@ -9,7 +9,7 @@ use App\Models\DetailQuatation;
 class DetailQuatationController extends Controller
 {
     public function index(){
-        $detailQuatation = DetailQuatation::with(['product'])->get();
+        $detailQuatation = DetailQuatation::with(['product', 'quo', 'quo.customer'])->get();
         return response()->json($detailQuatation);
     }
 

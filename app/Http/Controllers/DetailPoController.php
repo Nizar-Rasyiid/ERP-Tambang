@@ -16,7 +16,12 @@ class DetailPoController extends Controller
      */
     public function index()
     {
-        $detailPo = DetailPo::all();
+        $detailPo = DetailPo::with([
+            'product',
+            'purchaseorders',
+            'purchaseorders.vendor',
+        ])
+        ->get();
         return response()->json($detailPo);
     }
 

@@ -56,6 +56,8 @@ Route::put('/account_receivable_deposit/{id}', [SalesOrderController::class, 'up
 
 
 Route::get('/account_payable', [PurchaseOrderController::class, 'getAP'])->name('get.ap');
+Route::put('/account_payable_deposit/{id}', [PurchaseOrderController::class, 'updateDeposit'])->name('put.ar');
+
 //b
 Route::get('/bank_accounts', [BankAccountController::class, 'index'])->name('get.bank_account');
 Route::get('/bank_accounts/{id}', [BankAccountController::class, 'show'])->name('show.bank_account');
@@ -78,14 +80,16 @@ Route::get('/delivery_orders/{id}', [DeliveryOrderController::class, 'show'])->n
 Route::get('/delivery_sales/{id}', [DeliveryOrderController::class, 'SoShow']);
 Route::post('/store-do', [DeliveryOrderController::class, 'store'])->name('store.do');
 
-Route::get('/details_po', [DetailPoController::class, 'index'])->name('get.detailpo');
+Route::get('/detail_po', [DetailPoController::class, 'index'])->name('get.detailpo');
 Route::get('/detail_po/{id}', [DetailPoController::class, 'show'])->name('show.detailpo');
 
 Route::get('/details_so', [DetailSoController::class, 'index'])->name('get.detailso');
 Route::get('/details_so/{id}', [DetailSoController::class, 'show'])->name('show.detailso');
 
 Route::get('/detail_do/{id}', [DetailSoController::class, 'DoShow'])->name('get.doDetail');
+Route::get('/detail_do', [DetailSoController::class, 'DetailDO'])->name('get.doDetail');
 Route::get('/detail_quatation/{id}', [DetailQuatationController::class, 'show'])->name('get.quatationDetail');
+Route::get('/detail_quatation', [DetailQuatationController::class, 'index'])->name('get.quatationDetail');
 
 Route::get('/employees', [EmployeeController::class, 'index'])->name('get.employees');
 Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('show.employees');
@@ -99,6 +103,7 @@ Route::post('/invoices_code', [InvoiceController::class, 'store'])->name('post.i
 Route::post('/invoices_code/appr/{id}', [InvoiceController::class, 'store'])->name('post.invoices');
 Route::put('/invoices_code/{id}', [InvoiceController::class, 'update'])->name('put.invoices');
 Route::get('/detail_invoices/{id}', [InvoiceController::class, 'detail'])->name('detail.invoices');
+Route::get('/detail_invoices', [InvoiceController::class, 'DetailInvoice'])->name('get.doDetail');
 
 Route::get('/inquiry', [InquiryController::class, 'index'])->name('get.inquiry');
 Route::post('/inquiry_code', [InquiryController::class, 'store'])->name('store.inquiry');
@@ -149,6 +154,7 @@ Route::delete('/sales_orders_delete/{id}', [SalesOrderController::class, 'destro
 Route::get('/tandater', [TandaTerimaController::class, 'index'])->name('get.tandater');
 Route::get('/tandater/{id}', [TandaTerimaController::class, 'show'])->name('get.tandaterById');
 Route::get('/detail_tandater/{id}', [TandaTerimaController::class, 'detail'])->name('detail.tandater');
+Route::get('/detail_tandater', [TandaTerimaController::class, 'getDetail'])->name('detail.tandater');
 Route::post('/addTandater', [TandaTerimaController::class, 'store'])->name('post.tandater');
 Route::put('/addTandater/{id}', [TandaTerimaController::class, 'update'])->name('put.tandater');
 

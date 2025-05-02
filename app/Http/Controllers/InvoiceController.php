@@ -96,7 +96,8 @@ class InvoiceController extends Controller
             ]);
 
             DeliveryOrder::findOrFail($pro['id_do'])->update(['has_inv' => 1]);
-        }        
+        }
+
         $allDeliveryOrders = DeliveryOrder::where('id_so', $request->id_so)->get();
         
         $allHasInvoice = true;
@@ -130,11 +131,23 @@ class InvoiceController extends Controller
         $detail = DetailInvoice::with([
             'product', 
             'do', 
-            'invoice'
+            'invoice',                        
             ])
             ->where('id_invoice', $id)->get();
 
         return response()->json($detail);
+    }
+
+    public function DetailInvoice(){
+        $detailSo = DetailInvoice::with([
+            'product', 
+            'do', 
+            'invoice',
+            'invoice.customer',
+            'invoice.salesorder'
+        ])
+        ->get();
+        return response()->json($detailSo);
     }
 
     public function approved(Request $request) {
