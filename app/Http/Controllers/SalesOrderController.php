@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\SalesOrder;
 use App\Models\DetailSo;
+use App\Models\Invoice;
 use App\Models\Customer;
 use App\Models\Product;
 
@@ -227,8 +228,7 @@ class SalesOrderController extends Controller
     }
 
     public function getAR(){
-        $salesOrder = SalesOrder::with(['customer','employee'])
-            ->whereColumn('deposit', '<', 'grand_total')
+        $salesOrder = Invoice::with(['customer', 'salesorder','salesorder.employee'])        
             ->get();
         
         return response()->json($salesOrder);

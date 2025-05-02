@@ -235,20 +235,6 @@ class PurchaseOrderController extends Controller
         return response()->json(['message' => 'Purchase Order deleted successfully']);
     }
 
-    public function updateDeposit(Request $request, $id)
-    {
-        $salesOrder = PurchaseOrder::find($id);
-        if (is_null($salesOrder)) {
-            return response()->json(['message' => 'Sales Order not found'], 404);
-        }
-
-        $salesOrder->update([
-            'deposit' => $request->deposit,
-        ]);
-
-        return response()->json(['message' => 'Deposit updated successfully']);
-    }
-
     public function goodReceive(Request $request)
     {             
         $allItemsReceived = true;         

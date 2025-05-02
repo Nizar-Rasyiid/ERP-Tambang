@@ -145,6 +145,7 @@ $query = DB::table('purchaseorders')
 
         // Sales Order
         DB::raw('COALESCE(salesorders.code_so, "-") as sales_order'),
+        DB::raw('COALESCE(salesorders.po_number, "-") as po_code'),
         DB::raw('COALESCE(salesorders.issue_at, "-") as so_date'),
         DB::raw('COALESCE(detailso.quantity, 0) as qty_so'),
         DB::raw('COALESCE(detailso.price, 0) as price_so'),
@@ -159,8 +160,8 @@ $query = DB::table('purchaseorders')
         DB::raw('COALESCE(invoices.code_invoice, "-") as bill_no'),
         DB::raw('COALESCE(invoices.issue_at, "-") as billing_date'),
         DB::raw('COALESCE(invoices.grand_total, 0) as amount_invoice'),
-        DB::raw('COALESCE((invoices.grand_total - (detailpo.quantity * detailpo.price)), 0) as gross_profit'),
-        DB::raw('ROUND(COALESCE(((invoices.grand_total - (detailpo.quantity * detailpo.price)) / NULLIF(invoices.grand_total, 0) * 100), 0), 2) as gp_percentage'),
+        DB::raw('COALESCE(((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)), 0) as gross_profit'),
+        DB::raw('ROUND(COALESCE((((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)) / NULLIF(invoices.grand_total, 0) * 100), 0), 2) as gp_percentage'),
 
         // Faktur Pajak & Tanda Terima
         DB::raw('COALESCE(fp.code_faktur_pajak, "-") as faktur_pajak'),
