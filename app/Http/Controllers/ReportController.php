@@ -9,198 +9,248 @@ class ReportController extends Controller
 {
     public function getReport()
     {
-//         $query = DB::select("
-//          SELECT 
-//     dpo.id_detail_po AS 'no',
-//     po.code_po AS 'po_number',
-//     po.issue_at AS 'po_date',
-//     c.customer_code AS 'cust_code',
-//     c.customer_name AS 'cust_name', 
-//     p.product_sn AS 'pn',
-//     p.product_desc AS 'desc',
-//     dpo.quantity AS 'qty_po',
-//     dpo.price AS 'price_po',
-//     ROUND
-//     (dpo.quantity * dpo.price) AS 'amount_po',
-//     p.product_brand AS 'product_brand',
+        //Ini yang dari purchaseorder
+// $query = DB::table('purchaseorders')
+//     ->join('vendors', 'purchaseorders.vendor_id', '=', 'vendors.vendor_id')
+//     ->join('detailpo', 'purchaseorders.id_po', '=', 'detailpo.id_po')
+//     ->join('products', 'detailpo.product_id', '=', 'products.product_id')
+//     ->leftJoin('detailso', 'detailpo.product_id', '=', 'detailso.product_id')
+//     ->leftJoin('salesorders', 'detailso.id_so', '=', 'salesorders.id_so')
+//     ->leftJoin('customers', 'salesorders.customer_id', '=', 'customers.customer_id')
+//     ->leftJoin('deliveryorders', 'salesorders.id_so', '=', 'deliveryorders.id_so')
+//     ->leftJoin('detail_do', function($join) {
+//         $join->on('deliveryorders.id_do', '=', 'detail_do.id_do')
+//              ->on('detailso.product_id', '=', 'detail_do.product_id');
+//     })
+//     ->leftJoin('invoices', 'salesorders.id_so', '=', 'invoices.id_so')
+//     ->leftJoin('fakturpajak as fp', 'invoices.id_invoice', '=', 'fp.id_invoice')
+//     ->leftJoin('tandaterima', 'salesorders.id_so', '=', 'tandaterima.id_so')
 
-//     -- Ambil SO pertama
-//     COALESCE(so.code_so, '-') AS 'sales_order',
-//     COALESCE(so.issue_at, '-') AS 'so_date',
-//     COALESCE(dso.quantity, 0) AS 'qty_so',
-//     COALESCE(dso.price, 0) AS 'price_so',
-//     COALESCE((dso.quantity * dso.price), 0) AS 'amount_so',
+//     ->select([
+//         'detailpo.id_detail_po as no',
+//         'purchaseorders.code_po as po_number',
+//         'purchaseorders.issue_at as po_date',
+//         'customers.customer_name as cust_name',
+//         'customers.customer_code as cust_code',
+//         'vendors.vendor_name as vendor',
+//         'products.product_sn as pn',
+//         'products.product_desc as desc',
+//         'detailpo.quantity as qty_po',
+//         'detailpo.price as price_po',
+//         DB::raw('(detailpo.quantity * detailpo.price) as amount_po'),
+//         'products.product_brand as product_brand',
 
-//     -- Ambil DO pertama
-//     COALESCE(do_.code_do, '-') AS 'delivery_order',
-//     COALESCE(do_.issue_at, '-') AS 'do_date',
-//     COALESCE(dd.quantity, 0) AS 'qty_do',
+//         // Sales Order
+//         DB::raw('COALESCE(salesorders.code_so, "-") as sales_order'),
+//         DB::raw('COALESCE(salesorders.po_number, "-") as po_code'),
+//         DB::raw('COALESCE(salesorders.issue_at, "-") as so_date'),
+//         DB::raw('COALESCE(detailso.quantity, 0) as qty_so'),
+//         DB::raw('COALESCE(detailso.price, 0) as price_so'),
+//         DB::raw('COALESCE((detailso.quantity * detailso.price), 0) as amount_so'),
 
-//     -- Ambil Invoice pertama
-//     COALESCE(inv.code_invoice, '-') AS 'bill_no',
-//     COALESCE(inv.issue_at, '-') AS 'billing_date',
-//     COALESCE(inv.grand_total, 0) AS 'amount_invoice',
+//         // Delivery Order
+//         DB::raw('COALESCE(deliveryorders.code_do, "-") as delivery_order'),
+//         DB::raw('COALESCE(deliveryorders.issue_at, "-") as do_date'),
+//         DB::raw('COALESCE(detail_do.quantity, 0) as qty_do'),
 
-//     -- Perhitungan Gross Profit
-//     COALESCE((inv.grand_total - (dpo.quantity * dpo.price)), 0) AS 'gross_profit',
-//     ROUND(COALESCE(((inv.grand_total - (dpo.quantity * dpo.price)) / NULLIF(inv.grand_total, 0) * 100), 0), 2) AS 'gp_percentage',
+//         // Invoice dan Gross Profit
+//         DB::raw('COALESCE(invoices.code_invoice, "-") as bill_no'),
+//         DB::raw('COALESCE(invoices.issue_at, "-") as billing_date'),
+//         DB::raw('COALESCE(invoices.grand_total, 0) as amount_invoice'),
+//         DB::raw('COALESCE(((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)), 0) as gross_profit'),
+//         DB::raw('ROUND(COALESCE((((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)) / NULLIF(invoices.grand_total, 0) * 100), 0), 2) as gp_percentage'),
 
-//     -- Faktur Pajak & Tanda Terima
-//         COALESCE(fp.code_faktur_pajak, '-') AS 'faktur_pajak',
-//         COALESCE(fp.created_at, '-') AS 'faktur_date',
-//         COALESCE(tt.code_tandater, '-') AS 'tanda_terima_invoice',
-//         COALESCE(tt.issue_at, '-') AS 'tanda_terima_invoice_date'
+//         // Faktur Pajak & Tanda Terima
+//         DB::raw('COALESCE(fp.code_faktur_pajak, "-") as faktur_pajak'),
+//         DB::raw('COALESCE(fp.created_at, "-") as faktur_date'),
+//         DB::raw('COALESCE(tandaterima.code_tandater, "-") as tanda_terima_invoice'),
+//         DB::raw('COALESCE(tandaterima.issue_at, "-") as tanda_terima_invoice_date'),
+    
+//     ])
 
-// FROM detailpo dpo
+//     ->groupBy([
+//         'detailpo.id_detail_po',
+//         'purchaseorders.code_po',
+//         'purchaseorders.issue_at',
+//         'vendors.vendor_name',
+//         'products.product_sn',
+//         'products.product_desc',
+//         'detailpo.quantity',
+//         'detailpo.price',
+//         'products.product_brand',
+//         'salesorders.code_so',
+//         'salesorders.issue_at',
+//         'detailso.quantity',
+//         'detailso.price',
+//         'deliveryorders.code_do',
+//         'deliveryorders.issue_at',
+//         'detail_do.quantity',
+//         'invoices.code_invoice',
+//         'invoices.issue_at',
+//         'invoices.grand_total',
+//         'fp.code_faktur_pajak',
+//         'fp.created_at',
+//         'tandaterima.code_tandater',
+//         'tandaterima.issue_at'
+//     ])
 
-// -- Hubungkan ke Purchase Order
-// LEFT JOIN purchaseorders po ON dpo.id_po = po.id_po
+//     ->orderBy('purchaseorders.code_po')
+//     ->orderBy('salesorders.code_so')
+//     ->get();
+// $query = DB::table('purchaseorders')
+//     ->join('vendors', 'purchaseorders.vendor_id', '=', 'vendors.vendor_id')
+//     ->join('detailpo', 'purchaseorders.id_po', '=', 'detailpo.id_po')
+//     ->join('products', 'detailpo.product_id', '=', 'products.product_id')
+//     ->leftJoin('detailso', function ($join) {
+//         $join->on('detailpo.product_id', '=', 'detailso.product_id');
+//     })
+//     ->leftJoin('salesorders', 'detailso.id_so', '=', 'salesorders.id_so')
+//     ->leftJoin('customers', 'salesorders.customer_id', '=', 'customers.customer_id')
+//     ->leftJoin('deliveryorders', 'salesorders.id_so', '=', 'deliveryorders.id_so')
+//     ->leftJoin('detail_do', function ($join) {
+//         $join->on('deliveryorders.id_do', '=', 'detail_do.id_do')
+//              ->on('detailso.product_id', '=', 'detail_do.product_id')
+//              ->on('detailso.id_so', '=', 'deliveryorders.id_so'); // Tambahan untuk spesifisitas
+//     })
+//     ->leftJoin('invoices', 'salesorders.id_so', '=', 'invoices.id_so')
+//     ->leftJoin('fakturpajak as fp', 'invoices.id_invoice', '=', 'fp.id_invoice')
+//     ->leftJoin('tandaterima', 'salesorders.id_so', '=', 'tandaterima.id_so')
 
-// -- Hubungkan ke Produk
-// LEFT JOIN products p ON dpo.product_id = p.product_id
+//     ->select([
+//         'detailpo.id_detail_po as no',
+//         'purchaseorders.code_po as po_number',
+//         'purchaseorders.issue_at as po_date',
+//         DB::raw('COALESCE(customers.customer_name, "-") as cust_name'), // Tambahkan COALESCE untuk null
+//         DB::raw('COALESCE(customers.customer_code, "-") as cust_code'),
+//         'vendors.vendor_name as vendor',
+//         'products.product_sn as pn',
+//         'products.product_desc as desc',
+//         'detailpo.quantity as qty_po',
+//         'detailpo.price as price_po',
+//         DB::raw('(detailpo.quantity * detailpo.price) as amount_po'),
+//         'products.product_brand as product_brand',
 
-// -- Sales Order: Ambil hanya SO pertama
-// LEFT JOIN (
-//    SELECT 
-//     dso.product_id,
-//     MAX(so.id_so) AS id_so,
-//     MAX(so.code_so) AS code_so,
-//     MAX(so.issue_at) AS issue_at,
-//     MAX(so.customer_id) AS customer_id
-// FROM salesorders so 
-// JOIN detailso dso ON so.id_so = dso.id_so
-// GROUP BY dso.product_id
-// ) so ON dpo.product_id = so.product_id
+//         // Sales Order
+//         DB::raw('COALESCE(MAX(salesorders.code_so), "-") as sales_order'), // Gunakan MAX untuk menghindari duplikat
+//         DB::raw('COALESCE(MAX(salesorders.po_number), "-") as po_code'),
+//         DB::raw('COALESCE(MAX(salesorders.issue_at), "-") as so_date'),
+//         DB::raw('COALESCE(SUM(detailso.quantity), 0) as qty_so'), // Gunakan SUM untuk total kuantitas
+//         DB::raw('COALESCE(MAX(detailso.price), 0) as price_so'), // Ambil harga terakhir
+//         DB::raw('COALESCE(SUM(detailso.quantity * detailso.price), 0) as amount_so'),
 
+//         // Delivery Order
+//         DB::raw('COALESCE(MAX(deliveryorders.code_do), "-") as delivery_order'),
+//         DB::raw('COALESCE(MAX(deliveryorders.issue_at), "-") as do_date'),
+//         DB::raw('COALESCE(SUM(detail_do.quantity), 0) as qty_do'),
 
-// -- Ambil detail SO
-// LEFT JOIN detailso dso ON so.id_so = dso.id_so AND dpo.product_id = dso.product_id
+//         // Invoice dan Gross Profit
+//         DB::raw('COALESCE(MAX(invoices.code_invoice), "-") as bill_no'),
+//         DB::raw('COALESCE(MAX(invoices.issue_at), "-") as billing_date'),
+//         DB::raw('COALESCE(MAX(invoices.grand_total), 0) as amount_invoice'),
+//         DB::raw('COALESCE(SUM((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)), 0) as gross_profit'),
+//         DB::raw('ROUND(COALESCE(SUM(((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price))) / NULLIF(MAX(invoices.grand_total), 0) * 100, 0), 2) as gp_percentage'),
 
-// -- Customer lewat SO
-// LEFT JOIN customers c ON so.customer_id = c.customer_id
+//         // Faktur Pajak & Tanda Terima
+//         DB::raw('COALESCE(MAX(fp.code_faktur_pajak), "-") as faktur_pajak'),
+//         DB::raw('COALESCE(MAX(fp.created_at), "-") as faktur_date'),
+//         DB::raw('COALESCE(MAX(tandaterima.code_tandater), "-") as tanda_terima_invoice'),
+//         DB::raw('COALESCE(MAX(tandaterima.issue_at), "-") as tanda_terima_invoice_date'),
+//     ])
 
-// -- Delivery Order: Ambil DO pertama
-// LEFT JOIN (
-//     SELECT do_.id_do, do_.id_so, do_.code_do, do_.issue_at
-//     FROM deliveryorders do_
-//     GROUP BY do_.id_so
-// ) do_ ON so.id_so = do_.id_so
+//     ->groupBy([
+//         'detailpo.id_detail_po',
+//         'purchaseorders.code_po',
+//         'purchaseorders.issue_at',
+//         'vendors.vendor_name',
+//         'products.product_sn',
+//         'products.product_desc',
+//         'detailpo.quantity',
+//         'detailpo.price',
+//         'products.product_brand',
+//         'customers.customer_name', // Tambahkan ke GROUP BY
+//         'customers.customer_code', // Tambahkan ke GROUP BY
+//     ])
 
-// LEFT JOIN detail_do dd ON do_.id_do = dd.id_do AND dpo.product_id = dd.product_id
+//     ->orderBy('purchaseorders.code_po')
+//     ->orderBy('salesorders.code_so')
+//     ->get();
 
-// -- Invoice: Ambil invoice pertama
-// LEFT JOIN (
-//     SELECT inv.id_invoice, inv.id_so, inv.code_invoice, inv.issue_at, inv.grand_total
-//     FROM invoices inv
-//     GROUP BY inv.id_so
-// ) inv ON so.id_so = inv.id_so
-
-// -- Faktur Pajak
-// LEFT JOIN (
-//     SELECT fp.id_invoice, fp.code_faktur_pajak, fp.created_at
-//     FROM fakturpajak fp
-//     GROUP BY fp.id_invoice
-// ) fp ON inv.id_invoice = fp.id_invoice
-
-// -- Tanda Terima
-// LEFT JOIN (
-//     SELECT tt.id_so, tt.code_tandater, tt.issue_at
-//     FROM tandaterima tt
-//     GROUP BY tt.id_so
-// ) tt ON so.id_so = tt.id_so
-
-// -- Biar hasil lebih rapi
-// GROUP BY dpo.id_detail_po;
-// ");
-
-$query = DB::table('purchaseorders')
-    ->join('vendors', 'purchaseorders.vendor_id', '=', 'vendors.vendor_id')
-    ->join('detailpo', 'purchaseorders.id_po', '=', 'detailpo.id_po')
-    ->join('products', 'detailpo.product_id', '=', 'products.product_id')
-    ->leftJoin('detailso', 'detailpo.product_id', '=', 'detailso.product_id')
-    ->leftJoin('salesorders', 'detailso.id_so', '=', 'salesorders.id_so')
-    ->leftJoin('customers', 'salesorders.customer_id', '=', 'customers.customer_id')
+//Ini yang dari salesorder
+$query = DB::table('salesorders')
+    ->join('detailso', 'salesorders.id_so', '=', 'detailso.id_so')
+    ->join('customers', 'salesorders.customer_id', '=', 'customers.customer_id')
+    ->join('products', 'detailso.product_id', '=', 'products.product_id')
     ->leftJoin('deliveryorders', 'salesorders.id_so', '=', 'deliveryorders.id_so')
-    ->leftJoin('detail_do', function($join) {
+    ->leftJoin('detail_do', function ($join) {
         $join->on('deliveryorders.id_do', '=', 'detail_do.id_do')
-             ->on('detailso.product_id', '=', 'detail_do.product_id');
+             ->on('detailso.product_id', '=', 'detail_do.product_id')
+             ->on('detailso.id_so', '=', 'deliveryorders.id_so');
     })
     ->leftJoin('invoices', 'salesorders.id_so', '=', 'invoices.id_so')
     ->leftJoin('fakturpajak as fp', 'invoices.id_invoice', '=', 'fp.id_invoice')
     ->leftJoin('tandaterima', 'salesorders.id_so', '=', 'tandaterima.id_so')
+    ->leftJoin('detailpo', 'detailso.product_id', '=', 'detailpo.product_id')
+    ->leftJoin('purchaseorders', 'detailpo.id_po', '=', 'purchaseorders.id_po')
+    ->leftJoin('vendors', 'purchaseorders.vendor_id', '=', 'vendors.vendor_id')
 
     ->select([
-        'detailpo.id_detail_po as no',
-        'purchaseorders.code_po as po_number',
-        'purchaseorders.issue_at as po_date',
+        'detailso.id_detail_so as no',
+        'salesorders.code_so as sales_order',
+        'salesorders.po_number as po_code',
+        'salesorders.issue_at as so_date',
         'customers.customer_name as cust_name',
         'customers.customer_code as cust_code',
-        'vendors.vendor_name as vendor',
+        DB::raw('COALESCE(vendors.vendor_name, "-") as vendor'),
         'products.product_sn as pn',
         'products.product_desc as desc',
-        'detailpo.quantity as qty_po',
-        'detailpo.price as price_po',
-        DB::raw('(detailpo.quantity * detailpo.price) as amount_po'),
+        'detailso.quantity as qty_so',
+        'detailso.price as price_so',
+        DB::raw('(detailso.quantity * detailso.price) as amount_so'),
         'products.product_brand as product_brand',
 
-        // Sales Order
-        DB::raw('COALESCE(salesorders.code_so, "-") as sales_order'),
-        DB::raw('COALESCE(salesorders.po_number, "-") as po_code'),
-        DB::raw('COALESCE(salesorders.issue_at, "-") as so_date'),
-        DB::raw('COALESCE(detailso.quantity, 0) as qty_so'),
-        DB::raw('COALESCE(detailso.price, 0) as price_so'),
-        DB::raw('COALESCE((detailso.quantity * detailso.price), 0) as amount_so'),
+        // Purchase Order
+        DB::raw('COALESCE(MAX(purchaseorders.code_po), "-") as po_number'),
+        DB::raw('COALESCE(MAX(purchaseorders.issue_at), "-") as po_date'),
+        DB::raw('COALESCE(SUM(detailpo.quantity), 0) as qty_po'),
+        DB::raw('COALESCE(MAX(detailpo.price), 0) as price_po'),
+        DB::raw('COALESCE(SUM(detailpo.quantity * detailpo.price), 0) as amount_po'),
 
         // Delivery Order
-        DB::raw('COALESCE(deliveryorders.code_do, "-") as delivery_order'),
-        DB::raw('COALESCE(deliveryorders.issue_at, "-") as do_date'),
-        DB::raw('COALESCE(detail_do.quantity, 0) as qty_do'),
+        DB::raw('COALESCE(MAX(deliveryorders.code_do), "-") as delivery_order'),
+        DB::raw('COALESCE(MAX(deliveryorders.issue_at), "-") as do_date'),
+        DB::raw('COALESCE(SUM(detail_do.quantity), 0) as qty_do'),
 
         // Invoice dan Gross Profit
-        DB::raw('COALESCE(invoices.code_invoice, "-") as bill_no'),
-        DB::raw('COALESCE(invoices.issue_at, "-") as billing_date'),
-        DB::raw('COALESCE(invoices.grand_total, 0) as amount_invoice'),
-        DB::raw('COALESCE(((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)), 0) as gross_profit'),
-        DB::raw('ROUND(COALESCE((((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)) / NULLIF(invoices.grand_total, 0) * 100), 0), 2) as gp_percentage'),
+        DB::raw('COALESCE(MAX(invoices.code_invoice), "-") as bill_no'),
+        DB::raw('COALESCE(MAX(invoices.issue_at), "-") as billing_date'),
+        DB::raw('COALESCE(MAX(invoices.grand_total), 0) as amount_invoice'),
+        DB::raw('COALESCE(SUM((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)), 0) as gross_profit'),
+        DB::raw('ROUND(COALESCE(SUM((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)) / NULLIF(MAX(invoices.grand_total), 0) * 100, 0), 2) as gp_percentage'),
 
         // Faktur Pajak & Tanda Terima
-        DB::raw('COALESCE(fp.code_faktur_pajak, "-") as faktur_pajak'),
-        DB::raw('COALESCE(fp.created_at, "-") as faktur_date'),
-        DB::raw('COALESCE(tandaterima.code_tandater, "-") as tanda_terima_invoice'),
-        DB::raw('COALESCE(tandaterima.issue_at, "-") as tanda_terima_invoice_date'),
-    
+        DB::raw('COALESCE(MAX(fp.code_faktur_pajak), "-") as faktur_pajak'),
+        DB::raw('COALESCE(MAX(fp.created_at), "-") as faktur_date'),
+        DB::raw('COALESCE(MAX(tandaterima.code_tandater), "-") as tanda_terima_invoice'),
+        DB::raw('COALESCE(MAX(tandaterima.issue_at), "-") as tanda_terima_invoice_date'),
     ])
 
     ->groupBy([
-        'detailpo.id_detail_po',
-        'purchaseorders.code_po',
-        'purchaseorders.issue_at',
-        'vendors.vendor_name',
+        'detailso.id_detail_so',
+        'salesorders.code_so',
+        'salesorders.po_number',
+        'salesorders.issue_at',
+        'customers.customer_name',
+        'customers.customer_code',
         'products.product_sn',
         'products.product_desc',
-        'detailpo.quantity',
-        'detailpo.price',
-        'products.product_brand',
-        'salesorders.code_so',
-        'salesorders.issue_at',
         'detailso.quantity',
         'detailso.price',
-        'deliveryorders.code_do',
-        'deliveryorders.issue_at',
-        'detail_do.quantity',
-        'invoices.code_invoice',
-        'invoices.issue_at',
-        'invoices.grand_total',
-        'fp.code_faktur_pajak',
-        'fp.created_at',
-        'tandaterima.code_tandater',
-        'tandaterima.issue_at'
+        'products.product_brand',
     ])
 
-    ->orderBy('purchaseorders.code_po')
     ->orderBy('salesorders.code_so')
+    ->orderBy('detailso.id_detail_so')
     ->get();
-
         return response()->json($query);
     }
 }
