@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Opex;
+use App\Models\Customer;
 
 class OpexController extends Controller
 {
@@ -18,9 +19,11 @@ class OpexController extends Controller
     public function show($id)
     {
         $opex = Opex::find($id);
+        
         if (is_null($opex)) {
             return response()->json(['message' => 'Opex not found'], 404);
         }
+        $opex->load('customer');
         return response()->json($opex);
     }
 
