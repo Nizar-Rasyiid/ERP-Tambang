@@ -24,6 +24,7 @@ use App\Http\Controllers\FakturPajakController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\PackageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -112,6 +113,12 @@ Route::get('/products/{id}', [ProductController::class, 'show'])->name('show.pro
 Route::get('/products/search', [ProductController::class, 'search'])->name('search.product');
 Route::post('/products_code', [ProductController::class, 'store'])->name('post.products');
 Route::put('/products_code/{id}', [ProductController::class, 'update'])->name('update.products');
+
+Route::get('/package_adrs', [PackageController::class, 'index'])->name('get.package');
+Route::get('/package_adrs/{id}', [PackageController::class, 'detailindex'])->name('get.package');
+Route::get('/package_details', [PackageController::class, 'detailpackage'])->name('get.package');
+Route::get('/package_details/{id}', [PackageController::class, 'detailpack'])->name('get.package');
+Route::post('/package_adrs', [PackageController::class, 'store'])->name('get.package');
 
 Route::get('/payment_types', [PaymentTypeController::class, 'index'])->name('get.payment_type');
 Route::post('/payment_types_code', [PaymentTypeController::class, 'store'])->name('post.payment_type');
