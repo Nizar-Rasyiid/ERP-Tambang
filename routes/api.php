@@ -86,10 +86,10 @@ Route::get('/detail_po/{id}', [DetailPoController::class, 'show'])->name('show.d
 Route::get('/details_so', [DetailSoController::class, 'index'])->name('get.detailso');
 Route::get('/details_so/{id}', [DetailSoController::class, 'show'])->name('show.detailso');
 
-Route::get('/detail_do/{id}', [DetailSoController::class, 'DoShow'])->name('get.doDetail');
+Route::get('/detail_do/{id}', [DetailSoController::class, 'DoShow'])->name('show.doDetail');
 Route::get('/detail_do', [DetailSoController::class, 'DetailDO'])->name('get.doDetail');
 Route::get('/detail_quatation/{id}', [DetailQuatationController::class, 'show'])->name('get.quatationDetail');
-Route::get('/detail_quatation', [DetailQuatationController::class, 'index'])->name('get.quatationDetail');
+Route::get('/detail_quatation', [DetailQuatationController::class, 'index'])->name('get.quatationDetails');
 
 Route::get('/employees', [EmployeeController::class, 'index'])->name('get.employees');
 Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('show.employees');
@@ -103,7 +103,7 @@ Route::post('/invoices_code', [InvoiceController::class, 'store'])->name('post.i
 Route::post('/invoices_code/appr/{id}', [InvoiceController::class, 'store'])->name('post.invoices');
 Route::put('/invoices_code/{id}', [InvoiceController::class, 'update'])->name('put.invoices');
 Route::get('/detail_invoices/{id}', [InvoiceController::class, 'detail'])->name('detail.invoices');
-Route::get('/detail_invoices', [InvoiceController::class, 'DetailInvoice'])->name('get.doDetail');
+Route::get('/detail_invoices', [InvoiceController::class, 'DetailInvoice'])->name('get.detaiLInvoices');
 
 Route::get('/inquiry', [InquiryController::class, 'index'])->name('get.inquiry');
 Route::post('/inquiry_code', [InquiryController::class, 'store'])->name('store.inquiry');
@@ -115,10 +115,10 @@ Route::post('/products_code', [ProductController::class, 'store'])->name('post.p
 Route::put('/products_code/{id}', [ProductController::class, 'update'])->name('update.products');
 
 Route::get('/package_adrs', [PackageController::class, 'index'])->name('get.package');
-Route::get('/package_adrs/{id}', [PackageController::class, 'detailindex'])->name('get.package');
-Route::get('/package_details', [PackageController::class, 'detailpackage'])->name('get.package');
-Route::get('/package_details/{id}', [PackageController::class, 'detailpack'])->name('get.package');
-Route::post('/package_adrs', [PackageController::class, 'store'])->name('get.package');
+Route::get('/package_adrs/{id}', [PackageController::class, 'detailindex'])->name('get.Detailpackage');
+Route::get('/package_details', [PackageController::class, 'detailpackage'])->name('get.packageDetails');
+Route::get('/package_details/{id}', [PackageController::class, 'detailpack'])->name('get.packageDetailId');
+Route::post('/package_adrs', [PackageController::class, 'store'])->name('post.package');
 
 Route::get('/payment_types', [PaymentTypeController::class, 'index'])->name('get.payment_type');
 Route::post('/payment_types_code', [PaymentTypeController::class, 'store'])->name('post.payment_type');
@@ -145,6 +145,7 @@ Route::post('/vendors_code', [VendorController::class, 'store'])->name('post.ven
 Route::put('/vendors_code/{id}', [VendorController::class, 'update'])->name('put.vendor');
 
 Route::get('/opex', [OpexController::class, 'index'])->name('get.opex');
+Route::get('/opex/{id}', [OpexController::class, 'show'])->name('show.opex');
 Route::post('/opex_code', [OpexController::class, 'store'])->name('post.opex');
 Route::post('/opex_code/absorb', [OpexController::class, 'storeAbsorb'])->name('post.opex');
 
@@ -161,7 +162,7 @@ Route::delete('/sales_orders_delete/{id}', [SalesOrderController::class, 'destro
 Route::get('/tandater', [TandaTerimaController::class, 'index'])->name('get.tandater');
 Route::get('/tandater/{id}', [TandaTerimaController::class, 'show'])->name('get.tandaterById');
 Route::get('/detail_tandater/{id}', [TandaTerimaController::class, 'detail'])->name('detail.tandater');
-Route::get('/detail_tandater', [TandaTerimaController::class, 'getDetail'])->name('detail.tandater');
+Route::get('/detail_tandater', [TandaTerimaController::class, 'getDetail'])->name('detail.tandaters');
 Route::post('/addTandater', [TandaTerimaController::class, 'store'])->name('post.tandater');
 Route::put('/addTandater/{id}', [TandaTerimaController::class, 'update'])->name('put.tandater');
 

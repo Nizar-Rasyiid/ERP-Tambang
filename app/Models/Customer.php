@@ -44,4 +44,7 @@ class Customer extends Model
     public function point(){
         return $this->hasMany(CustomerPoint::class, 'customer_id');
     }
+    public function opex(){
+        return $this->hasMany(Opex::class, 'customer_id');
+    }
 }
