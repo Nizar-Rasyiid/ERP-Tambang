@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\AbsorbDetail;
 use App\Models\Opex;
 
 class OpexController extends Controller
@@ -38,6 +39,27 @@ class OpexController extends Controller
             'opex_price' => $request->opex_price,
             'customer_id' => $request->customer_id,
         ]);
+        
+        return response()->json($opex, 201);
+    }
+
+    public function storeAbsorb(Request $request)
+    {
+        $opex = Opex::create([
+            'opex_code' => $request->opex_code,
+            'opex_name' => $request->opex_name,
+            'opex_type' => $request->opex_type,
+            'opex_price' => $request->opex_price,
+            'customer_id' => $request->customer_id,
+        ]);
+        
+        foreach ($request->sales_order_details as $absorb) {
+            AbsorbDetail::create([
+                'opex_id' => $opex->id,
+                'product_id' => $absorb['product_id'],
+            ]);
+        }
+
         
         return response()->json($opex, 201);
     }

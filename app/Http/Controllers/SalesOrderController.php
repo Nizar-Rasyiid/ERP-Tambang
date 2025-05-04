@@ -86,16 +86,17 @@ class SalesOrderController extends Controller
             $sub_total += $line_total;
     
             DetailSo::create([
-                'id_so'      => $salesOrder->id_so,                
-                'product_id' => $pro['product_id'],
-                'quantity'   => $pro['quantity'],
+                'id_so'         => $salesOrder->id_so,                
+                'product_id'    => $pro['product_id'],
+                'quantity'      => $pro['quantity'],
                 'quantity_left' => 0,
-                'has_do'     => 0,
-                'price'      => $pro['price'],
-                'discount'   => $pro['discount'],
-                'amount'     => $pro['amount'],
-                'created_at' => now(),
-                'updated_at' => now(),
+                'has_do'        => 0,
+                'price'         => $pro['price'],
+                'discount'      => $pro['discount'],
+                'product_type'  => $pro['product_type'],
+                'amount'        => $pro['amount'],
+                'created_at'    => now(),
+                'updated_at'    => now(),
             ]);    
         }    
         
@@ -109,7 +110,7 @@ class SalesOrderController extends Controller
     
         return response()->json([
             'message'      => 'Sales Order berhasil dibuat!',
-            'sales_order'  => $salesOrder,            
+            'sales_order'  => $request->sales_order_details,            
         ], 201);
     }
     

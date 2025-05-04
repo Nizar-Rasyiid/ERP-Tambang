@@ -146,6 +146,7 @@ Route::put('/vendors_code/{id}', [VendorController::class, 'update'])->name('put
 
 Route::get('/opex', [OpexController::class, 'index'])->name('get.opex');
 Route::post('/opex_code', [OpexController::class, 'store'])->name('post.opex');
+Route::post('/opex_code/absorb', [OpexController::class, 'storeAbsorb'])->name('post.opex');
 
 Route::get('/sales_orders', [SalesOrderController::class, 'index'])->name('get.sales_order');
 Route::get('/sales_orders/monthly', [SalesOrderController::class, 'monthlySales']);
