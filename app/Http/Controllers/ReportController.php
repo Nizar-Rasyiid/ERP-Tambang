@@ -249,7 +249,7 @@ $query = DB::table('salesorders')
     ])
 
     ->orderBy('salesorders.code_so')
-    ->orderBy('detailso.id_detail_so')
+    ->orderBy('detailso.id_detail_so', 'desc')
     ->get();
         return response()->json($query);
     }

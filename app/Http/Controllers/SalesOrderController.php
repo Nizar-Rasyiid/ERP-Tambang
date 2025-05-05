@@ -29,9 +29,10 @@ class SalesOrderController extends Controller
 
     public function store(Request $request)
     {
-        // $request->validate([
-        //     'sales_order_details' => 'required|array',
-        // ]);
+        $request->validate([
+            'sales_order_details.*.product_id' => 'required_if:product_type,product|exists:products,product_id',
+            'sales_order_details.*.package_id' => 'required_if:product_type,package|exists:package,package_id',
+        ]);
     
         // Ambil bulan & tahun saat ini
         $currentMonth = date('m'); // 02
@@ -84,10 +85,9 @@ class SalesOrderController extends Controller
         foreach ($request->sales_order_details as $pro) {                                                                         
             $line_total = $pro['price'] * $pro['quantity'];
             $sub_total += $line_total;
-    
-            DetailSo::create([
-                'id_so'         => $salesOrder->id_so,                
-                'product_id'    => $pro['product_id'],
+            
+            $detailData = [
+                'id_so'         => $salesOrder->id_so,                                                
                 'quantity'      => $pro['quantity'],
                 'quantity_left' => 0,
                 'has_do'        => 0,
@@ -97,7 +97,17 @@ class SalesOrderController extends Controller
                 'amount'        => $pro['amount'],
                 'created_at'    => now(),
                 'updated_at'    => now(),
-            ]);    
+            ];
+
+            if ($pro['product_type'] == 'product') {
+                $detailData['product_id'] = $pro['product_id'];
+                $detailData['package_id'] = null; // Pastikan package_id null
+            } else {
+                $detailData['package_id'] = $pro['package_id'];
+                $detailData['product_id'] = null; // Pastikan product_id null
+            }
+
+            DetailSo::create($detailData);                          
         }    
         
         $ppn = $sub_total * 0.11;
@@ -110,7 +120,7 @@ class SalesOrderController extends Controller
     
         return response()->json([
             'message'      => 'Sales Order berhasil dibuat!',
-            'sales_order'  => $request->sales_order_details,            
+            'sales_order'  => $detailData,            
         ], 201);
     }
     
@@ -154,27 +164,60 @@ class SalesOrderController extends Controller
                 $sub_total += $amount;
 
                 if (isset($detail['id_detail_so']) && in_array($detail['id_detail_so'], $existingDetailIds)) {
-                DetailSo::where('id_detail_so', $detail['id_detail_so'])->update([
-                    'product_id'    => $detail['product_id'],
-                    'quantity'      => $quantity,
-                    'quantity_left' => $detail['quantity_left'] ?? 0,
-                    'has_do'        => $detail['has_do'] ?? 0,
-                    'price'         => $price,
-                    'discount'      => $discount,
-                    'amount'        => $amount,
-                ]);
+                if ($detail['product_type'] == 'product') {
+                    DetailSo::where('id_detail_so', $detail['id_detail_so'])->update([
+                        'product_id'    => $detail['product_id'],
+                        'package_id'    => 0,
+                        'product_type'  => $detail['product_type'],
+                        'quantity'      => $quantity,
+                        'quantity_left' => $detail['quantity_left'] ?? 0,
+                        'has_do'        => $detail['has_do'] ?? 0,
+                        'price'         => $price,
+                        'discount'      => $discount,
+                        'amount'        => $amount,
+                    ]);
+                }else{
+                    DetailSo::where('id_detail_so', $detail['id_detail_so'])->update([
+                        'product_id'    => 0,
+                        'package_id'    => $detail['package_id'],
+                        'product_type'  => $detail['product_type'],
+                        'quantity'      => $quantity,
+                        'quantity_left' => $detail['quantity_left'] ?? 0,
+                        'has_do'        => $detail['has_do'] ?? 0,
+                        'price'         => $price,
+                        'discount'      => $discount,
+                        'amount'        => $amount,
+                    ]);
+                }
                 $processedIds[] = $detail['id_detail_so'];
                 } else {
-                $newDetail = DetailSo::create([
-                    'id_so'         => $id,
-                    'product_id'    => $detail['product_id'],
-                    'quantity'      => $quantity,
-                    'quantity_left' => $detail['quantity_left'] ?? 0,
-                    'has_do'        => $detail['has_do'] ?? 0,
-                    'price'         => $price,
-                    'discount'      => $discount,
-                    'amount'        => $amount,
-                ]);
+                    if ($detail['product_type'] == 'product') {
+                        $newDetail = DetailSo::create([
+                            'id_so'         => $id,
+                            'product_id'    => $detail['product_id'],
+                            'package_id'    => 0,
+                            'product_type'  => $detail['product_type'],                    
+                            'quantity'      => $quantity,
+                            'quantity_left' => $detail['quantity_left'] ?? 0,
+                            'has_do'        => $detail['has_do'] ?? 0,
+                            'price'         => $price,
+                            'discount'      => $discount,
+                            'amount'        => $amount,
+                        ]);
+                    }else{
+                        $newDetail = DetailSo::create([
+                            'id_so'         => $id,
+                            'product_id'    => 0,
+                            'package_id'    => $detail['package_id'],
+                            'product_type'  => $detail['product_type'],                    
+                            'quantity'      => $quantity,
+                            'quantity_left' => $detail['quantity_left'] ?? 0,
+                            'has_do'        => $detail['has_do'] ?? 0,
+                            'price'         => $price,
+                            'discount'      => $discount,
+                            'amount'        => $amount,
+                        ]);
+                    }            
                 if ($newDetail) {
                     $processedIds[] = $newDetail->id_detail_so;
                 }

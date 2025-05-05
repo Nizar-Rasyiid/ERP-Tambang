@@ -15,7 +15,7 @@ class DetailSoController extends Controller
     public function index()
     {
         $detailSo = DetailSo::with(
-            ['product', 'salesorders', 'salesorders.customer'])
+            ['product', 'salesorders', 'salesorders.customer', 'package'])
             ->get();
         return response()->json($detailSo);
     }
@@ -41,7 +41,7 @@ class DetailSoController extends Controller
      */
     public function show(string $id)
     {
-        $detailSo = DetailSo::with('product')
+        $detailSo = DetailSo::with('product', 'package')
             ->where('id_so', $id)->get();    
                 
         return response()->json($detailSo);

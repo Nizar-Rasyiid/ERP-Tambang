@@ -14,6 +14,8 @@ class DetailSo extends Model
     protected $fillable = [
         'id_so',
         'product_id',
+        'package_id',
+        'product_type',
         'quantity',
         'quantity_left',
         'has_do',
@@ -32,5 +34,9 @@ class DetailSo extends Model
 
     public function salesorders(){
         return $this->belongsTo(SalesOrder::class, 'id_so');
+    }
+
+    public function package(){
+        return $this->hasMany(Package::class, 'package_id', 'package_id');
     }
 }
