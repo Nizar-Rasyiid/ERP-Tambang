@@ -34,10 +34,13 @@ class FakturPajakController extends Controller
 
     public function show($id)
     {
-        $fakturpajak = FakturPajak::find($id);
-        if (is_null($fakturpajak)) {
-            return response()->json(['message' => 'Record not found'], 404);
-        }
+        $fakturpajak = FakturPajak::with([
+            'invoice',
+            'invoice',
+            'so.customer'
+        ])
+        ->where('id', $id)
+        ->get();      
         return response()->json($fakturpajak);
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\SalesOrder;
+use App\Models\PaymentSalesOrder;
 use App\Models\DetailSo;
 use App\Models\Invoice;
 use App\Models\Customer;
@@ -286,6 +287,14 @@ class SalesOrderController extends Controller
 
         $salesOrder->update([
             'deposit' => $request->deposit,
+        ]);
+
+        $payment = PaymentSalesOrder::create([
+            'id_so'         => $id,
+            'payment_method'=> $request->payment_method,
+            'price'         => $request->deposit,
+            'issue_at'      => $request->issue_at,
+            'due_at'        => $request->due_at,   
         ]);
 
         return response()->json(['message' => 'Deposit updated successfully']);

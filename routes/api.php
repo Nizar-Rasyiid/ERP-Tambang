@@ -145,6 +145,7 @@ Route::post('/vendors_code', [VendorController::class, 'store'])->name('post.ven
 Route::put('/vendors_code/{id}', [VendorController::class, 'update'])->name('put.vendor');
 
 Route::get('/opex', [OpexController::class, 'index'])->name('get.opex');
+Route::get('/opex/absorb/{id}', [OpexController::class, 'absorbDetail'])->name('get.opex');
 Route::get('/opex/{id}', [OpexController::class, 'show'])->name('show.opex');
 Route::post('/opex_code', [OpexController::class, 'store'])->name('post.opex');
 Route::post('/opex_code/absorb', [OpexController::class, 'storeAbsorb'])->name('post.opex');
@@ -168,6 +169,7 @@ Route::put('/addTandater/{id}', [TandaTerimaController::class, 'update'])->name(
 
 
 Route::get('/faktur-pajak', [FakturPajakController::class, 'index'])->name('get.fakturpajak');
+Route::get('/faktur-pajak/{id}', [FakturPajakController::class, 'show'])->name('get.fakturpajak');
 Route::post('/faktur-pajak-code', [FakturPajakController::class, 'store'])->name('post.fakturpajak');
 
 //u

@@ -16,10 +16,15 @@ class Opex extends Model
         'opex_type',
         'opex_price',
         'customer_id',
+        'issue_at',
     ];
 
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function absorbDetail(){
+        return $this->hasMany(AbsorbDetail::class, 'opex_id');
     }
 }
     

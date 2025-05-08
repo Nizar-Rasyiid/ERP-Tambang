@@ -6,6 +6,7 @@ use App\Models\PurchaseOrder;
 use App\Models\Invoice;
 use App\Models\Customer;
 use App\Models\PaymentType;
+use App\Models\PaymentPurchaseOrder;
 use App\Models\BankAccount;
 use App\Models\Employee;
 use App\Models\DetailPo;
@@ -279,6 +280,14 @@ class PurchaseOrderController extends Controller
         $purchaseOrder = PurchaseOrder::findOrFail($id);
         $purchaseOrder->update([
             'deposit' => $request->deposit,
+        ]);
+
+        $payment = PaymentPurchaseOrder::create([
+            'id_po'         => $id,
+            'payment_method'=> $request->payment_method,
+            'price'         => $request->deposit,
+            'issue_at'      => $request->issue_at,
+            'due_at'        => $request->due_at,   
         ]);
 
         return response()->json([

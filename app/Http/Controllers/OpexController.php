@@ -12,7 +12,7 @@ class OpexController extends Controller
     // Get all Opex records
     public function index()
     {
-        $opexes = Opex::with('customer')->get();
+        $opexes = Opex::with('customer', 'absorbDetail')->get();
         return response()->json($opexes);
     }
 
@@ -41,6 +41,7 @@ class OpexController extends Controller
             'opex_type' => $request->opex_type,
             'opex_price' => $request->opex_price,
             'customer_id' => $request->customer_id,
+            'issue_at' => $request->issue_at,
         ]);
         
         return response()->json($opex, 201);
@@ -48,23 +49,38 @@ class OpexController extends Controller
 
     public function storeAbsorb(Request $request)
     {
+        $last = Opex::latest()->first();
+        $lastId = $last ? $last->opex_code : 1000;
+        $newId = $lastId + 1; 
+
         $opex = Opex::create([
-            'opex_code' => $request->opex_code,
+            'opex_code' => $newId,
             'opex_name' => $request->opex_name,
             'opex_type' => $request->opex_type,
             'opex_price' => $request->opex_price,
             'customer_id' => $request->customer_id,
+            'issue_at' => $request->issue_at,
         ]);
         
         foreach ($request->sales_order_details as $absorb) {
             AbsorbDetail::create([
-                'opex_id' => $opex->id,
+                'opex_id' => $opex->opex_id,
                 'product_id' => $absorb['product_id'],
             ]);
-        }
-
-        
+        }    
         return response()->json($opex, 201);
+    }
+
+    public function absorbDetail($id){
+        $absorbDetail = Opex::with([
+            'absorbDetail',
+            'absorbDetail.product'
+        ])
+        ->where('opex_type', 'absorb')
+        ->where('opex_id', $id)
+        ->get();
+
+        return response()->json($absorbDetail);
     }
 
     // Update an existing Opex record
