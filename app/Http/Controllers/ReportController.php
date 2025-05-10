@@ -196,7 +196,7 @@ $query = DB::table('salesorders')
     ->select([
         'detailso.id_detail_so as no',
         'salesorders.code_so as sales_order',
-        'salesorders.po_number as po_code',
+        'salesorders.po_number as po_number',
         'salesorders.issue_at as so_date',
         'customers.customer_name as cust_name',
         'customers.customer_code as cust_code',
