@@ -104,11 +104,19 @@ class PurchaseOrderController extends Controller
         ]);
     }            
 
-    // ✅ Hitung PPN (11% dari sub_total)
-    $ppn = $sub_total * 0.11;
+    if ($request->ppnCheck != true) {
+        // ✅ Hitung PPN (11% dari sub_total)
+        $ppn = 0;
 
-    // ✅ Hitung Grand Total
-    $grand_total = $sub_total + $ppn;        
+        // ✅ Hitung Grand Total
+        $grand_total = $sub_total + $ppn;   
+    }else{
+        // ✅ Hitung PPN (11% dari sub_total)
+        $ppn = $sub_total * 0.11;
+
+        // ✅ Hitung Grand Total
+        $grand_total = $sub_total + $ppn;   
+    }         
 
     // Update Purchase Order dengan PPN & Grand Total
     $purchaseOrder->update([
@@ -186,15 +194,28 @@ class PurchaseOrderController extends Controller
                         if ($newDetail) {
                             $processedIds[] = $newDetail->id_detail_po;
                         }
-                    }
+                    }                    
                 }
+
+                if ($request->ppnCheck != true) {
+                    // ✅ Hitung PPN (11% dari sub_total)
+                    $ppn = 0;
+
+                    // ✅ Hitung Grand Total
+                    $grand_total = $sub_total + $ppn;   
+                }else{
+                    // ✅ Hitung PPN (11% dari sub_total)
+                    $ppn = $sub_total * 0.11;
+
+                    // ✅ Hitung Grand Total
+                    $grand_total = $sub_total + $ppn;   
+                } 
 
                 $detailsToDelete = array_diff($existingDetailIds, $processedIds);
                 if (!empty($detailsToDelete)) {
                     DetailPo::whereIn('id_detail_po', $detailsToDelete)->delete();
                 }
-
-                $ppn = $sub_total * 0.11;
+                
                 $purchaseOrder->update([
                     'sub_total'   => $sub_total,
                     'ppn'         => $ppn,
@@ -268,8 +289,7 @@ class PurchaseOrderController extends Controller
     }
 
     public function getAP(){
-        $purchaseOrder = PurchaseOrder::with(['vendor', 'employee'])           
-            ->whereColumn('deposit', '<', 'grand_total')
+        $purchaseOrder = PurchaseOrder::with(['vendor', 'employee', 'payment'])                       
             ->get();
         
         return response()->json($purchaseOrder);
@@ -302,6 +322,25 @@ class PurchaseOrderController extends Controller
 
         return response()->json([
             'approved' => 'Purchase Order been Approved',
+        ]);
+    }
+
+    public function editPPn(Request $request, string $id){
+        $sub_total = $request->sub_total;
+        $ppns = $request->ppn;
+        
+        $ppn = 0;
+        $grand_total = 0;
+        if ($ppns != 0) {            
+            $grand_total = $sub_total;
+        }else{
+            $ppn = $sub_total * 0.11;
+            $grand_total = $sub_total + $ppn;   
+        }
+
+        $purchaseOrder = PurchaseOrder::findOrFail($id)->update([
+            'ppn' => $ppn,
+            'grand_total' => $grand_total,
         ]);
     }
 

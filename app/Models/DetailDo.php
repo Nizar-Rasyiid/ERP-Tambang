@@ -14,6 +14,8 @@ class DetailDo extends Model
         'id_do',
         'code_do',
         'product_id',
+        'id_po',
+        'id_detail_po',
         'quantity',
         'quantity_left',
         'price'

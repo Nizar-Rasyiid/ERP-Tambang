@@ -17,6 +17,7 @@ class Invoice extends Model
         'employee_id',
         'sub_total',
         'total_tax',
+        'deposit',
         'ppn',
         'grand_total',
         'approved',

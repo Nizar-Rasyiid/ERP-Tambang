@@ -138,6 +138,25 @@ class InvoiceController extends Controller
         return response()->json($detail);
     }
 
+    public function editPPn(Request $request, string $id){
+        $sub_total = $request->sub_total;
+        $ppns = $request->ppn;
+        
+        $ppn = 0;
+        $grand_total = 0;
+        if ($ppns != 0) {            
+            $grand_total = $sub_total;
+        }else{
+            $ppn = $sub_total * 0.11;
+            $grand_total = $sub_total + $ppn;   
+        }
+
+        $purchaseOrder = Invoice::findOrFail($id)->update([
+            'ppn' => $ppn,
+            'grand_total' => $grand_total,
+        ]);
+    }
+
     public function DetailInvoice(){
         $detailSo = DetailInvoice::with([
             'product', 

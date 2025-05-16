@@ -17,4 +17,7 @@ class StockHistory extends Model
         'price', 
         'quantity_left'
     ];
+    public function product(){
+        return $this->belongsTo(Product::class, 'product_id');
+    }
 }

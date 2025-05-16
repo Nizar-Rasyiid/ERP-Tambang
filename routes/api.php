@@ -78,7 +78,7 @@ Route::post('/file-upload', [DocumentController::class, 'uploadFile'])->name('ge
 Route::get('/delivery_orders', [DeliveryOrderController::class, 'index'])->name('get.delivery_order');
 Route::get('/delivery_orders/{id}', [DeliveryOrderController::class, 'show'])->name('get.do');
 Route::get('/delivery_sales/{id}', [DeliveryOrderController::class, 'SoShow']);
-Route::post('/store-do', [DeliveryOrderController::class, 'store'])->name('store.do');
+Route::post('/store-do', [DeliveryOrderController::class, 'create'])->name('store.do');
 
 Route::get('/detail_po', [DetailPoController::class, 'index'])->name('get.detailpo');
 Route::get('/detail_po/{id}', [DetailPoController::class, 'show'])->name('show.detailpo');
@@ -101,6 +101,7 @@ Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('show.inv
 Route::get('/invoices/code/{id}', [InvoiceController::class, 'InvoiceSo'])->name('show.invoices');
 Route::post('/invoices_code', [InvoiceController::class, 'store'])->name('post.invoice');
 Route::post('/invoices_code/appr/{id}', [InvoiceController::class, 'store'])->name('post.invoices');
+Route::post('/invoices_code/edit_ppn/{id}', [InvoiceController::class, 'editPPn'])->name('post.invoices');
 Route::put('/invoices_code/{id}', [InvoiceController::class, 'update'])->name('put.invoices');
 Route::get('/detail_invoices/{id}', [InvoiceController::class, 'detail'])->name('detail.invoices');
 Route::get('/detail_invoices', [InvoiceController::class, 'DetailInvoice'])->name('get.detaiLInvoices');
@@ -127,6 +128,7 @@ Route::get('/purchase_orders', [PurchaseOrderController::class, 'index'])->name(
 Route::get('/purchase_orders/monthly', [PurchaseOrderController::class, 'monthlyPurchase'])->name('monthly.purchase_order');
 Route::get('/purchase_orders/{id}', [PurchaseOrderController::class, 'show'])->name('show.purchase_order');
 Route::post('/purchase_orders/approve/{id}', [PurchaseOrderController::class, 'approved'])->name('approve.purchase_order');
+Route::post('/purchase_orders/edit_ppn/{id}', [PurchaseOrderController::class, 'editPPn'])->name('approve.purchase_order');
 Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])->name('post.purchase_order');
 Route::put('/purchase_orders_code/{id}', [PurchaseOrderController::class, 'update'])->name('put.purchase_order');
 Route::post('/purchase_orders/good-receive', [PurchaseOrderController::class, 'goodReceive'])->name('show.purchase_orderReceive');

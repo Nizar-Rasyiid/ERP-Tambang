@@ -280,7 +280,7 @@ class SalesOrderController extends Controller
     }
     public function updateDeposit(Request $request, $id)
     {
-        $salesOrder = SalesOrder::find($id);
+        $salesOrder = Invoice::find($id);
         if (is_null($salesOrder)) {
             return response()->json(['message' => 'Sales Order not found'], 404);
         }

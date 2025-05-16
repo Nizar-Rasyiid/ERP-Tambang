@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('opex_name');
             $table->string('opex_type');
             $table->bigInteger('opex_price');
-            $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade')->nullable();            
+            $table->foreignId('customer_id')->nullable()->constrained('customers', 'customer_id')->onDelete('cascade');            
+            $table->date('issue_at');
             $table->timestamps();
         });
     }

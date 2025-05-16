@@ -44,5 +44,9 @@ class PurchaseOrder extends Model
         public function salesorder() {
             return $this->hasOne(SalesOrder::class, 'po_number', 'code_po');
         }
+
+        public function payment(){
+            return $this->hasOne(PaymentPurchaseOrder::class, 'id_po', 'id_po');
+        }
         
 }

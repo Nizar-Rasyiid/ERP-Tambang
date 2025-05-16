@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\DeliveryOrder;
 use App\Models\SalesOrder;
 use App\Models\DetailDo;
+use App\Models\StockHistory;
 use App\Models\DetailSo;
 use App\Models\Customer;
 use App\Models\Employee;
@@ -35,10 +36,114 @@ class DeliveryOrderController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'delivery_order_details' => 'required|array',
+        ]);
+    
+        // Ambil bulan & tahun saat ini
+        $currentMonth = date('m'); // 02
+        $currentYear  = date('Y'); // 2025
+        $monthRoman   = [
+            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
+            '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
+            '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
+        ];
+    
+        $lastDo = DeliveryOrder::whereYear('created_at', $currentYear)
+                               ->whereMonth('created_at', $currentMonth)
+                               ->latest('id_do')
+                               ->first();
+    
+        $lastIdDo = $lastDo ? intval(explode('/', $lastDo->code_do)[0]) : 0;
+        $newIdDo  = str_pad($lastIdDo + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
+    
+        // Format kode DO: 00ID/DO/II/2025
+        $formattedCodeDo = "{$newIdDo}/DO/{$monthRoman[$currentMonth]}/{$currentYear}";
+
+        // buat data untuk table deliveryorder 
+        $deliveryOrder = DeliveryOrder::create([
+            'customer_id'     => $request->customer_id,
+            'employee_id'     => $request->employee_id,
+            'id_so'           => $request->id_so,
+            'id_customer_point' => $request->id_customer_point,
+            'code_do'         => $formattedCodeDo,
+            'sub_total'       => 0,          
+            'issue_at'        => $request->issue_at,
+            'due_at'          => $request->due_at,
+        ]);
+
+        $sub_total = 0;
+        $allDelivered = true;
+
+        foreach ($request->delivery_order_details as $do) {
+            $stock = StockHistory::with('product')
+                    ->where('product_id', $do['product_id'])
+                    ->where('quantity_left', '>=', $do['quantity_left'])
+                    ->first();
+
+            if ($stock) {
+                $detailSo = DetailSo::findOrFail($do['id_detail_so']);
+                $product = Product::findOrFail($do['product_id']);
+
+                if ($do['quantity_left'] > $product->product_stock) {
+                    $do['quantity_left'] = $product->product_stock;
+                } elseif ($do['quantity_left'] > $do['quantity'] && $product->product_stock >= $do['quantity']) {
+                    $do['quantity_left'] = $do['quantity'];
+                }
+
+                if ($do['quantity_left'] > 0) {
+                    $detailSo->increment('quantity_left', $do['quantity_left']);
+                    $product->decrement('product_stock', $do['quantity_left']);
+                    $stock->decrement('quantity_left', $do['quantity_left']);
+
+                    DetailDo::create([
+                        'id_do'         => $deliveryOrder->id_do,
+                        'product_id'    => $do['product_id'],
+                        'code_do'       => $deliveryOrder->code_do,
+                        'quantity'      => $do['quantity'],
+                        'price'         => $do['price'],
+                        'id_detail_po'  => $stock->id_detail_po,
+                        'id_po'         => $stock->id_po,
+                    ]);
+
+                    $sub_total += $do['quantity'] * $do['price'];
+                }  
+                $line_total = $do['price'] * $do['quantity_left'];
+                $sub_total += $line_total;                                                
+            }    
+            
+            if ($do['quantity'] != $do['quantity_left']) {
+                $allDelivered = false;
+            }else{
+                DetailSo::findOrFail($do['id_detail_so'])->update([
+                    'has_do' => 1,
+                ]);
+            }
+        }    
+        
+        foreach ($request->delivery_order_details as $check) {
+            $detail = DetailSo::findOrFail($check['id_detail_so']);            
+            if ($detail->has_do != 1) {
+                $allDelivered = false;
+                break;
+            }                                
+        }        
+
+        if ($allDelivered) {
+            $has_do = SalesOrder::findOrFail($request->id_so)->update([
+                'has_do' => 1,
+            ]);
+        }        
+
+        return response()->json([
+            'message'       => 'Delivery Order berhasil dibuat!',
+            'delivery_order'=> $deliveryOrder,
+            'stock'  => $stock,                 
+        ], 201);
+
+    }    
 
     /**
      * Store a newly created resource in storage.
@@ -165,7 +270,7 @@ class DeliveryOrderController extends Controller
             'message'       => 'Delivery Order berhasil dibuat!',
             'delivery_order'=> $deliveryOrder,                 
         ], 201);
-    }
+    }    
     
 
     /**
