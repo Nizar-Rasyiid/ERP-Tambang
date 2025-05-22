@@ -12,7 +12,9 @@ class AbsorbDetail extends Model
     protected $primaryKey = 'id_absorb_detail';
     protected $fillable = [
         'opex_id',
-        'product_id'
+        'product_id',
+        'quantity',
+        'price',
     ];
 
     public function product(){

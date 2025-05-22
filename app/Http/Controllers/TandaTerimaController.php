@@ -12,7 +12,7 @@ use App\Models\DetailTandater;
 class TandaTerimaController extends Controller
 {
     public function index(){
-        $tandater = TandaTerima::with(['so','customer'])->get();
+        $tandater = TandaTerima::with(['so','customer', 'detailtandater.so', 'detailtandater.invoice'])->get();
         return response()->json($tandater);
     }
     public function store(Request $request)

@@ -25,6 +25,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PackageController;
+use App\Http\Controllers\JasaKirimController;
 
 /*
 |--------------------------------------------------------------------------
@@ -134,11 +135,17 @@ Route::put('/purchase_orders_code/{id}', [PurchaseOrderController::class, 'updat
 Route::post('/purchase_orders/good-receive', [PurchaseOrderController::class, 'goodReceive'])->name('show.purchase_orderReceive');
 Route::delete('/purchase_orders_delete/{id}', [PurchaseOrderController::class, 'destroy'])->name('delete.purchase_order');
 
+Route::get('/po-jasakirim', [JasaKirimController::class, 'index'])->name('get.jasakirim');
+Route::get('/po-jasakirim/{id}', [JasaKirimController::class, 'show'])->name('get.jasakirim');
+Route::get('/po-jasakirim/detail/{id}', [JasaKirimController::class, 'detail'])->name('get.jasakirim');
+Route::get('/po-jasakirim/store', [JasaKirimController::class, 'store'])->name('get.jasakirim');
+
 Route::get('/quatations', [QuatationController::class, 'index'])->name('get.quatation');
 Route::get('/quatations/monthly', [QuatationController::class, 'monthlyQuo'])->name('get.quatationMonthly');
 Route::get('/quatations/{id}', [QuatationController::class, 'show'])->name('get.quatationById');
 Route::post('/quatations_code', [QuatationController::class, 'store'])->name('post.quatation');
 Route::put('/quatations_code/{id}', [QuatationController::class, 'put'])->name('put.quatation');
+Route::post('/quatations_code/edit-ppn/{id}', [QuatationController::class, 'editPPn'])->name('put.quatation');
 Route::delete('/quatations_delete/{id}', [QuatationController::class, 'destroy'])->name('delete.quatation');
 
 Route::get('/vendors', [VendorController::class, 'index'])->name('get.vendor');
@@ -150,6 +157,7 @@ Route::get('/opex', [OpexController::class, 'index'])->name('get.opex');
 Route::get('/opex/absorb/{id}', [OpexController::class, 'absorbDetail'])->name('get.opex');
 Route::get('/opex/{id}', [OpexController::class, 'show'])->name('show.opex');
 Route::post('/opex_code', [OpexController::class, 'store'])->name('post.opex');
+Route::put('/opex_code/{id}', [OpexController::class, 'update'])->name('post.opex');
 Route::post('/opex_code/absorb', [OpexController::class, 'storeAbsorb'])->name('post.opex');
 
 Route::get('/sales_orders', [SalesOrderController::class, 'index'])->name('get.sales_order');

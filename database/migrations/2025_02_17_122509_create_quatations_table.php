@@ -23,9 +23,12 @@ return new class extends Migration
                 ->references('employee_id')
                 ->on('employees')
                 ->onDelete('cascade');
+                
             $table->text('termin');
             $table->text('code_quatation');            
             $table->integer('sub_total');
+            $table->integer('ppn');
+            $table->integer('grand_total');
             $table->date('issue_at');
             $table->date('due_at');
             $table->timestamps();

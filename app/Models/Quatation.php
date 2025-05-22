@@ -17,6 +17,8 @@ class Quatation extends Model
         'termin',
         'code_quatation',
         'sub_total',
+        'ppn',
+        'grand_total',
         'issue_at',
         'due_at',
     ];

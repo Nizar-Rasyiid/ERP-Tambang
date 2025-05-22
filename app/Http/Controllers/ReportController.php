@@ -10,46 +10,83 @@ class ReportController extends Controller
     public function getReport()
     {
         $query = DB::table('detail_do')
+        ->join('products', 'detail_do.product_id', '=', 'products.product_id')        
         ->join('deliveryorders', 'detail_do.id_do', '=', 'deliveryorders.id_do')
         ->join('customers', 'deliveryorders.customer_id', '=', 'customers.customer_id')
-        ->join('products', 'detail_do.product_id', '=', 'products.product_id')
-        ->leftJoin('salesorders', 'deliveryorders.id_so', '=', 'salesorders.id_so')
+        ->join('purchaseorders', 'detail_do.id_po', '=', 'purchaseorders.id_po')
+        ->join('detailpo', 'detail_do.id_detail_po', '=', 'detailpo.id_detail_po')        
+        ->leftJoin('salesorders', 'deliveryorders.id_so', '=', 'salesorders.id_so')                
         ->leftJoin('detailso', 'salesorders.id_so', '=', 'detailso.id_so')
         ->leftJoin('invoices', 'salesorders.id_so', '=', 'invoices.id_so')
         ->leftJoin('fakturpajak', 'salesorders.id_so', '=', 'fakturpajak.id_so')
-        ->leftJoin('tandaterima', 'salesorders.id_so', '=', 'tandaterima.id_so')
-        ->leftJoin('purchaseorders', 'detail_do.id_po', '=', 'purchaseorders.id_po')
-        ->leftJoin('detailpo', 'detail_do.id_detail_po', '=', 'detailpo.id_detail_po')
         ->select([
-            'salesorders.po_number as po_number',
+            'salesorders.po_number',
             'customers.customer_code',
             'customers.customer_name',
             'products.product_sn',
-            'product_desc',
+            'products.product_desc', 
             'detailso.quantity as quantity_so',
             'detailso.price as price_so',
-            'salesorders.sub_total as amount_so',
-            'salesorders.code_so',
+            'detailso.amount as amount_so',
+            'products.product_brand as brand',
+            'salesorders.code_so as code_so',
             'salesorders.issue_at as so_date',
             'detailpo.quantity as quantity_po',
             'detailpo.price as price_po',
-            'purchaseorders.sub_total as amount_po',
-            'products.product_brand as brand',
-            'deliveryorders.code_do',
+            'detailpo.amount as amount_po',
+            'deliveryorders.code_do as delivery_order',
             'deliveryorders.issue_at as do_date',
-            DB::raw('detailpo.quantity - detailso.quantity as outstanding_supply'),            
-            'invoices.code_invoice',
-            'invoices.issue_at as invoice_date',
-            'invoices.grand_total',
-            DB::raw('COALESCE(SUM((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)), 0) as gross_profit'),               
-            DB::raw('ROUND(COALESCE(((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)) / NULLIF(invoices.grand_total, 0) * 100, 0), 2) as percen'),
-            'fakturpajak.code_faktur_pajak',
-            'fakturpajak.created_at as fp_date',
-            'tandaterima.code_tandater',
-            'tandaterima.issue_at',
-            'tandaterima.resi',            
-        ])
+            'detail_do.quantity as qty_do',
+            'invoices.code_invoice as code_invoice'                       
+        ])      
+        ->groupBy(
+            'detail_do.id_detail_do',
+            'salesorders.code_so',
+            'deliveryorders.code_do',
+            'products.product_stock'
+        )  
         ->get();
+        // $query = DB::table('detail_do')
+        // ->join('deliveryorders', 'detail_do.id_do', '=', 'deliveryorders.id_do')
+        // ->join('customers', 'deliveryorders.customer_id', '=', 'customers.customer_id')
+        // ->join('products', 'detail_do.product_id', '=', 'products.product_id')
+        // ->leftJoin('salesorders', 'deliveryorders.id_so', '=', 'salesorders.id_so')
+        // ->leftJoin('detailso', 'salesorders.id_so', '=', 'detailso.id_so')
+        // ->leftJoin('invoices', 'salesorders.id_so', '=', 'invoices.id_so')
+        // ->leftJoin('fakturpajak', 'salesorders.id_so', '=', 'fakturpajak.id_so')
+        // ->leftJoin('tandaterima', 'salesorders.id_so', '=', 'tandaterima.id_so')
+        // ->leftJoin('purchaseorders', 'detail_do.id_po', '=', 'purchaseorders.id_po')
+        // ->leftJoin('detailpo', 'detail_do.id_detail_po', '=', 'detailpo.id_detail_po')
+        // ->select([
+        //     'salesorders.po_number as po_number',
+        //     'customers.customer_code',
+        //     'customers.customer_name',
+        //     'products.product_sn',
+        //     'product_desc',
+        //     'detailso.quantity as quantity_so',
+        //     'detailso.price as price_so',
+        //     'salesorders.sub_total as amount_so',
+        //     'salesorders.code_so',
+        //     'salesorders.issue_at as so_date',
+        //     'detailpo.quantity as quantity_po',
+        //     'detailpo.price as price_po',
+        //     'purchaseorders.sub_total as amount_po',
+        //     'products.product_brand as brand',
+        //     'deliveryorders.code_do',
+        //     'deliveryorders.issue_at as do_date',
+        //     DB::raw('detailpo.quantity - detailso.quantity as outstanding_supply'),            
+        //     'invoices.code_invoice',
+        //     'invoices.issue_at as invoice_date',
+        //     'invoices.grand_total',
+        //     DB::raw('COALESCE(SUM((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)), 0) as gross_profit'),               
+        //     DB::raw('ROUND(COALESCE(((detailso.quantity * detailso.price) - (detailpo.quantity * detailpo.price)) / NULLIF(invoices.grand_total, 0) * 100, 0), 2) as percen'),
+        //     'fakturpajak.code_faktur_pajak',
+        //     'fakturpajak.created_at as fp_date',
+        //     'tandaterima.code_tandater',
+        //     'tandaterima.issue_at',
+        //     'tandaterima.resi',            
+        // ])
+        // ->get();
         
         return response()->json($query);
     }

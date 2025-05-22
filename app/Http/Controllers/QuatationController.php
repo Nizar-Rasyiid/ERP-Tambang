@@ -48,7 +48,7 @@ class QuatationController extends Controller
         // Ambil ID terakhir & buat ID baru dengan format 2 digit
         $lastIdQuatation = $lastQuatation ? intval(explode('/', $lastQuatation->code_quatation)[0]) : 0;
         $newIdQuatation  = str_pad($lastIdQuatation + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
-    
+        
         // Format kode Invoice: 00ID/INV/II/2025
         $formattedCodeQuatation = "{$newIdQuatation}/QUO/{$monthRoman[$currentMonth]}/{$currentYear}";
 
@@ -58,6 +58,8 @@ class QuatationController extends Controller
             'termin' => $request->termin,
             'code_quatation' => $formattedCodeQuatation,
             'sub_total' => $request->sub_total,
+            'ppn' => $request->ppn,
+            'grand_total' => $request->grand_total,            
             'issue_at' => $request->issue_at,
             'due_at' => $request->due_at                        
         ]);
@@ -168,6 +170,27 @@ class QuatationController extends Controller
 
         return response()->json($formattedSales);
     }
+    public function editPPn(Request $request, string $id){
+        $sub_total = $request->sub_total;
+        $ppns = $request->ppn;
+        
+        $ppn = 0;
+        $grand_total = 0;
+        if ($ppns != 0) {            
+            $grand_total = $sub_total;
+        }else{
+            $ppn = $sub_total * 0.11;
+            $grand_total = $sub_total + $ppn;   
+        }
+
+        $purchaseOrder = Quatation::findOrFail($id)->update([
+            'ppn' => $ppn,
+            'grand_total' => $grand_total,
+        ]);
+
+        return response()->json($purchaseOrder);
+    }
+    
     public function destroy($id)
     {
         $quatation = Quatation::findOrFail($id);

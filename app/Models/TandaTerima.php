@@ -25,4 +25,7 @@ class TandaTerima extends Model
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
     }
+    public function detailtandater(){
+        return $this->hasMany(DetailTandater::class, 'id_tandater');
+    }
 }

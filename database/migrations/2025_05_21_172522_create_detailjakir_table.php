@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('absorbdetail', function (Blueprint $table) {
-            $table->id('id_absorb_detail');
-            $table->foreignId('opex_id')->constrained('opex', 'opex_id')->onDelete('cascade');            
+        Schema::create('detailjakir', function (Blueprint $table) {
+            $table->id('id_detailjakir');
+            $table->foreignId('id_jasakirim')->constrained('po_jasakirim', 'id_jasakirim')->onDelete('cascade');
             $table->foreignId('product_id')->constrained('products', 'product_id')->onDelete('cascade');
             $table->integer('quantity');
             $table->integer('price');
+            $table->integer('amount');
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('absorbdetail');
+        Schema::dropIfExists('detailjakir');
     }
 };
