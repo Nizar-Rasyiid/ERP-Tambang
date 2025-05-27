@@ -15,7 +15,7 @@ class JasaKirimController extends Controller
      */
     public function index()
     {
-        $jakir = PoJasaKirim::all();
+        $jakir = PoJasaKirim::with('vendor')->get();
         return response()->json($jakir);
     }    
 
@@ -36,7 +36,7 @@ class JasaKirimController extends Controller
         // Cari PO terakhir dalam bulan dan tahun yang sama
         $lastPo = PoJasaKirim::whereYear('created_at', $currentYear)
                             ->whereMonth('created_at', $currentMonth)
-                            ->latest('id_po')
+                            ->latest('id_jasakirim')
                             ->first();
 
         // Ambil ID terakhir & buat ID baru dengan format 2 digit
@@ -64,15 +64,14 @@ class JasaKirimController extends Controller
             'due_at'        => $request->due_at,        
         ];
 
-        $jakir = PoJasaKirim::create($po);
+        $jakirim = PoJasaKirim::create($po);
         
-        foreach ($jasa_kirim_details as $jakir) {
+        foreach ($request->purchase_order_details as $jakir) {
             $detailjakir = DetailJakir::create([
-                'id_jasakirim' => $po->id_jasakirim,
+                'id_jasakirim' => $jakirim->id_jasakirim,
                 'product_id' => $jakir['product_id'],
                 'quantity' => $jakir['quantity'],
-                'price' => $jakir['amount'],                
-            
+                'price' => $jakir['amount'],            
             ]);
         }   
         return response()->json($po);                
@@ -86,12 +85,16 @@ class JasaKirimController extends Controller
         $jasakirim = PoJasaKirim::with([
             'vendor'
         ])->where('id_jasakirim', $id)
-        ->get();   
+        ->get(); 
+        
+        return response()->json($jasakirim);
     }
+
     public function detail($id) 
     {
         $detail = DetailJakir::with([
             'jasakirim',
+            'product',
         ])->where('id_jasakirim', $id)
         ->get();
         return response()->json($detail);

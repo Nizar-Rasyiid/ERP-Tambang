@@ -23,4 +23,7 @@ class PoJasaKirim extends Model
         'issue_at',
         'due_at',
     ];
+    public function vendor(){
+        return $this->belongsTo(Vendor::class, 'vendor_id');
+    }
 }

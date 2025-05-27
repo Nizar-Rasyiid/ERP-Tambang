@@ -138,7 +138,7 @@ Route::delete('/purchase_orders_delete/{id}', [PurchaseOrderController::class, '
 Route::get('/po-jasakirim', [JasaKirimController::class, 'index'])->name('get.jasakirim');
 Route::get('/po-jasakirim/{id}', [JasaKirimController::class, 'show'])->name('get.jasakirim');
 Route::get('/po-jasakirim/detail/{id}', [JasaKirimController::class, 'detail'])->name('get.jasakirim');
-Route::get('/po-jasakirim/store', [JasaKirimController::class, 'store'])->name('get.jasakirim');
+Route::post('/po-jasakirim/store', [JasaKirimController::class, 'store'])->name('get.jasakirim');
 
 Route::get('/quatations', [QuatationController::class, 'index'])->name('get.quatation');
 Route::get('/quatations/monthly', [QuatationController::class, 'monthlyQuo'])->name('get.quatationMonthly');
