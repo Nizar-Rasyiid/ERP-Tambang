@@ -105,15 +105,34 @@ class CustomerController extends Controller
             'customer_contact' => $request->customer_contact,
         ]);
 
+        $existingDetails = CustomerPoint::where('customer_id', $id)->pluck('id_customer_point')->toArray();
+        $ids = [];
+        
         foreach ($request->customer_details as $pro) {                                                                
-            CustomerPoint::findOrFail($pro['id_customer_point'])->update([
-                'customer_id'=> $customer->customer_id,                
-                'point' => $pro['point'],
-                'alamat'   => $pro['alamat'],                
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }  
+            if (isset($pro['id_customer_point'])) {
+                CustomerPoint::findOrFail($pro['id_customer_point'])->update([
+                    'customer_id'=> $customer->customer_id,                
+                    'point' => $pro['point'],
+                    'alamat'   => $pro['alamat'],                
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                $ids[] = $pro['id_customer_point'];
+            }else{
+                CustomerPoint::create([
+                    'customer_id'=> $customer->customer_id,                
+                    'point' => $pro['point'],
+                    'alamat'   => $pro['alamat'],                
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        } 
+        $detailsDelete = array_diff($existingDetails, $ids);
+        if (!empty($detailsDelete)) {
+            CustomerPoint::whereIn('id_customer_point', $detailsDelete)->delete();
+        } 
 
         return response()->json($customer);
     }

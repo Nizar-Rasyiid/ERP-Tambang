@@ -12,9 +12,9 @@ class Asset extends Model
     protected $primaryKey = 'asset_id';
     protected $fillable = [
         'vendor_id',        
-        'code',
+        'assets_code',
         'assets_name',
-        'price',
+        'assets_price',
         'assets_life', 
         'issue_at',
         'due_at',       

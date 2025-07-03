@@ -11,18 +11,17 @@ class Invoice extends Model
     protected $table = 'invoices';
     protected $primaryKey = 'id_invoice';
 
-    protected $fillable = [        
-        'id_so',
+    protected $fillable = [                
         'customer_id',        
         'employee_id',
-        'sub_total',
-        'total_tax',
-        'deposit',
+        'code_invoice',                
+        'sub_total',                
         'ppn',
         'grand_total',
+        'deposit',
         'approved',
-        'has_tandater',
-        'code_invoice',                
+        'has_tandater', 
+        'has_faktur',       
         'issue_at',
         'due_at'
     ];
@@ -41,5 +40,10 @@ class Invoice extends Model
 
     public function detailInv(){
         return $this->hasMany(DetailInvoice::class, 'id_invoice');
+    }
+
+    public function paymentsales()
+    {
+        return $this->hasMany(PaymentSalesOrder::class, 'id_invoice');
     }
 }

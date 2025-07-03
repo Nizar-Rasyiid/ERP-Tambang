@@ -49,7 +49,7 @@ class DetailSoController extends Controller
 
     public function DoShow(string $id)
     {
-        $detailDo = DetailDo::with('product')
+        $detailDo = DetailDo::with('product', 'do')
             ->where('id_do', $id)
             ->get();
             

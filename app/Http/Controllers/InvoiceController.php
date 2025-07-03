@@ -68,24 +68,28 @@ class InvoiceController extends Controller
         $formattedCodeInvoice = "{$newIdInvoice}/INV/{$monthRoman[$currentMonth]}/{$currentYear}";
     
         // Buat Invoice
-        $invoice = Invoice::create([
-            'id_so'           => $request->id_so,
+        $invoice = Invoice::create([            
             'customer_id'     => $request->customer_id,
             'employee_id'     => $request->employee_id,
             'code_invoice'    => $formattedCodeInvoice,                
+            'sub_total'       => $request->sub_total,
+            'ppn'             => $request->ppn,
+            'grand_total'     => $request->grand_total,
+            'deposit'         => 0,
             'issue_at'        => $request->issue_at,
             'due_at'          => $request->due_at,            
         ]);
 
-        $detailDo = DetailDo::findOrFail($request->id_so)->get();
-        $sub_total = 0;
+        // $detailDo = DetailDo::findOrFail($request->id_so)->get();        
     
-        foreach ($request->delivery_order_details as $pro) {
-            $line_total = $pro['price'] * $pro['quantity'];
-            $sub_total += $line_total;
+        foreach ($request->delivery_order_details as $pro) {            
     
             DetailInvoice::create([
                 'id_invoice'    => $invoice->id_invoice,
+                'id_so'         => $pro['id_so'],
+                'id_detail_so'  => $pro['id_detail_so'],
+                'id_detail_po'  => $pro['id_detail_po'],
+                'id_detail_do'  => $pro['id_detail_do'],
                 'id_do'         => $pro['id_do'],
                 'product_id'    => $pro['product_id'],
                 'quantity'      => $pro['quantity'],
@@ -95,31 +99,21 @@ class InvoiceController extends Controller
                 'updated_at'    => now(),
             ]);
 
-            DeliveryOrder::findOrFail($pro['id_do'])->update(['has_inv' => 1]);
-        }
+            DeliveryOrder::findOrFail($pro['id_do'])
+                ->update(['has_inv' => 1]);
 
-        $allDeliveryOrders = DeliveryOrder::where('id_so', $request->id_so)->get();
-        
-        $allHasInvoice = true;
+            $details = DeliveryOrder::where('id_do', $pro['id_so'])->get();
 
-        foreach ($allDeliveryOrders as $do) {
-            if ($do->has_inv != 1) {
-                $allHasInvoice = false;
-                break;
+            $delilverysales = $details->every(function ($item) {
+                return $item->has_inv == 1; 
+            });
+            
+            if ($delilverysales) {
+                $has_inv = SalesOrder::findOrFail($pro['id_so'])->update([
+                    'has_invoice' => true,
+                ]);
             }
-        }
-        
-        if ($allHasInvoice) {
-            SalesOrder::findOrFail($request->id_so)->update(['has_invoice' => 1]);
-        }
-        
-    
-        // Update sub_total pada Invoice
-        $invoice->update([
-            'sub_total' => $sub_total,
-            'ppn' => $sub_total * 0.11,
-            'grand_total' => $sub_total * 0.11 + $sub_total,    
-        ]);
+        }        
     
         return response()->json([
             'message'  => 'Invoice berhasil dibuat!',
@@ -174,6 +168,15 @@ class InvoiceController extends Controller
             'approved' => 1,
         ]);
     }
+
+    public function test(){
+        $inv = Invoice::with([
+            'detailInv',                                    
+            'detailInv.invoice',            
+        ])->get();
+
+        return response()->json($inv);
+    }
     
 
     /**
@@ -183,9 +186,7 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::with([
             'customer', 
-            'employee', 
-            'salesorder',
-            'salesorder.detailSo',            
+            'employee',             
             ])
             ->where('id_invoice', $id)
             ->get();
@@ -194,11 +195,10 @@ class InvoiceController extends Controller
     
     public function InvoiceSo(string $id)
     {
-        $invoice = Invoice::with([
-            'customer', 
-            'employee', 
-            'salesorder',
-            'salesorder.detailSo',            
+        $invoice = DetailInvoice::with([            
+            'so',
+            'invoice',
+            'product'
             ])
             ->where('id_so', $id)
             ->get();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\FakturPajak;
+use App\Models\Invoice;
 
 class FakturPajakController extends Controller
 {
@@ -27,6 +28,11 @@ class FakturPajakController extends Controller
             'customer_id' => $request->customer_id,
             'code_faktur_pajak' => $request->code_faktur_pajak,
         ]);
+
+        Invoice::findOrFail($request->id_invoice)->update([
+            'has_faktur'    => 1,
+        ]);
+
         return response()->json([
             'message' => 'Berhasil Membuat Faktur pajak',
         ]);

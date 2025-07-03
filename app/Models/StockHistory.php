@@ -9,13 +9,13 @@ class StockHistory extends Model
 {
     use HasFactory;
     protected $table = 'stockhistory';
-    protected $fillable = [
-        'product_id', 
+    protected $fillable = [        
         'id_po',
         'id_detail_po', 
+        'product_id', 
         'quantity', 
-        'price', 
-        'quantity_left'
+        'quantity_left',
+        'price',         
     ];
     public function product(){
         return $this->belongsTo(Product::class, 'product_id');

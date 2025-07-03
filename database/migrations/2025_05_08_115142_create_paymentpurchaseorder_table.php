@@ -14,9 +14,13 @@ return new class extends Migration
         Schema::create('paymentpurchaseorder', function (Blueprint $table) {
             $table->id('payment_po_id');
             $table->foreignId('id_po')->constrained('purchaseorders', 'id_po')->onDelete('cascade');
-            $table->integer('price')->nullable();
-            $table->string('payment_method')->nullable();
-            $table->date('issue_at')->nullable();
+            $table->enum('payment_method', [
+                'Transfer',
+                'Cash'
+            ])->default('Transfer');
+            $table->text('code_paymentpo');
+            $table->decimal('price', 10, 2)->default(0);
+            $table->date('issue_at');
             $table->timestamps();
         });
     }

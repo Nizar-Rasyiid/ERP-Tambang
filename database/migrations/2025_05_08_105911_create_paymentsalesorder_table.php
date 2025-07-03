@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('paymentsalesorder', function (Blueprint $table) {
             $table->id('payment_so_id');
-            $table->foreignId('id_so')->constrained('salesorders', 'id_so')->onDelete('cascade');
-            $table->integer('price');
-            $table->string('payment_method')->nullable();
+            $table->foreignId('id_invoice')->constrained('invoices', 'id_invoice')->onDelete('cascade');            
+            $table->enum('payment_method', ['Cash', 'Transfer'])->default('Transfer');
+            $table->text('code_paymentso');
+            $table->decimal('price', 10, 2);
             $table->date('issue_at')->nullable();
             $table->date('due_at')->nullable();            
             $table->timestamps();

@@ -11,9 +11,10 @@ class PaymentSalesOrder extends Model
     protected $table = 'paymentsalesorder';
     protected $primaryKey = 'payment_so_id';
     protected $fillable = [
-        'id_so',
-        'price',
+        'id_invoice',
         'payment_method',
+        'code_paymentso',
+        'price',        
         'issue_at',
         'due_at'
     ];

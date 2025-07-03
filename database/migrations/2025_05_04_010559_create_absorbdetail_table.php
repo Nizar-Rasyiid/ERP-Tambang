@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('opex_id')->constrained('opex', 'opex_id')->onDelete('cascade');            
             $table->foreignId('product_id')->constrained('products', 'product_id')->onDelete('cascade');
             $table->integer('quantity');
-            $table->integer('price');
+            $table->decimal('price', 10, 2);            
             $table->timestamps();
         });
     }

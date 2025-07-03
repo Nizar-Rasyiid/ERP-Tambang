@@ -16,8 +16,7 @@ class SalesOrder extends Model
         'employee_id',
         'code_so',
         'po_number',
-        'termin',        
-        'total_tax',            
+        'termin',                
         'sub_total',
         'deposit',
         'ppn',        
@@ -50,5 +49,5 @@ class SalesOrder extends Model
     public function salesOrderDetails()
     {
         return $this->hasMany(DetailSo::class, 'id_so', 'id_so');
-    }
+    }   
 }

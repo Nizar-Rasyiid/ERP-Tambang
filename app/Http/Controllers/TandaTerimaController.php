@@ -44,43 +44,32 @@ class TandaTerimaController extends Controller
     $formattedCodePo = "{$newIdPo}/TT/{$monthRoman[$currentMonth]}/{$currentYear}";
 
     // Buat Purchase Order
-    $purchaseOrder = Tandaterima::create([        
-        'code_tandater' => $formattedCodePo,
-        'id_so'         => $request->id_so,
+    $purchaseOrder = Tandaterima::create([ 
         'customer_id'   => $request->customer_id,
-        'resi'          => $request->resi,   
+        'employee_id'   => $request->employee_id,
+        'code_tandater' => $formattedCodePo,
+        'resi'          => $request->resi,                  
         'issue_at'      => $request->issue_at,
-        'due_at'        => $request->due_at,                 
+        'due_at'        => $request->due_at,               
     ]);
 
     foreach ($request->tandaterima_details as $pro) {                                                                
         DetailTandater::create([
-            'id_invoice'=> $pro['id_invoice'], 
+            'id_tandater' => $purchaseOrder->id_tandater,
             'id_so' => $pro['id_so'],
-            'id_tandater' => $purchaseOrder->id_tandater,                           
+            'id_invoice'=> $pro['id_invoice'], 
+            'issue_at'  => $request->issue_at,            
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         Invoice::findOrFail($pro['id_invoice'])->update([
             'has_tandater' => 1,
-        ]);        
+        ]);      
+        SalesOrder::findOrFail($pro['id_so'])->update([
+            'has_tandater'  => 1,
+        ]);
     }      
-    $allInvoice = Invoice::where('id_so', $request->id_so)->get();
-
-    $allHasTandaterima = true;
-    foreach($allInvoice as $inv)
-    {
-        if ($inv->has_tandater != 1) {
-            $allHasTandaterima = false;
-            break;
-        }
-    }
-
-    if ($allHasTandaterima) {
-        SalesOrder::findOrFail($request->id_so)->update(['has_tandater' => 1]);
-    }
-
 
     return response()->json([
         'message'        => 'Purchase Order berhasil dibuat!',

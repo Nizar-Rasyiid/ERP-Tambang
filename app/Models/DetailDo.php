@@ -12,10 +12,10 @@ class DetailDo extends Model
     protected $primaryKey = 'id_detail_do';
     protected $fillable = [
         'id_do',
-        'code_do',
-        'product_id',
         'id_po',
         'id_detail_po',
+        'id_detail_so',
+        'product_id',                           
         'quantity',
         'quantity_left',
         'price'

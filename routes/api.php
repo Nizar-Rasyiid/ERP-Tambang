@@ -97,6 +97,8 @@ Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('show.e
 Route::post('/employees_code', [EmployeeController::class, 'store'])->name('post.employees');
 Route::put('/employees_code/{id}', [EmployeeController::class, 'update'])->name('put.employees');
 
+Route::get('/invoices/faktur', [InvoiceController::class, 'test'])->name('get.invoices');
+
 Route::get('/invoices', [InvoiceController::class, 'index'])->name('get.invoices');
 Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('show.invoice');
 Route::get('/invoices/code/{id}', [InvoiceController::class, 'InvoiceSo'])->name('show.invoices');
@@ -135,10 +137,15 @@ Route::put('/purchase_orders_code/{id}', [PurchaseOrderController::class, 'updat
 Route::post('/purchase_orders/good-receive', [PurchaseOrderController::class, 'goodReceive'])->name('show.purchase_orderReceive');
 Route::delete('/purchase_orders_delete/{id}', [PurchaseOrderController::class, 'destroy'])->name('delete.purchase_order');
 
+Route::get('/po-jasakirim/detail', [JasaKirimController::class, 'indexDetail']);
 Route::get('/po-jasakirim', [JasaKirimController::class, 'index'])->name('get.jasakirim');
 Route::get('/po-jasakirim/{id}', [JasaKirimController::class, 'show'])->name('get.jasakirim');
 Route::get('/po-jasakirim/detail/{id}', [JasaKirimController::class, 'detail'])->name('get.jasakirim');
 Route::post('/po-jasakirim/store', [JasaKirimController::class, 'store'])->name('get.jasakirim');
+Route::put('/po-jasakirim/store/{id}', [JasaKirimController::class, 'update'])->name('put.jasakirim');
+Route::post('/po-jasakirim/edit_ppn/{id}', [JasaKirimController::class, 'editPPn'])->name('editppn.jasakirim');
+Route::delete('/po-jasakirim/delete/{id}', [JasaKirimController::class, 'destroy'])->name('delete.jasakirim');
+Route::post('/po-jasakirim/approve/{id}', [JasaKirimController::class, 'approved'])->name('approve.jasakirim');
 
 Route::get('/quatations', [QuatationController::class, 'index'])->name('get.quatation');
 Route::get('/quatations/monthly', [QuatationController::class, 'monthlyQuo'])->name('get.quatationMonthly');
@@ -159,6 +166,8 @@ Route::get('/opex/{id}', [OpexController::class, 'show'])->name('show.opex');
 Route::post('/opex_code', [OpexController::class, 'store'])->name('post.opex');
 Route::put('/opex_code/{id}', [OpexController::class, 'update'])->name('post.opex');
 Route::post('/opex_code/absorb', [OpexController::class, 'storeAbsorb'])->name('post.opex');
+Route::put('/opex_code/absorb/{id}', [OpexController::class, 'updateAbsorb'])->name('update.opex');
+Route::post('/opex_code/approved/{id}', [OpexController::class, 'approved']);
 
 Route::get('/sales_orders', [SalesOrderController::class, 'index'])->name('get.sales_order');
 Route::get('/sales_orders/monthly', [SalesOrderController::class, 'monthlySales']);
@@ -189,4 +198,5 @@ Route::post('/faktur-pajak-code', [FakturPajakController::class, 'store'])->name
 //y
 Route::get('/laporan_keuangan', [DetailPoController::class, 'laporan'])->name('get.laporan');
 Route::get('/report_management', [ReportController::class, 'getReport'])->name('get.report');
+Route::get('/sales_report', [ReportController::class, 'getSales'])->name('get.report');
 

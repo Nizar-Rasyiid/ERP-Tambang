@@ -12,7 +12,7 @@ class DetailJakir extends Model
     protected $primaryKey = 'id_detail_jakir';
     protected $fillable = [
         'id_jasakirim',
-        'product_id',
+        'product_name',
         'quantity',
         'price',
         'amount',

@@ -45,10 +45,7 @@ class PurchaseOrderController extends Controller
     ];
 
     // Cari PO terakhir dalam bulan dan tahun yang sama
-    $lastPo = PurchaseOrder::whereYear('created_at', $currentYear)
-                           ->whereMonth('created_at', $currentMonth)
-                           ->latest('id_po')
-                           ->first();
+    $lastPo = PurchaseOrder::latest()->first();
 
     // Ambil ID terakhir & buat ID baru dengan format 2 digit
     $lastIdPo  = $lastPo ? intval(explode('/', $lastPo->code_po)[0]) : 0;
@@ -63,25 +60,19 @@ class PurchaseOrderController extends Controller
     // Buat Purchase Order
     $purchaseOrder = PurchaseOrder::create([
         'vendor_id'      => $request->vendor_id, // ✅ Vendor, bukan Customer
-        'employee_id'    => $request->employee_id,        
-        'termin'         => $request->termin,            
-        'total_tax'      => $request->total_tax,
+        'employee_id'    => $request->employee_id,                        
         'code_po'        => $formattedCodePo,
+        'termin'         => $request->termin,
         'status_payment' => $request->status_payment,
-        'sub_total'      => 0,            
-        'total_service'  => 0,
+        'sub_total'      => $request->sub_total,                    
         'deposit'        => $request->deposit,
-        'ppn'            => 0, // ✅ PPN otomatis dihitung
-        'grand_total'    => 0, // ✅ Grand Total otomatis dihitung
+        'ppn'            => $request->ppn, 
+        'grand_total'    => $request->grand_total,
         'issue_at'       => $request->issue_at,
         'due_at'         => $request->due_at,
     ]);
 
-    $sub_total = 0;
-
-    foreach ($request->purchase_order_details as $pro) {                                                                
-        $line_total = $pro['price'] * $pro['quantity'];
-        $sub_total += $line_total;
+    foreach ($request->purchase_order_details as $pro) {       
 
         $detailpo = DetailPO::create([
             'id_po'      => $purchaseOrder->id_po,                
@@ -102,31 +93,11 @@ class PurchaseOrderController extends Controller
             'quantity'      => $pro['quantity'],
             'quantity_left' => $pro['quantity'],
         ]);
-    }            
-
-    if ($request->ppnCheck != true) {
-        // ✅ Hitung PPN (11% dari sub_total)
-        $ppn = 0;
-
-        // ✅ Hitung Grand Total
-        $grand_total = $sub_total + $ppn;   
-    }else{
-        // ✅ Hitung PPN (11% dari sub_total)
-        $ppn = $sub_total * 0.11;
-
-        // ✅ Hitung Grand Total
-        $grand_total = $sub_total + $ppn;   
-    }         
-
-    // Update Purchase Order dengan PPN & Grand Total
-    $purchaseOrder->update([
-        'sub_total'   => $sub_total,
-        'ppn'         => $ppn, // ✅ PPN otomatis dihitung
-        'grand_total' => $grand_total, // ✅ Grand Total otomatis dihitung
-    ]);  
+    }                        
 
     return response()->json([
         'message'        => 'Purchase Order berhasil dibuat!',        
+        'data'           =>$purchaseOrder,
     ], 201);
 }
 
@@ -268,14 +239,13 @@ class PurchaseOrderController extends Controller
             Product::findOrFail($pro['product_id'])
                 ->increment('product_stock', $pro['quantity_left']);                                                
         }    
-        foreach($request->purchase_order_details as $pro)
-        {
-            $detailPro = DetailPo::findOrFail($pro['id_detail_po']);            
-            if ($pro['quantity'] != $detailPro->quantity_left) {
-                $allItemsReceived = false;
-                break;
-            }
-        }
+        
+        $details = DetailPo::where('id_po', $request->id_po)->get();  
+
+        $allItemsReceived = $details->every(function ($item) {
+            return $item->quantity_left >= $item->quantity;
+        });
+
         if ($allItemsReceived) {
             $has_gr = PurchaseOrder::findOrFail($request->id_po)->update([
                 'has_gr' => 1,
@@ -300,6 +270,7 @@ class PurchaseOrderController extends Controller
         $purchaseOrder = PurchaseOrder::findOrFail($id);
         $purchaseOrder->update([
             'deposit' => $request->deposit,
+            'status_payment'    => $request->status_payment,
         ]);
 
         $payment = PaymentPurchaseOrder::create([

@@ -11,10 +11,8 @@ class Vendor extends Model
 
     protected $primaryKey = 'vendor_id';
     protected $table = 'vendors';
-    protected $fillable = [        
-        'account_name',
-        'vendor_name',
-        'vendor_type',
+    protected $fillable = [                
+        'vendor_name',        
         'vendor_email',
         'vendor_phone',
         'vendor_address',        

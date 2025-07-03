@@ -26,4 +26,8 @@ class PoJasaKirim extends Model
     public function vendor(){
         return $this->belongsTo(Vendor::class, 'vendor_id');
     }
+
+    public function detailjakir(){
+        return $this->hasMany(DetailJakir::class, 'id_jasakirim');
+    }
 }

@@ -11,25 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('quatations', function (Blueprint $table) {
-            $table->id('id_quatation');                                            
-        
+        Schema::create('deliveryorders', function (Blueprint $table) {
+            $table->id('id_do');
             $table->foreignId('customer_id')
-                ->references('customer_id')
-                ->on('customers')
+                ->constrained('customers', 'customer_id')
                 ->onDelete('cascade');
-
             $table->foreignId('employee_id')
-                ->references('employee_id')
-                ->on('employees')
+                ->constrained('employees', 'employee_id')
                 ->onDelete('cascade');
-                
-            $table->text('termin');
-            $table->text('code_quatation');            
+            $table->foreignId('id_so')
+                ->constrained('salesorders', 'id_so')
+                ->onDelete('cascade');
+            $table->foreignId('id_customer_point')
+                ->constrained('customerpoints', 'id_customer_point')->onDelete('cascade');
+            $table->text('code_do');
             $table->decimal('sub_total', 12, 2);
             $table->decimal('ppn', 12, 2);
-            $table->decimal('grand_total', 12, 2);            
-            $table->text('description')->nullable();
+            $table->boolean('has_inv')->default(false);            
             $table->date('issue_at');
             $table->date('due_at');
             $table->timestamps();
@@ -41,6 +39,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('quatations');
+        Schema::dropIfExists('deliveryorders');
     }
 };

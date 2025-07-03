@@ -45,10 +45,7 @@ class SalesOrderController extends Controller
         ];
     
         // Cari SO terakhir dalam bulan dan tahun yang sama
-        $lastSo = SalesOrder::whereYear('created_at', $currentYear)
-                            ->whereMonth('created_at', $currentMonth)
-                            ->latest('id_so')
-                            ->first();
+        $lastSo = SalesOrder::latest()->first();
     
         // Ambil ID terakhir & buat ID baru dengan format 2 digit
         $lastIdSo  = $lastSo ? intval(explode('/', $lastSo->code_so)[0]) : 0;
@@ -66,35 +63,23 @@ class SalesOrderController extends Controller
             'employee_id'    => $request->employee_id,
             'code_so'        => $formattedCodeSo,
             'po_number'      => $request->po_number,
-            'termin'         => $request->termin,            
-            'total_tax'      => $request->total_tax,
-            'status_payment' => $request->status_payment,
-            'sub_total'      => 0,            
-            'total_service'  => 0,
-            'has_do'         => 0,
-            'has_invoice'    => 0,
+            'termin'         => $request->termin,                                    
+            'sub_total'      => $request->sub_total,
             'deposit'        => $request->deposit,
-            'has_invoice'    => $request->has_invoice,
-            'ppn'            => 0, // ✅ PPN otomatis dihitung
-            'grand_total'    => 0, // ✅ Grand Total otomatis dihitung
+            'ppn'            => $request->ppn,
+            'grand_total'    => $request->grand_total,                                    
             'issue_at'       => $request->issue_at,
             'due_at'         => $request->due_at,
         ]);
     
-        $sub_total = 0;
-    
         foreach ($request->sales_order_details as $pro) {                                                                         
-            $line_total = $pro['price'] * $pro['quantity'];
-            $sub_total += $line_total;
-            
             $detailData = [
-                'id_so'         => $salesOrder->id_so,                                                
-                'quantity'      => $pro['quantity'],
-                'quantity_left' => 0,
-                'has_do'        => 0,
-                'price'         => $pro['price'],
-                'discount'      => $pro['discount'],
-                'product_type'  => $pro['product_type'],
+                'id_so'         => $salesOrder->id_so,                
+                'product_type'  => $pro['product_type'],                                     
+                'quantity'      => $pro['quantity'],                
+                'quantity_left' => 0,            
+                'discount'      => $pro['discount'],    
+                'price'         => $pro['price'],                                
                 'amount'        => $pro['amount'],
                 'created_at'    => now(),
                 'updated_at'    => now(),
@@ -109,15 +94,7 @@ class SalesOrderController extends Controller
             }
 
             DetailSo::create($detailData);                          
-        }    
-        
-        $ppn = $sub_total * 0.11;
-
-        $salesorder = SalesOrder::where('id_so', $salesOrder->id_so)->update([
-            'sub_total' => $sub_total,
-            'ppn' => $ppn,
-            'grand_total' => $sub_total + $ppn,
-        ]);
+        }            
     
         return response()->json([
             'message'      => 'Sales Order berhasil dibuat!',
@@ -272,26 +249,48 @@ class SalesOrderController extends Controller
         return response()->json(['message' => 'Sales Order deleted successfully']);
     }
 
-    public function getAR(){
-        $salesOrder = Invoice::with(['customer', 'salesorder','salesorder.employee'])        
+
+    public function getAR(){                   
+        $salesOrder = Invoice::with(['customer', 'paymentsales'])            
             ->get();
         
         return response()->json($salesOrder);
     }
+
+
     public function updateDeposit(Request $request, $id)
     {
-        $salesOrder = Invoice::find($id);
+        $salesOrder = Invoice::findOrFail($request->id_invoice);
         if (is_null($salesOrder)) {
             return response()->json(['message' => 'Sales Order not found'], 404);
         }
+        $currentMonth = date('m'); // 02
+        $currentYear  = date('Y'); // 2025
+        $monthRoman   = [
+            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
+            '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
+            '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
+        ];
+    
+        // Cari invoice terakhir dalam bulan dan tahun yang sama
+        $lastInvoice = Invoice::latest()->first();
+    
+        // Ambil ID terakhir & buat ID baru dengan format 2 digit
+        $lastIdInvoice = $lastInvoice ? intval(explode('/', $lastInvoice->code_invoice)[0]) : 0;
+        $newIdInvoice  = str_pad($lastIdInvoice + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
+    
+        // Format kode Invoice: 00ID/INV/II/2025
+        $formattedCodeInvoice = "{$newIdInvoice}/PAY/{$monthRoman[$currentMonth]}/{$currentYear}"; 
 
         $salesOrder->update([
             'deposit' => $request->deposit,
+            'status_payment'    => $request->status_payment,
         ]);
 
         $payment = PaymentSalesOrder::create([
-            'id_so'         => $id,
+            'id_invoice'         => $request->id_invoice,
             'payment_method'=> $request->payment_method,
+            'code_paymentso'=> $formattedCodeInvoice,
             'price'         => $request->deposit,
             'issue_at'      => $request->issue_at,
             'due_at'        => $request->due_at,   

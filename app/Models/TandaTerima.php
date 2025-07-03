@@ -13,7 +13,7 @@ class TandaTerima extends Model
 
     protected $fillable = [
         'customer_id',
-        'id_so',
+        'employee_id',        
         'code_tandater',
         'resi',
         'issue_at',

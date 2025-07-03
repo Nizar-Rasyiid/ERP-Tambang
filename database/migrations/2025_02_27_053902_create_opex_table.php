@@ -16,8 +16,9 @@ return new class extends Migration
             $table->string('opex_code');
             $table->string('opex_name');
             $table->string('opex_type');
-            $table->bigInteger('opex_price');
+            $table->decimal('opex_price',12,2);
             $table->foreignId('customer_id')->nullable()->constrained('customers', 'customer_id')->onDelete('cascade');            
+            $table->boolean('approved')->default(false);
             $table->date('issue_at');
             $table->timestamps();
         });

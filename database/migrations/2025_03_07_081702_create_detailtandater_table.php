@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('id_tandater')->constrained('tandaterima', 'id_tandater')->onDelete('cascade');                        
             $table->foreignId('id_so')->constrained('salesorders', 'id_so')->onDelete('cascade');                        
             $table->foreignId('id_invoice')->constrained('invoices', 'id_invoice')->onDelete('cascade');            
+            $table->date('issue_at');
             $table->timestamps();
         });
     }

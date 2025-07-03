@@ -59,7 +59,8 @@ class QuatationController extends Controller
             'code_quatation' => $formattedCodeQuatation,
             'sub_total' => $request->sub_total,
             'ppn' => $request->ppn,
-            'grand_total' => $request->grand_total,            
+            'grand_total' => $request->grand_total,   
+            'description'   => $request->description,         
             'issue_at' => $request->issue_at,
             'due_at' => $request->due_at                        
         ]);
@@ -83,8 +84,7 @@ class QuatationController extends Controller
         
         return response()->json([
             'message' => 'Successfully to Save Quatation',
-            'quatation' => $quatation,
-            'code_quatation' => $formattedCodeQuatation,            
+            'quatation' => $quatation,                      
         ]);
     }
     public function put(Request $request, $id){
@@ -97,6 +97,7 @@ class QuatationController extends Controller
             'code_quatation' => $request->code_quatation,
             'sub_total' => $request->sub_total,
             'issue_at' => $request->issue_at,
+            'description' => $request->description,
             'due_at' => $request->due_at                        
         ]);
     
@@ -107,7 +108,7 @@ class QuatationController extends Controller
         $processedIds = [];
         
         foreach($request->inquiry_details as $key => $pro){
-            if(isset($pro['id_detail_quatation'])) {
+            if(isset($pro['id_detail_quatation']) && in_array($pro['id_detail_quatation'], $existingDetailIds)) {
                 // Update existing item
                 DetailQuatation::findOrFail($pro['id_detail_quatation'])->update([
                     'product_id' => $pro['product_id'],
@@ -121,7 +122,7 @@ class QuatationController extends Controller
                 $processedIds[] = $pro['id_detail_quatation'];
             } else {
                 // Create new item
-                DetailQuatation::create([
+                $detail = DetailQuatation::create([
                     'id_quatation' => $id,
                     'product_id' => $pro['product_id'],
                     'quantity' => $pro['quantity'],
@@ -131,6 +132,7 @@ class QuatationController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+                $processedIds[] = $detail->id_detail_quatation;
             }
         }
         

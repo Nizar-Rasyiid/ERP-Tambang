@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('assets', function (Blueprint $table) {
             $table->id('asset_id');
             $table->foreignId('vendor_id')->constrained('vendors', 'vendor_id')->onDelete('cascade');                        
-            $table->text('code');
+            $table->text('assets_code');
             $table->text('assets_name');  
-            $table->integer('price');               
+            $table->integer('assets_price');               
             $table->integer('assets_life');      
-            $table->date('issue_at');                     
-            $table->date('due_at');                     
+            $table->date('issue_at')->nullable();            
+            $table->date('due_at')->nullable();                 
             $table->timestamps();
         });
     }

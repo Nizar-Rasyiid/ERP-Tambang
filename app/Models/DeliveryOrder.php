@@ -17,8 +17,9 @@ class DeliveryOrder extends Model
         'id_so',  
         'id_customer_point',      
         'code_do',
-        'has_inv',
         'sub_total',
+        'ppn',
+        'has_inv',        
         'issue_at',
         'due_at',
     ];

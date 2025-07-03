@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('vendor_name');            
             $table->string('vendor_email');
             $table->string('vendor_phone');
-            $table->string('vendor_address');
+            $table->string('vendor_address')->nullable();
             $table->string('vendor_singkatan');     
-            $table->string('vendor_npwp');
+            $table->string('vendor_npwp')->nullable();
             $table->string('vendor_contact');         
             $table->timestamps();
         });

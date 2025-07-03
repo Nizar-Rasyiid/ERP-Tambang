@@ -16,7 +16,7 @@ return new class extends Migration
                 $table->integer('employee_code');
                 $table->text('employee_name');
                 $table->bigInteger('employee_phone');
-                $table->string('employee_email')->unique();
+                $table->text('employee_email')->nullable();
                 $table->text('employee_address');
                 $table->integer('employee_salary');
                 $table->date('employee_end_contract');

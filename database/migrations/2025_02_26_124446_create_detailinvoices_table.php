@@ -17,20 +17,40 @@ return new class extends Migration
             $table->foreignId('id_invoice')
                 ->references('id_invoice')
                 ->on('invoices')
-                ->onDelete('cascade');  
-            
-            $table->foreignId('product_id')
-                ->constrained('products', 'product_id')
                 ->onDelete('cascade');
 
+            $table->foreignId('id_so')
+                ->nullable()
+                ->constrained('salesorders', 'id_so')
+                ->onDelete('cascade');
+
+            $table->foreignId('id_detail_so')
+                ->nullable()
+                ->constrained('detailso', 'id_detail_so')
+                ->onDelete('cascade');
+            
+            $table->foreignId('id_detail_do')
+                ->nullable()            
+                ->constrained('detail_do', 'id_detail_do')
+                ->onDelete('cascade');
+            
+            $table->foreignId('id_detail_po')
+                ->nullable()
+                ->constrained('detailpo', 'id_detail_po')
+                ->onDelete('cascade');                        
+            
             $table->foreignId('id_do')
                 ->references('id_do')
                 ->on('deliveryorders')
                 ->onDelete('cascade');
-            
-            $table->integer('price');
-            $table->integer('quantity');
-            $table->integer('amount');
+
+            $table->foreignId('product_id')
+                ->constrained('products', 'product_id')
+                ->onDelete('cascade');            
+                    
+            $table->integer('quantity')->default(0);
+            $table->decimal('price', 12, 2);
+            $table->decimal('amount', 12, 2);
             $table->timestamps();
         });
     }

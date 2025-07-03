@@ -18,10 +18,10 @@ class DetailSo extends Model
         'product_type',
         'quantity',
         'quantity_left',
-        'has_do',
         'discount',
         'price',
-        'amount'
+        'amount',
+        'has_do',                        
     ];
 
     public function product(){

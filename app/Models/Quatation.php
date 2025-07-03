@@ -19,6 +19,7 @@ class Quatation extends Model
         'sub_total',
         'ppn',
         'grand_total',
+        'description',        
         'issue_at',
         'due_at',
     ];

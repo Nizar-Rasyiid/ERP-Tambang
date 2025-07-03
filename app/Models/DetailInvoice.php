@@ -13,6 +13,10 @@ class DetailInvoice extends Model
 
     protected $fillable = [
         'id_invoice',
+        'id_so',
+        'id_detail_so',
+        'id_detail_do',
+        'id_detail_po',
         'id_do',
         'product_id',
         'quantity',
@@ -26,6 +30,10 @@ class DetailInvoice extends Model
 
     public function do(){
         return $this->belongsTo(DeliveryOrder::class, 'id_do');
+    }
+
+    public function so(){
+        return $this->belongsTo(SalesOrder::class, 'id_so');
     }
 
     public function invoice()

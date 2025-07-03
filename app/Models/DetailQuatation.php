@@ -14,8 +14,8 @@ class DetailQuatation extends Model
     Protected $fillable = [
         'id_quatation',
         'product_id',
-        'discount',
         'quantity',
+        'discount',        
         'price',
         'amount',
     ];

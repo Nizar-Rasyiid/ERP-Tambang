@@ -16,6 +16,7 @@ class Opex extends Model
         'opex_type',
         'opex_price',
         'customer_id',
+        'approved',
         'issue_at',
     ];
 

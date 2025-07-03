@@ -12,6 +12,8 @@ class PaymentPurchaseOrder extends Model
     protected $primaryKey = 'payment_po_id';
     protected $fillable = [
         'id_po',
+        'payment_method',
+        'code_paymentpo',
         'price',
         'payment_method',
         'issue_at',

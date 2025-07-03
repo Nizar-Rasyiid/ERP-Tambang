@@ -16,12 +16,12 @@ return new class extends Migration
             $table->foreignId('vendor_id')->constrained('vendors', 'vendor_id')->onDelete('cascade');                        
             $table->foreignId('employee_id')->nullable()->constrained('employees', 'employee_id')->onDelete('cascade');
             $table->string('code_jasakirim');
-            $table->integer('termin');
-            $table->integer('deposit');
-            $table->integer('sub_total');
-            $table->integer('ppn');
-            $table->integer('grand_total');
-            $table->boolean('approved')->nullable()->default(0);
+            $table->text('termin');
+            $table->decimal('deposit', 12, 2);
+            $table->decimal('sub_total', 12, 2);
+            $table->decimal('ppn', 12, 2);
+            $table->decimal('grand_total', 12, 2);
+            $table->boolean('approved')->default(false);
             $table->date('issue_at');
             $table->date('due_at');            
             $table->timestamps();

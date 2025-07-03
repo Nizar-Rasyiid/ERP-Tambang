@@ -15,9 +15,19 @@ class JasaKirimController extends Controller
      */
     public function index()
     {
-        $jakir = PoJasaKirim::with('vendor')->get();
+        $jakir = PoJasaKirim::with('vendor', 'detailjakir')->get();
         return response()->json($jakir);
-    }    
+    }   
+    
+    public function indexDetail() 
+    {
+        $detail = DetailJakir::with([
+            'jasakirim.vendor',
+            'product',
+        ])->get();
+
+        return response()->json($detail);
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -69,7 +79,7 @@ class JasaKirimController extends Controller
         foreach ($request->purchase_order_details as $jakir) {
             $detailjakir = DetailJakir::create([
                 'id_jasakirim' => $jakirim->id_jasakirim,
-                'product_id' => $jakir['product_id'],
+                'product_name' => $jakir['product_desc'],
                 'quantity' => $jakir['quantity'],
                 'price' => $jakir['amount'],            
             ]);
@@ -88,6 +98,66 @@ class JasaKirimController extends Controller
         ->get(); 
         
         return response()->json($jasakirim);
+    }  
+    
+    public function update(Request $request, string $id)
+    {
+        $request->validate([
+            'vendor_id'     => 'required',
+            'employee_id'   => 'required',
+            'jakir_details' => 'array'            
+        ]);
+
+        $jakir = PoJasaKirim::findOrFail($id);
+        $jakir->update([
+            'vendor_id'     => $request->vendor_id,
+            'employee_id'   => $request->employee_id,            
+            'termin'        => $request->termin,
+            'deposit'       => $request->deposit,
+            'sub_total'     => $request->sub_total,            
+            'ppn'           => $request->ppn,
+            'grand_total'   => $request->grand_total,
+            'issue_at'      => $request->issue_at,
+            'due_at'        => $request->due_at,  
+        ]);
+
+        if ($request->has('jakir_details')) {
+            $existingDetails = DetailJakir::where('id_jasakirim', $id)
+                ->pluck('id_detail_jakir')->toArray();
+            $procesIds = [];
+
+            foreach ($request->jakir_details as $details) {
+                if (isset($details['id_detail_jakir']) && in_array($details['id_detail_jakir'], $existingDetails)) {
+                    DetailJakir::where('id_detail_jakir', $details['id_detail_jakir'])
+                        ->update([
+                            'id_jasakirim' => $jakir->id_jasakirim,
+                            'product_name' => $details['product_desc'],
+                            'quantity' => $details['quantity'],
+                            'price' => $details['amount'], 
+                        ]);
+                    
+                    $procesIds[] = $details['id_detail_jakir'];
+                }else{
+                    $detailjakir = DetailJakir::create([
+                        'id_jasakirim' => $jakir->id_jasakirim,
+                        'product_name' => $details['product_desc'],
+                        'quantity'     => $details['quantity'],
+                        'price'        => $details['amount'], 
+                    ]);
+                    if ($detailjakir) {
+                        $procesIds[] = $detailjakir->id_detail_jakir;
+                    }
+                }
+            }
+
+            $detailDelete = array_diff($existingDetails, $procesIds);
+            if (!empty($detailDelete)) {
+                DetailJakir::whereIn('id_detail_jakir', $detailDelete)
+                    ->delete();
+            }            
+        }
+
+        return response()->json($jakir);
     }
 
     public function detail($id) 
@@ -100,6 +170,27 @@ class JasaKirimController extends Controller
         return response()->json($detail);
     }
 
+    public function editPPn(Request $request, string $id){
+        $sub_total = $request->sub_total;
+        $ppns = $request->ppn;
+        
+        $ppn = 0;
+        $grand_total = 0;
+        if ($ppns != 0) {            
+            $grand_total = $sub_total;
+        }else{
+            $ppn = $sub_total * 0.11;
+            $grand_total = $sub_total + $ppn;   
+        }
+
+        $purchaseOrder = PoJasaKirim::findOrFail($id)->update([
+            'ppn' => $ppn,
+            'grand_total' => $grand_total,
+        ]);
+
+        return response()->json($purchaseOrder);
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -108,19 +199,22 @@ class JasaKirimController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
+    public function approved($id){
+        $approve = PoJasaKirim::findOrFail($id)->update([
+            'approved' => 1,
+        ]);
+
+        return response()->json([
+            'approved' => 'Purchase Order been Approved',
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    // 🔴 DELETE: Hapus Purchase Order
+    public function destroy($id)
     {
-        //
+        $purchaseOrder = PoJasaKirim::findOrFail($id);
+        $purchaseOrder->delete();
+
+        return response()->json(['message' => 'Purchase Order deleted successfully']);
     }
 }
