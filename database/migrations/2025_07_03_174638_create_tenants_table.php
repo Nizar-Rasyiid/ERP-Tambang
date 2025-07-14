@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('detailpackage', function (Blueprint $table) {
-            $table->id('id_detail_package');
-            $table->foreignId('package_id')->constrained('products', 'product_id')->onDelete('cascade');
-            $table->foreignId('product_id')->constrained('products', 'product_id')->onDelete('cascade');            
+        Schema::create('tenants', function (Blueprint $table) {
+            $table->id();
+            $table->text('name');
+            $table->text('token');
+            $table->text('database');
+            $table->enum('status', ['active', 'null']);
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('detailpackage');
+        Schema::dropIfExists('tenants');
     }
 };

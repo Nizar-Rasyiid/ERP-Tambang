@@ -199,4 +199,5 @@ Route::post('/faktur-pajak-code', [FakturPajakController::class, 'store'])->name
 Route::get('/laporan_keuangan', [DetailPoController::class, 'laporan'])->name('get.laporan');
 Route::get('/report_management', [ReportController::class, 'getReport'])->name('get.report');
 Route::get('/sales_report', [ReportController::class, 'getSales'])->name('get.report');
+Route::get('/sales_count', [ReportController::class, 'reportSales'])->name('get.report');
 

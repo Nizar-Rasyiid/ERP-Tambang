@@ -18,6 +18,7 @@ class Product extends Model
         'product_brand',
         'product_uom',
         'product_stock',
+        'is_package',
         'product_image',
     ];
 
@@ -37,5 +38,9 @@ class Product extends Model
     }
     public function detailpo(){
         return $this->belongsTo(DetailPo::class, 'product_id');
+    }
+
+    public function detailPackage(){
+        return $this->hasMany(DetailPackage::class, 'product_id');
     }
 }

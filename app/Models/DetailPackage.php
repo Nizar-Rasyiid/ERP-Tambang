@@ -10,13 +10,13 @@ class DetailPackage extends Model
     use HasFactory;
     protected $table = 'detailpackage';
     protected $primaryKey = 'id_detail_package';
-    protected $fillable = [
-        'package_id',
-        'product_id'
+    protected $fillable = [        
+        'product_id',
+        'products'
     ];
 
     public function product(){
-        return $this->belongsTo(Product::class, 'product_id');        
+        return $this->belongsTo(Product::class, 'products');        
     }
 
     public function package(){

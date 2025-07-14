@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\DetailPackage;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -35,12 +36,9 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([            
-            'product_sn'    => 'required|string',
-            'product_desc'  => 'required|string',
-            'product_brand' => 'required|string',
-            'product_uom'   => 'required|string',
-            'product_stock' => 'required|integer',
-            'product_image' => 'string',            
+            'product_sn'        => 'required|string',
+            'product_desc'      => 'required|string',
+            'package_details'   => 'required|array',                    
         ]);
 
         $lastCode = Product::latest()->first();
@@ -55,8 +53,20 @@ class ProductController extends Controller
             'product_uom'   => $request->product_uom,
             'product_stock' => $request->product_stock,
             'product_image' => $request->product_image,
+            'is_package'    => $request->is_package,
             'product_category_id' => $request->product_category_id,
         ]);
+
+        if ($request->is_package = true) {
+            foreach ($request->package_details as $pack) {
+                DetailPackage::create([
+                    'product_id'  => $product->product_id,
+                    'products'    => $pack['product_id'],
+                ]);
+            }            
+        }
+
+
         return response()->json($product, 201);
     }
 
@@ -65,9 +75,11 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with('detailPackage.product')
+            ->where('product_id', $id)
+            ->get();
         return response()->json($product);
-    }
+    }    
 
     /**
      * Update the specified resource in storage.
@@ -75,7 +87,40 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {        
         $product = Product::findOrFail($id);
-        $product->update($request->all());
+        $product->update([              
+            'product_sn'    => $request->product_sn,         
+            'product_desc'  => $request->product_desc,
+            'product_brand' => $request->product_brand,
+            'product_uom'   => $request->product_uom,
+            'product_stock' => $request->product_stock,
+            'product_image' => $request->product_image,
+            'is_package'    => $request->is_package,
+            'product_category_id' => $request->product_category_id,
+        ]);
+
+        $existingDetails = DetailPackage::where('product_id', $id)->pluck('id_detail_package')->toArray();
+        $processIds = [];
+
+        foreach ($request->package_details as $pack) {
+            if (isset($pack['id_detail_package']) && in_array($pack['id_detail_package'], $existingDetails)) {
+                DetailPackage::findOrFail($pack('id_detail_package'))->update([
+                    'product_id'  => $product->product_id,
+                    'products'    => $pack['product_id'],
+                ]);
+                $processIds[] = $pack['id_detail_package'];
+            }else{
+                $details = DetailPackage::create([
+                    'product_id'  => $product->product_id,
+                    'products'    => $pack['product_id'],
+                ]);
+                $processIds[] = $details->id_detail_package;
+            }
+        }
+        $detailsDelete = array_diff($existingDetails, $processIds);
+        if (!empty($detailsDelete)) {
+            DetailPackage::whereIn('id_detail_package', $detailsDelete)->delete();
+        }
+
         return response()->json($product);
     }
 

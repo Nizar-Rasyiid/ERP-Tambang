@@ -15,12 +15,13 @@ return new class extends Migration
             $table->id('product_id');       
             $table->Text('product_category_id')->nullable();
             $table->integer('product_code');
-            $table->string('product_sn');
+            $table->string('product_sn')->nullable();
             $table->string('product_desc');            
-            $table->string('product_brand');
-            $table->string('product_uom');
+            $table->string('product_brand')->nullable();
+            $table->string('product_uom')->nullable();
             $table->integer('product_stock');
-            $table->text('product_image')->nullable();                                    
+            $table->text('product_image')->nullable(); 
+            $table->boolean('is_package')->default(0);
             $table->timestamps();
         });
     }

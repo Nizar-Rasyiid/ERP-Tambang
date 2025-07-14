@@ -20,15 +20,20 @@ class DocumentController extends Controller
             'document_name' => 'required|string', // Nama dokumen
         ]);
 
-        // Simpan file ke folder public/uploads
+        // Simpan file ke folder public/uploads        
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName(); // Nama file unik
-            $filePath = $file->storeAs('invoice', $fileName, 'public'); // Simpan di public/invoice
+
+            $destinationPath = 'D:/folder';
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, $fileName);
+            }
+            $file->move($destinationPath, $fileName);
 
             // Simpan data ke tabel documents
             $document = Document::create([
-                'document_path' => '/storage/' . $filePath, // Path file yang dapat diakses
+                'document_path' => $destinationPath . '/' . $fileName, // Path file yang dapat diakses
                 'document_file' => $fileName, // Nama file
                 'document_name' => $request->document_name, // Nama dokumen dari input
             ]);
@@ -41,13 +46,13 @@ class DocumentController extends Controller
         }
 
         return response()->json([
-            'message' => 'File gagal diunggah!',
+            'message' => 'File gagal diunggah!',            
         ], 400);
     }
 
     public function show($filename) 
-    {
-        $path = storage_path('app/public/invoice/' . $filename);
+    {           
+        $path = 'D:/folder/' . $filename;
 
         if (!file_exists($path)) {
             abort(404, 'file not found');

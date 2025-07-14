@@ -35,10 +35,10 @@ class AssetController extends Controller
 
         $assets = Asset::create([
             'vendor_id' => $request->vendor_id,
-            'code' => $newCode,
+            'assets_code' => $newCode,
             'assets_name' => $request->assets_name,
-            'price' => $request->price,
-            'assets_life' => $request->assets_life,            
+            'assets_price' => $request->price,
+            'assets_life' => $request->assets_life, 
             'issue_at' => $request->issue_at,
             'due_at' => $request->due_at,
         ]);
@@ -67,20 +67,12 @@ class AssetController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
-    {
-        $request->validate([
-            'id_asset_type' => 'integer',
-            'code' => 'string',
-            'name' => 'string',
-            'qty' => 'integer',
-            'status' => 'boolean',
-        ]);
-
+    {        
         $asset = Asset::findOrFail($id);
         $asset->update([
             'vendor_id' => $request->vendor_id,            
             'assets_name' => $request->assets_name,
-            'price' => $request->price,
+            'assets_price' => $request->price,
             'assets_life' => $request->assets_life,            
             'issue_at' => $request->issue_at,
             'due_at' => $request->due_at,

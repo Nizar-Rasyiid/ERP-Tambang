@@ -74,24 +74,18 @@ class SalesOrderController extends Controller
     
         foreach ($request->sales_order_details as $pro) {                                                                         
             $detailData = [
-                'id_so'         => $salesOrder->id_so,                
+                'id_so'         => $salesOrder->id_so,  
+                'product_id'    => $pro['product_id'],
+                'package_id'    => null,
                 'product_type'  => $pro['product_type'],                                     
                 'quantity'      => $pro['quantity'],                
-                'quantity_left' => 0,            
+                'quantity_left' => 0,         
                 'discount'      => $pro['discount'],    
                 'price'         => $pro['price'],                                
                 'amount'        => $pro['amount'],
                 'created_at'    => now(),
                 'updated_at'    => now(),
-            ];
-
-            if ($pro['product_type'] == 'product') {
-                $detailData['product_id'] = $pro['product_id'];
-                $detailData['package_id'] = null; // Pastikan package_id null
-            } else {
-                $detailData['package_id'] = $pro['package_id'];
-                $detailData['product_id'] = null; // Pastikan product_id null
-            }
+            ];            
 
             DetailSo::create($detailData);                          
         }            
@@ -113,36 +107,27 @@ class SalesOrderController extends Controller
             }
 
             $salesOrder->update([
-            'customer_id'    => $request->customer_id,
-            'employee_id'    => $request->employee_id,            
-            'po_number'      => $request->po_number,
-            'termin'         => $request->termin,            
-            'total_tax'      => $request->total_tax,
-            'status_payment' => $request->status_payment ?? "Hasn't Payed",
-            'deposit'        => $request->deposit,
-            'has_invoice'    => $request->has_invoice,
-            'issue_at'       => $request->issue_at,
-            'due_at'         => $request->due_at,
+                'customer_id'    => $request->customer_id,
+                'employee_id'    => $request->employee_id,                
+                'po_number'      => $request->po_number,
+                'termin'         => $request->termin,                                    
+                'sub_total'      => $request->sub_total,
+                'deposit'        => $request->deposit,
+                'ppn'            => $request->ppn,
+                'grand_total'    => $request->grand_total,                                    
+                'issue_at'       => $request->issue_at,
+                'due_at'         => $request->due_at,
             ]);
 
             // Proses detail
-            if ($request->has('sales_order_details')) {
-            $sub_total = 0;
+            if ($request->has('sales_order_details')) {            
             $existingDetailIds = DetailSo::where('id_so', $id)
                 ->pluck('id_detail_so')->toArray();
             $processedIds = [];
 
-            foreach ($request->sales_order_details as $detail) {
-                $quantity = $detail['quantity'] ?? 0;
-                $price = $detail['price'] ?? 0;
-                $discount = $detail['discount'] ?? 0;
-                $amount = isset($detail['amount']) ? $detail['amount'] : 
-                      $price * $quantity * (1 - ($discount / 100));
-                
-                $sub_total += $amount;
+            foreach ($request->sales_order_details as $detail) {                
 
                 if (isset($detail['id_detail_so']) && in_array($detail['id_detail_so'], $existingDetailIds)) {
-                if ($detail['product_type'] == 'product') {
                     DetailSo::where('id_detail_so', $detail['id_detail_so'])->update([
                         'product_id'    => $detail['product_id'],
                         'package_id'    => 0,
@@ -154,81 +139,31 @@ class SalesOrderController extends Controller
                         'discount'      => $discount,
                         'amount'        => $amount,
                     ]);
-                }else{
-                    DetailSo::where('id_detail_so', $detail['id_detail_so'])->update([
-                        'product_id'    => 0,
-                        'package_id'    => $detail['package_id'],
-                        'product_type'  => $detail['product_type'],
+                    $processedIds[] = $detail['id_detail_so'];
+                } else {
+                    $newDetail = DetailSo::create([
+                        'id_so'         => $id,
+                        'product_id'    => $detail['product_id'],
+                        'package_id'    => 0,
+                        'product_type'  => $detail['product_type'],                    
                         'quantity'      => $quantity,
                         'quantity_left' => $detail['quantity_left'] ?? 0,
                         'has_do'        => $detail['has_do'] ?? 0,
                         'price'         => $price,
                         'discount'      => $discount,
                         'amount'        => $amount,
-                    ]);
-                }
-                $processedIds[] = $detail['id_detail_so'];
-                } else {
-                    if ($detail['product_type'] == 'product') {
-                        $newDetail = DetailSo::create([
-                            'id_so'         => $id,
-                            'product_id'    => $detail['product_id'],
-                            'package_id'    => 0,
-                            'product_type'  => $detail['product_type'],                    
-                            'quantity'      => $quantity,
-                            'quantity_left' => $detail['quantity_left'] ?? 0,
-                            'has_do'        => $detail['has_do'] ?? 0,
-                            'price'         => $price,
-                            'discount'      => $discount,
-                            'amount'        => $amount,
-                        ]);
-                    }else{
-                        $newDetail = DetailSo::create([
-                            'id_so'         => $id,
-                            'product_id'    => 0,
-                            'package_id'    => $detail['package_id'],
-                            'product_type'  => $detail['product_type'],                    
-                            'quantity'      => $quantity,
-                            'quantity_left' => $detail['quantity_left'] ?? 0,
-                            'has_do'        => $detail['has_do'] ?? 0,
-                            'price'         => $price,
-                            'discount'      => $discount,
-                            'amount'        => $amount,
-                        ]);
-                    }            
-                if ($newDetail) {
-                    $processedIds[] = $newDetail->id_detail_so;
-                }
+                    ]);           
+                    if ($newDetail) {
+                        $processedIds[] = $newDetail->id_detail_so;
+                    }
                 }
             }
 
             $detailsToDelete = array_diff($existingDetailIds, $processedIds);
             if (!empty($detailsToDelete)) {
                 DetailSo::whereIn('id_detail_so', $detailsToDelete)->delete();
-            }
-
-            $ppn = $sub_total * 0.11;
-            $salesOrder->update([
-                'sub_total'   => $sub_total,
-                'ppn'         => $ppn,
-                'grand_total' => $sub_total + $ppn,
-            ]);
-            }
-
-            // Tangkap error loading relasi dengan try-catch terpisah
-            try {
-            $salesOrder = SalesOrder::with('salesOrderDetails')->find($id);
-            return response()->json([
-                'message'     => 'Sales Order updated successfully',
-                'sales_order' => $salesOrder,
-            ]);
-            } catch (\Exception $e) {
-            \Log::error('Error loading related data: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Sales Order updated but error loading details',
-                'error' => $e->getMessage()
-            ], 500);
-            }
+            }            
+            }                        
         } catch (\Exception $e) {
             \Log::error('Sales Order Update Error: ' . $e->getMessage());
             return response()->json([
