@@ -23,7 +23,8 @@ class InvoiceController extends Controller
                 'salesorder',
                 'detailInv',
                 'detailInv.product'
-            ])->get();
+            ])->orderBy('created_at', 'desc')
+            ->get();
         return response()->json($invoice);
     }
 

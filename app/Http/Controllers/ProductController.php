@@ -38,7 +38,7 @@ class ProductController extends Controller
         $request->validate([            
             'product_sn'        => 'required|string',
             'product_desc'      => 'required|string',
-            'package_details'   => 'required|array',                    
+            'package_details'   => 'array',                    
         ]);
 
         $lastCode = Product::latest()->first();

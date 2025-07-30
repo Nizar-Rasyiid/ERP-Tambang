@@ -81,7 +81,8 @@ class JasaKirimController extends Controller
                 'id_jasakirim' => $jakirim->id_jasakirim,
                 'product_name' => $jakir['product_desc'],
                 'quantity' => $jakir['quantity'],
-                'price' => $jakir['amount'],            
+                'price' => $jakir['price'],
+                'amount' => $jakir['amount'],
             ]);
         }   
         return response()->json($po);                
@@ -101,13 +102,7 @@ class JasaKirimController extends Controller
     }  
     
     public function update(Request $request, string $id)
-    {
-        $request->validate([
-            'vendor_id'     => 'required',
-            'employee_id'   => 'required',
-            'jakir_details' => 'array'            
-        ]);
-
+    {        
         $jakir = PoJasaKirim::findOrFail($id);
         $jakir->update([
             'vendor_id'     => $request->vendor_id,

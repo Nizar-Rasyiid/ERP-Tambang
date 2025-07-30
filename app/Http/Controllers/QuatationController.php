@@ -16,7 +16,9 @@ class QuatationController extends Controller
             'customer', 
             'detailQuo',
             'detailQuo.product'            
-            ])->get();
+            ])->orderBy('created_at', 'desc')
+            ->get();
+            
         return response()->json($quatation);
     }
 
@@ -70,14 +72,14 @@ class QuatationController extends Controller
         foreach($request->inquiry_details as $key => $pro){              
 
             $detailso = DetailQuatation::create([
-            'id_quatation' => $quatation->id_quatation,                
-            'product_id' => $pro['product_id'],
-            'quantity' => $pro['quantity'],
-            'discount' => $pro['discount'],
-            'price' => $pro['price'],
-            'amount' => $pro['amount'],
-            'created_at' => now(),
-            'updated_at' => now(),
+                'id_quatation' => $quatation->id_quatation,                
+                'product_id' => $pro['product_id'],
+                'quantity' => $pro['quantity'],
+                'discount' => $pro['discount'],
+                'price' => $pro['price'],
+                'amount' => $pro['amount'],
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
         } 
@@ -93,12 +95,13 @@ class QuatationController extends Controller
         $quatation->update([            
             'customer_id' => $request->customer_id,
             'employee_id' => $request->employee_id,
-            'termin' => $request->termin,
-            'code_quatation' => $request->code_quatation,
+            'termin' => $request->termin,            
             'sub_total' => $request->sub_total,
+            'ppn' => $request->ppn,
+            'grand_total' => $request->grand_total,   
+            'description'   => $request->description,         
             'issue_at' => $request->issue_at,
-            'description' => $request->description,
-            'due_at' => $request->due_at                        
+            'due_at' => $request->due_at                       
         ]);
     
         // Get all current detail IDs

@@ -128,30 +128,31 @@ class SalesOrderController extends Controller
             foreach ($request->sales_order_details as $detail) {                
 
                 if (isset($detail['id_detail_so']) && in_array($detail['id_detail_so'], $existingDetailIds)) {
-                    DetailSo::where('id_detail_so', $detail['id_detail_so'])->update([
+                    DetailSo::where('id_detail_so', $detail['id_detail_so'])->update([                        
                         'product_id'    => $detail['product_id'],
-                        'package_id'    => 0,
-                        'product_type'  => $detail['product_type'],
-                        'quantity'      => $quantity,
-                        'quantity_left' => $detail['quantity_left'] ?? 0,
-                        'has_do'        => $detail['has_do'] ?? 0,
-                        'price'         => $price,
-                        'discount'      => $discount,
-                        'amount'        => $amount,
+                        'package_id'    => null,
+                        'product_type'  => $detail['product_type'],                                     
+                        'quantity'      => $detail['quantity'],                
+                        'quantity_left' => 0,         
+                        'discount'      => $detail['discount'],    
+                        'price'         => $detail['price'],                                
+                        'amount'        => $detail['amount'],
+                        'created_at'    => now(),
+                        'updated_at'    => now(),
                     ]);
                     $processedIds[] = $detail['id_detail_so'];
                 } else {
-                    $newDetail = DetailSo::create([
-                        'id_so'         => $id,
+                    $newDetail = DetailSo::create([                        
                         'product_id'    => $detail['product_id'],
-                        'package_id'    => 0,
-                        'product_type'  => $detail['product_type'],                    
-                        'quantity'      => $quantity,
-                        'quantity_left' => $detail['quantity_left'] ?? 0,
-                        'has_do'        => $detail['has_do'] ?? 0,
-                        'price'         => $price,
-                        'discount'      => $discount,
-                        'amount'        => $amount,
+                        'package_id'    => null,
+                        'product_type'  => $detail['product_type'],                                     
+                        'quantity'      => $detail['quantity'],                
+                        'quantity_left' => 0,         
+                        'discount'      => $detail['discount'],    
+                        'price'         => $detail['price'],                                
+                        'amount'        => $detail['amount'],
+                        'created_at'    => now(),
+                        'updated_at'    => now(),
                     ]);           
                     if ($newDetail) {
                         $processedIds[] = $newDetail->id_detail_so;
@@ -233,6 +234,18 @@ class SalesOrderController extends Controller
 
         return response()->json(['message' => 'Deposit updated successfully']);
     }
+
+    public function resetPrice(Request $request, $id){
+        $purchaseOrder = Invoice::findOrFail($id);
+        $purchaseOrder->update([
+            'deposit'        => $request->deposit,
+            'status_payment' => 'unpaid',
+        ]);
+
+        $payment = PaymentSalesOrder::where('id_invoice', $id)->delete();
+        return response()->json($purchaseOrder);
+    }
+
     public function monthlySales()
     {
         // Ambil data penjualan per bulan

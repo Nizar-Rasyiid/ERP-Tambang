@@ -14,6 +14,7 @@ class DetailTandater extends Model
     protected $fillable = [
         'id_invoice',
         'id_so',
+        'issue_at',
         'id_tandater'
     ];
 

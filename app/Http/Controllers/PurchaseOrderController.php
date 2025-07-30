@@ -12,6 +12,7 @@ use App\Models\Employee;
 use App\Models\DetailPo;
 use App\Models\Vendor;
 use App\Models\Product;
+use App\Models\PoJasaKirim;
 use App\Models\StockHistory;
 use Illuminate\Support\Facades\DB;
 
@@ -24,7 +25,9 @@ class PurchaseOrderController extends Controller
     // 🟢 GET: Tampilkan semua Purchase Orders
     public function index()
     {
-        $purchaseOrders = PurchaseOrder::with(['vendor', 'detailPo', 'detailPo.product'])->get();
+        $purchaseOrders = PurchaseOrder::with(['vendor', 'detailPo', 'detailPo.product'])
+            ->orderBy('created_at', 'desc')
+            ->get();
         return response()->json($purchaseOrders);
     }
 
@@ -120,12 +123,14 @@ class PurchaseOrderController extends Controller
             }
 
             $purchaseOrder->update([
-                'vendor_id'      => $request->vendor_id,
-                'employee_id'    => $request->employee_id,
+                'vendor_id'      => $request->vendor_id, // ✅ Vendor, bukan Customer
+                'employee_id'    => $request->employee_id,                                        
                 'termin'         => $request->termin,
-                'total_tax'      => $request->total_tax,
-                'status_payment' => $request->status_payment ?? "Hasn't Paid",
+                'status_payment' => $request->status_payment,
+                'sub_total'      => $request->sub_total,                    
                 'deposit'        => $request->deposit,
+                'ppn'            => $request->ppn, 
+                'grand_total'    => $request->grand_total,
                 'issue_at'       => $request->issue_at,
                 'due_at'         => $request->due_at,
             ]);
@@ -261,8 +266,14 @@ class PurchaseOrderController extends Controller
     public function getAP(){
         $purchaseOrder = PurchaseOrder::with(['vendor', 'employee', 'payment'])                       
             ->get();
+
+        $jasakirim = PoJasaKirim::with(['vendor'])                       
+            ->get();
         
-        return response()->json($purchaseOrder);
+        return response()->json([
+            'purchase' => $purchaseOrder, 
+            'jasakirim'=> $jasakirim
+        ]);
     }
 
     public function updateDeposit(Request $request, $id)
@@ -272,10 +283,14 @@ class PurchaseOrderController extends Controller
             'deposit' => $request->deposit,
             'status_payment'    => $request->status_payment,
         ]);
+        $code = PaymentPurchaseOrder::latest()->first();
 
+        $lastCode = $code ? $code->code_paymentpo : 1000;
+        $newCode = $lastCode + 1;
         $payment = PaymentPurchaseOrder::create([
             'id_po'         => $id,
             'payment_method'=> $request->payment_method,
+            'code_paymentpo'=> $newCode,
             'price'         => $request->deposit,
             'issue_at'      => $request->issue_at,
             'due_at'        => $request->due_at,   
@@ -285,6 +300,16 @@ class PurchaseOrderController extends Controller
             'message' => 'Deposit updated successfully',
         ]);
     }   
+
+    public function resetPrice(Request $request, $id){
+        $purchaseOrder = PurchaseOrder::findOrFail($id);
+        $purchaseOrder->update([
+            'deposit'       => $request->deposit,
+            'status_payment'=> $request->status_payment,
+        ]);
+
+        $payment = PaymentPurchaseOrder::where('id_po', $id)->delete();
+    }
 
     public function approved($id){
         $approve = PurchaseOrder::findOrFail($id)->update([

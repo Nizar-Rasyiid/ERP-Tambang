@@ -55,10 +55,12 @@ Route::put('/assets_code/{id}', [AssetController::class, 'update'])->name('put.a
 
 Route::get('/account_receivable', [SalesOrderController::class, 'getAR'])->name('get.ar');
 Route::put('/account_receivable_deposit/{id}', [SalesOrderController::class, 'updateDeposit'])->name('put.ar');
+Route::put('/account_receivable_reset/{id}', [SalesOrderController::class, 'resetPrice'])->name('put.ar');
 
 
 Route::get('/account_payable', [PurchaseOrderController::class, 'getAP'])->name('get.ap');
 Route::put('/account_payable_deposit/{id}', [PurchaseOrderController::class, 'updateDeposit'])->name('put.ap');
+Route::put('/account_payable_reset/{id}', [PurchaseOrderController::class, 'resetPrice'])->name('put.ap');
 //b
 Route::get('/bank_accounts', [BankAccountController::class, 'index'])->name('get.bank_account');
 Route::get('/bank_accounts/{id}', [BankAccountController::class, 'show'])->name('show.bank_account');

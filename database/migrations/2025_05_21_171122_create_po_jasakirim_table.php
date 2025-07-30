@@ -16,6 +16,11 @@ return new class extends Migration
             $table->foreignId('vendor_id')->constrained('vendors', 'vendor_id')->onDelete('cascade');                        
             $table->foreignId('employee_id')->nullable()->constrained('employees', 'employee_id')->onDelete('cascade');
             $table->string('code_jasakirim');
+            $table->enum('status_payment', [
+                'unpaid',
+                'partial',
+                'full'
+            ])->default('unpaid');
             $table->text('termin');
             $table->decimal('deposit', 12, 2);
             $table->decimal('sub_total', 12, 2);
