@@ -33,76 +33,87 @@ class PurchaseOrderController extends Controller
 
     // 🔵 POST: Simpan Purchase Order Baru
     public function store(Request $request)
-{
-    $request->validate([
-        'purchase_order_details' => 'required|array',
-    ]);
-
-    // Ambil bulan & tahun saat ini
-    $currentMonth = date('m'); // 02
-    $currentYear  = date('Y'); // 2025
-    $monthRoman   = [
-        '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
-        '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
-        '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
-    ];
-
-    // Cari PO terakhir dalam bulan dan tahun yang sama
-    $lastPo = PurchaseOrder::latest()->first();
-
-    // Ambil ID terakhir & buat ID baru dengan format 2 digit
-    $lastIdPo  = $lastPo ? intval(explode('/', $lastPo->code_po)[0]) : 0;
-    $newIdPo   = str_pad($lastIdPo + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
-
-    // Ambil Nama Vendor dari tabel `vendors` berdasarkan `vendor_id`
-    $vendor = Vendor::where('vendor_id', $request->vendor_id)->value('vendor_singkatan') ?? 'Unknown';
-
-    // Format kode PO: 00(ID_PO)/PO/NamaVendor/II/2025
-    $formattedCodePo = "{$newIdPo}/PO/{$vendor}/{$monthRoman[$currentMonth]}/{$currentYear}";
-
-    // Buat Purchase Order
-    $purchaseOrder = PurchaseOrder::create([
-        'vendor_id'      => $request->vendor_id, // ✅ Vendor, bukan Customer
-        'employee_id'    => $request->employee_id,                        
-        'code_po'        => $formattedCodePo,
-        'termin'         => $request->termin,
-        'status_payment' => $request->status_payment,
-        'sub_total'      => $request->sub_total,                    
-        'deposit'        => $request->deposit,
-        'ppn'            => $request->ppn, 
-        'grand_total'    => $request->grand_total,
-        'issue_at'       => $request->issue_at,
-        'due_at'         => $request->due_at,
-    ]);
-
-    foreach ($request->purchase_order_details as $pro) {       
-
-        $detailpo = DetailPO::create([
-            'id_po'      => $purchaseOrder->id_po,                
-            'product_id' => $pro['product_id'],
-            'quantity'   => $pro['quantity'],
-            'quantity_left' => 0,
-            'price'      => $pro['price'],
-            'amount'     => $pro['amount'],
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);  
-        
-        StockHistory::create([
-            'id_po'         => $purchaseOrder->id_po,
-            'product_id'    => $pro['product_id'],
-            'id_detail_po'  => $detailpo->id_detail_po,
-            'price'         => $pro['price'],
-            'quantity'      => $pro['quantity'],
-            'quantity_left' => $pro['quantity'],
+    {
+        $request->validate([
+            'purchase_order_details' => 'required|array',
         ]);
-    }                        
+        try {
+            DB::beginTransaction();
+            // Ambil bulan & tahun saat ini
+            $currentMonth = date('m'); // 02
+            $currentYear  = date('Y'); // 2025
+            $monthRoman   = [
+                '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
+                '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
+                '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
+            ];
 
-    return response()->json([
-        'message'        => 'Purchase Order berhasil dibuat!',        
-        'data'           =>$purchaseOrder,
-    ], 201);
-}
+            // Cari PO terakhir dalam bulan dan tahun yang sama
+            $lastPo = PurchaseOrder::whereYear('created_at', $currentYear)
+                                    ->whereMonth('created_at', $currentMonth)
+                                    ->latest()
+                                    ->first();
+
+            // Ambil ID terakhir & buat ID baru dengan format 2 digit
+            $lastIdPo  = $lastPo ? intval(explode('/', $lastPo->code_po)[0]) : 0;
+            $newIdPo   = str_pad($lastIdPo + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
+
+            // Ambil Nama Vendor dari tabel `vendors` berdasarkan `vendor_id`
+            $vendor = Vendor::where('vendor_id', $request->vendor_id)->value('vendor_singkatan') ?? 'Unknown';
+
+            // Format kode PO: 00(ID_PO)/PO/NamaVendor/II/2025
+            $formattedCodePo = "{$newIdPo}/PO/{$vendor}/{$monthRoman[$currentMonth]}/{$currentYear}";
+
+            // Buat Purchase Order
+            $purchaseOrder = PurchaseOrder::create([
+                'vendor_id'      => $request->vendor_id, // ✅ Vendor, bukan Customer
+                'employee_id'    => $request->employee_id,                        
+                'code_po'        => $formattedCodePo,
+                'termin'         => $request->termin,
+                'status_payment' => $request->status_payment,
+                'sub_total'      => $request->sub_total,                    
+                'deposit'        => $request->deposit,
+                'ppn'            => $request->ppn, 
+                'grand_total'    => $request->grand_total,
+                'issue_at'       => $request->issue_at,
+                'due_at'         => $request->due_at,
+            ]);
+
+            foreach ($request->purchase_order_details as $pro) {       
+
+                $detailpo = DetailPO::create([
+                    'id_po'      => $purchaseOrder->id_po,                
+                    'product_id' => $pro['product_id'],
+                    'quantity'   => $pro['quantity'],
+                    'quantity_left' => 0,
+                    'price'      => $pro['price'],
+                    'amount'     => $pro['amount'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);  
+                
+                StockHistory::create([
+                    'id_po'         => $purchaseOrder->id_po,
+                    'product_id'    => $pro['product_id'],
+                    'id_detail_po'  => $detailpo->id_detail_po,
+                    'price'         => $pro['price'],
+                    'quantity'      => $pro['quantity'],
+                    'quantity_left' => $pro['quantity'],
+                ]);
+            } 
+            DB::commit();
+            return response()->json([
+                'message'        => 'Purchase Order berhasil dibuat!',        
+                'Purchase Order' =>$purchaseOrder,
+            ], 201);
+        } catch (\Excaption $e) {
+            DB::rollback();
+            return response()->json([
+                'message'       => 'Purchase Order berhasil dibuat!',        
+                'error'         =>$e->getMessage(),
+            ], 403);
+        }                           
+    }
 
 
     // 🟠 GET: Tampilkan Purchase Order berdasarkan ID
@@ -116,16 +127,18 @@ class PurchaseOrderController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            DB::beginTransaction();
             // Proses update dasar
             $purchaseOrder = PurchaseOrder::find($id);
             if (is_null($purchaseOrder)) {
                 return response()->json(['message' => 'Purchase Order not found'], 404);
-            }
+            }            
 
             $purchaseOrder->update([
                 'vendor_id'      => $request->vendor_id, // ✅ Vendor, bukan Customer
                 'employee_id'    => $request->employee_id,                                        
                 'termin'         => $request->termin,
+                'code_po'        => $request->code_po,
                 'status_payment' => $request->status_payment,
                 'sub_total'      => $request->sub_total,                    
                 'deposit'        => $request->deposit,
@@ -172,52 +185,21 @@ class PurchaseOrderController extends Controller
                         }
                     }                    
                 }
-
-                if ($request->ppnCheck != true) {
-                    // ✅ Hitung PPN (11% dari sub_total)
-                    $ppn = 0;
-
-                    // ✅ Hitung Grand Total
-                    $grand_total = $sub_total + $ppn;   
-                }else{
-                    // ✅ Hitung PPN (11% dari sub_total)
-                    $ppn = $sub_total * 0.11;
-
-                    // ✅ Hitung Grand Total
-                    $grand_total = $sub_total + $ppn;   
-                } 
-
-                $detailsToDelete = array_diff($existingDetailIds, $processedIds);
-                if (!empty($detailsToDelete)) {
-                    DetailPo::whereIn('id_detail_po', $detailsToDelete)->delete();
+                $detailsDelete = array_diff($existingDetailIds, $processedIds);
+                if (!empty($detailsDelete)) {
+                    DetailPo::whereIn('id_detail_po', $detailsDelete)->delete();
                 }
-                
-                $purchaseOrder->update([
-                    'sub_total'   => $sub_total,
-                    'ppn'         => $ppn,
-                    'grand_total' => $sub_total + $ppn,
-                ]);
             }
-
-            // Tangkap error loading relasi dengan try-catch terpisah
-            try {
-                $purchaseOrder = PurchaseOrder::with('detailPo')->find($id);
-                return response()->json([
-                    'message'        => 'Purchase Order updated successfully',
-                    'purchase_order' => $purchaseOrder,
-                ]);
-            } catch (\Exception $e) {
-                \Log::error('Error loading related data: ' . $e->getMessage());
-                return response()->json([
-                    'message' => 'Purchase Order updated but error loading details',
-                    'error'   => $e->getMessage()
-                ], 500);
-            }
+            DB::commit();
+            return response()->json([
+                'message'        => 'Purchase Order updated successfully',
+                'purchase_order' => $purchaseOrder,
+            ]);                                   
         } catch (\Exception $e) {
-            \Log::error('Purchase Order Update Error: ' . $e->getMessage());
+            DB::rollback();            
             return response()->json([
                 'message' => 'Error updating Purchase Order',
-                'error'   => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
@@ -228,9 +210,23 @@ class PurchaseOrderController extends Controller
     public function destroy($id)
     {
         $purchaseOrder = PurchaseOrder::findOrFail($id);
-        $purchaseOrder->delete();
+        if ($purchaseOrder->is_deleted != 1) {
+            $purchaseOrder->update([
+                'is_deleted' => 1,
+            ]);            
+        }else {
+            $purchaseOrder->delete();
+        }
+        
+        return response()->json(['message' => 'Purchase Order Deleted']);
+    }
 
-        return response()->json(['message' => 'Purchase Order deleted successfully']);
+    public function restore($id){
+        $purchaseOrder = PurchaseOrder::findOrFail($id)->update([
+            'is_deleted' => 0,
+        ]);
+
+        return response()->json(['message' => 'Purchase Order Restored']);
     }
 
     public function goodReceive(Request $request)
@@ -286,7 +282,7 @@ class PurchaseOrderController extends Controller
         $code = PaymentPurchaseOrder::latest()->first();
 
         $lastCode = $code ? $code->code_paymentpo : 1000;
-        $newCode = $lastCode + 1;
+        $newCode = (string)((int)$lastCode + 1);
         $payment = PaymentPurchaseOrder::create([
             'id_po'         => $id,
             'payment_method'=> $request->payment_method,
@@ -338,7 +334,7 @@ class PurchaseOrderController extends Controller
             'ppn' => $ppn,
             'grand_total' => $grand_total,
         ]);
-    }
+    }    
 
     public function monthlyPurchase()
     {

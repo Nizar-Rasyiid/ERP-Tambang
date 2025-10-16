@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Vendor;
 
 class VendorController extends Controller
@@ -34,7 +35,8 @@ class VendorController extends Controller
         return response()->json($vendors);
     }
     public function store(Request $request)
-    {        
+    {       
+        DB::beginTransaction(); 
         $vendor = Vendor::create([            
             'vendor_name' => $request->vendor_name,            
             'vendor_email' => $request->vendor_email,
@@ -43,7 +45,8 @@ class VendorController extends Controller
             'vendor_singkatan' => $request->vendor_singkatan,
             'vendor_npwp' => $request->vendor_npwp,
             'vendor_contact' => $request->vendor_contact,                      
-        ]);        
+        ]);
+        DB::commit();
 
         return response()->json(['success' => 'Vendor created successfully.', 'vendor' => $vendor], 201);
     }

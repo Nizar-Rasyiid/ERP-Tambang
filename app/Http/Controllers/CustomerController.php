@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Customer;
 use App\Models\CustomerPoint;
@@ -41,33 +42,77 @@ class CustomerController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {        
-        $lastCode = Customer::latest()->first();
-        $lastCode = $lastCode ? $lastCode->customer_code : 1000;
-        $newCode = $lastCode + 1;
+    {
+        $request->validate([
+            'customer_name'         => 'required',
+            'customer_singkatan'    => 'required',
+            'customer_email'        => 'required',
+            'customer_phone'        => 'required',
+            'customer_details'      => 'array'                        
+        ]); 
+        try {
+            DB::beginTransaction();
+            $lastCode = Customer::latest()->first();
+            $lastCode = $lastCode ? $lastCode->customer_code : 1000;
+            $newCode = $lastCode + 1;
+            
+            $customer = new Customer();
+            $customer->customer_code        = $newCode;
+            $customer->customer_name        = $request->input('customer_name');
+            $customer->customer_phone       = $request->input('customer_phone');
+            $customer->customer_singkatan   = $request->input('customer_singkatan');
+            $customer->customer_email       = $request->input('customer_email');
+            $customer->customer_address     = $request->input('customer_address');
+            $customer->customer_npwp        = $request->input('customer_npwp');
+            $customer->customer_contact     = $request->input('customer_contact');            
 
-        $customer = Customer::create([
-            'customer_code'    => $newCode,            
-            'customer_name'    => $request->customer_name,
-            'customer_phone'   => $request->customer_phone,            
-            'customer_singkatan' => $request->customer_singkatan,
-            'customer_email'   => $request->customer_email,
-            'customer_address' => $request->customer_address,
-            'customer_npwp' => $request->customer_npwp,
-            'customer_contact' => $request->customer_contact,
-        ]);
+            $customer->save();
 
-        foreach ($request->customer_details as $pro) {                                                                
-            CustomerPoint::create([
-                'customer_id'=> $customer->customer_id,                
-                'point' => $pro['point'],
-                'alamat'   => $pro['alamat'],                
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }  
+            foreach ($request->customer_details as $cust) {
+                $detail = new CustomerPoint();
+                $detail->customer_id    = $customer->customer_id;
+                $detail->point          = $cust['point'];
+                $detail->alamat         = $cust['alamat'];
+                $detail->created_at     = now();
+                $detail->updated_at      = now();
 
-        return response()->json($customer, 201);
+                $detail->save();
+            }
+            DB::commit();
+            return response()->json($customer, 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'message'   => 'Failed to Created Customer',
+                'error'     => $e->getMessage()
+            ], 403);
+        }
+        // $lastCode = Customer::latest()->first();
+        // $lastCode = $lastCode ? $lastCode->customer_code : 1000;
+        // $newCode = $lastCode + 1;
+
+        // $customer = Customer::create([
+        //     'customer_code'    => $newCode,            
+        //     'customer_name'    => $request->customer_name,
+        //     'customer_phone'   => $request->customer_phone,            
+        //     'customer_singkatan' => $request->customer_singkatan,
+        //     'customer_email'   => $request->customer_email,
+        //     'customer_address' => $request->customer_address,
+        //     'customer_npwp' => $request->customer_npwp,
+        //     'customer_contact' => $request->customer_contact,
+        // ]);
+
+        // foreach ($request->customer_details as $pro) {                                                                
+        //     CustomerPoint::create([
+        //         'customer_id'=> $customer->customer_id,                
+        //         'point' => $pro['point'],
+        //         'alamat'   => $pro['alamat'],                
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ]);
+        // }  
+
+        // return response()->json($customer, 201);
     }
 
     /**

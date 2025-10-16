@@ -50,7 +50,7 @@ class JasaKirimController extends Controller
                             ->first();
 
         // Ambil ID terakhir & buat ID baru dengan format 2 digit
-        $lastIdPo  = $lastPo ? intval(explode('/', $lastPo->code_po)[0]) : 0;
+        $lastIdPo  = $lastPo ? intval(explode('/', $lastPo->code_jasakirim)[0]) : 0;
         $newIdPo   = str_pad($lastIdPo + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
 
         // Ambil Nama Vendor dari tabel `vendors` berdasarkan `vendor_id`

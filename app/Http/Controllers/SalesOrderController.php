@@ -15,7 +15,10 @@ class SalesOrderController extends Controller
 {
     public function index()
     {
-        $salesOrders = SalesOrder::with(['customer', 'employee'])->get();
+        $salesOrders = SalesOrder::with(['customer', 'employee'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
         return response()->json($salesOrders);
     }
 
@@ -34,66 +37,77 @@ class SalesOrderController extends Controller
             'sales_order_details.*.product_id' => 'required_if:product_type,product|exists:products,product_id',
             'sales_order_details.*.package_id' => 'required_if:product_type,package|exists:package,package_id',
         ]);
-    
-        // Ambil bulan & tahun saat ini
-        $currentMonth = date('m'); // 02
-        $currentYear  = date('Y'); // 2025
-        $monthRoman   = [
-            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
-            '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
-            '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
-        ];
-    
-        // Cari SO terakhir dalam bulan dan tahun yang sama
-        $lastSo = SalesOrder::latest()->first();
-    
-        // Ambil ID terakhir & buat ID baru dengan format 2 digit
-        $lastIdSo  = $lastSo ? intval(explode('/', $lastSo->code_so)[0]) : 0;
-        $newIdSo   = str_pad($lastIdSo + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
-    
-        // Ambil Nama Customer dari tabel `customers` berdasarkan `customer_id`
-        $customer = Customer::where('customer_id', $request->customer_id)->value('customer_singkatan') ?? 'Unknown';
-    
-        // Format kode SO: 00(ID_SO)/SO/NamaCustomer/II/2025
-        $formattedCodeSo = "{$newIdSo}/SO/{$customer}/{$monthRoman[$currentMonth]}/{$currentYear}";
-    
-        // Buat Sales Order
-        $salesOrder = SalesOrder::create([
-            'customer_id'    => $request->customer_id,
-            'employee_id'    => $request->employee_id,
-            'code_so'        => $formattedCodeSo,
-            'po_number'      => $request->po_number,
-            'termin'         => $request->termin,                                    
-            'sub_total'      => $request->sub_total,
-            'deposit'        => $request->deposit,
-            'ppn'            => $request->ppn,
-            'grand_total'    => $request->grand_total,                                    
-            'issue_at'       => $request->issue_at,
-            'due_at'         => $request->due_at,
-        ]);
-    
-        foreach ($request->sales_order_details as $pro) {                                                                         
-            $detailData = [
-                'id_so'         => $salesOrder->id_so,  
-                'product_id'    => $pro['product_id'],
-                'package_id'    => null,
-                'product_type'  => $pro['product_type'],                                     
-                'quantity'      => $pro['quantity'],                
-                'quantity_left' => 0,         
-                'discount'      => $pro['discount'],    
-                'price'         => $pro['price'],                                
-                'amount'        => $pro['amount'],
-                'created_at'    => now(),
-                'updated_at'    => now(),
-            ];            
+        try {
+            DB::beginTransaction();
+            // Ambil bulan & tahun saat ini
+            $currentMonth = date('m'); // 02
+            $currentYear  = date('Y'); // 2025
+            $monthRoman   = [
+                '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
+                '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
+                '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
+            ];
+        
+            // Cari SO terakhir dalam bulan dan tahun yang sama
+            $lastSo = SalesOrder::whereYear('created_at', $currentYear)
+                                ->whereMonth('created_at', $currentMonth)
+                                ->latest('id_so')
+                                ->first();
+        
+            // Ambil ID terakhir & buat ID baru dengan format 2 digit
+            $lastIdSo  = $lastSo ? intval(explode('/', $lastSo->code_so)[0]) : 0;
+            $newIdSo   = str_pad($lastIdSo + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
+        
+            // Ambil Nama Customer dari tabel `customers` berdasarkan `customer_id`
+            $customer = Customer::where('customer_id', $request->customer_id)->value('customer_singkatan') ?? 'Unknown';
+        
+            // Format kode SO: 00(ID_SO)/SO/NamaCustomer/II/2025
+            $formattedCodeSo = "{$newIdSo}/SO/{$customer}/{$monthRoman[$currentMonth]}/{$currentYear}";
+        
+            // Buat Sales Order
+            $salesOrder = SalesOrder::create([
+                'customer_id'    => $request->customer_id,
+                'employee_id'    => $request->employee_id,
+                'code_so'        => $formattedCodeSo,
+                'po_number'      => $request->po_number,
+                'termin'         => $request->termin,                                    
+                'sub_total'      => $request->sub_total,
+                'deposit'        => $request->deposit,
+                'ppn'            => $request->ppn,
+                'grand_total'    => $request->grand_total,                                    
+                'issue_at'       => $request->issue_at,
+                'due_at'         => $request->due_at,
+            ]);
+        
+            foreach ($request->sales_order_details as $pro) {                                                                         
+                $detailData = [
+                    'id_so'         => $salesOrder->id_so,  
+                    'product_id'    => $pro['product_id'],
+                    'package_id'    => null,
+                    'product_type'  => $pro['product_type'],                                     
+                    'quantity'      => $pro['quantity'],                
+                    'quantity_left' => 0,         
+                    'discount'      => $pro['discount'],    
+                    'price'         => $pro['price'],                                
+                    'amount'        => $pro['amount'],
+                    'created_at'    => now(),
+                    'updated_at'    => now(),
+                ];            
 
-            DetailSo::create($detailData);                          
-        }            
-    
-        return response()->json([
-            'message'      => 'Sales Order berhasil dibuat!',
-            'sales_order'  => $detailData,            
-        ], 201);
+                DetailSo::create($detailData);                          
+            }
+            DB::commit();
+            return response()->json([
+                'message'      => 'Sales Order berhasil dibuat!',
+                'sales order'  => $salesOrder,            
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'message'      => 'Sales Order Gagal dibuat!',
+                'error'  => $e->getMessage()            
+            ], 403);
+        }                            
     }
     
 
@@ -129,6 +143,7 @@ class SalesOrderController extends Controller
 
                 if (isset($detail['id_detail_so']) && in_array($detail['id_detail_so'], $existingDetailIds)) {
                     DetailSo::where('id_detail_so', $detail['id_detail_so'])->update([                        
+                        'id_so'         => $salesOrder->id_so,
                         'product_id'    => $detail['product_id'],
                         'package_id'    => null,
                         'product_type'  => $detail['product_type'],                                     
@@ -142,7 +157,8 @@ class SalesOrderController extends Controller
                     ]);
                     $processedIds[] = $detail['id_detail_so'];
                 } else {
-                    $newDetail = DetailSo::create([                        
+                    $newDetail = DetailSo::create([    
+                        'id_so'         => $salesOrder->id_so,                    
                         'product_id'    => $detail['product_id'],
                         'package_id'    => null,
                         'product_type'  => $detail['product_type'],                                     

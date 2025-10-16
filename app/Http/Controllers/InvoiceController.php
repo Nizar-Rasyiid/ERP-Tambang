@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
 use App\Models\DeliveryOrder;
+use Illuminate\Support\Facades\DB;
 use App\Models\SalesOrder;
 use App\Models\DetailDO;
 use App\Models\DetailInvoice;
@@ -19,9 +20,8 @@ class InvoiceController extends Controller
     {
         $invoice = Invoice::with(
             [
-                'customer',                  
-                'salesorder',
-                'detailInv',
+                'customer',                                  
+                'detailInv.so',
                 'detailInv.product'
             ])->orderBy('created_at', 'desc')
             ->get();
@@ -45,81 +45,90 @@ class InvoiceController extends Controller
             'delivery_order_details' => 'required|array',
             'due_at' => 'required|string',            
         ]);
-    
-        // Ambil bulan & tahun saat ini
-        $currentMonth = date('m'); // 02
-        $currentYear  = date('Y'); // 2025
-        $monthRoman   = [
-            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
-            '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
-            '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
-        ];
-    
-        // Cari invoice terakhir dalam bulan dan tahun yang sama
-        $lastInvoice = Invoice::whereYear('created_at', $currentYear)
-                              ->whereMonth('created_at', $currentMonth)
-                              ->latest('id_invoice')
-                              ->first();
-    
-        // Ambil ID terakhir & buat ID baru dengan format 2 digit
-        $lastIdInvoice = $lastInvoice ? intval(explode('/', $lastInvoice->code_invoice)[0]) : 0;
-        $newIdInvoice  = str_pad($lastIdInvoice + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
-    
-        // Format kode Invoice: 00ID/INV/II/2025
-        $formattedCodeInvoice = "{$newIdInvoice}/INV/{$monthRoman[$currentMonth]}/{$currentYear}";
-    
-        // Buat Invoice
-        $invoice = Invoice::create([            
-            'customer_id'     => $request->customer_id,
-            'employee_id'     => $request->employee_id,
-            'code_invoice'    => $formattedCodeInvoice,                
-            'sub_total'       => $request->sub_total,
-            'ppn'             => $request->ppn,
-            'grand_total'     => $request->grand_total,
-            'deposit'         => 0,
-            'issue_at'        => $request->issue_at,
-            'due_at'          => $request->due_at,            
-        ]);
-
-        // $detailDo = DetailDo::findOrFail($request->id_so)->get();        
-    
-        foreach ($request->delivery_order_details as $pro) {            
-    
-            DetailInvoice::create([
-                'id_invoice'    => $invoice->id_invoice,
-                'id_so'         => $pro['id_so'],
-                'id_detail_so'  => $pro['id_detail_so'],
-                'id_detail_po'  => $pro['id_detail_po'],
-                'id_detail_do'  => $pro['id_detail_do'],
-                'id_do'         => $pro['id_do'],
-                'product_id'    => $pro['product_id'],
-                'quantity'      => $pro['quantity'],
-                'price'         => $pro['price'],
-                'amount'        => $pro['amount'],
-                'created_at'    => now(),
-                'updated_at'    => now(),
+        
+        try {
+            DB::beginTransaction(); 
+            // Ambil bulan & tahun saat ini
+            $currentMonth = date('m'); // 02
+            $currentYear  = date('Y'); // 2025
+            $monthRoman   = [
+                '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
+                '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
+                '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
+            ];
+        
+            // Cari invoice terakhir dalam bulan dan tahun yang sama
+            $lastInvoice = Invoice::whereYear('created_at', $currentYear)
+                                ->whereMonth('created_at', $currentMonth)
+                                ->latest('id_invoice')
+                                ->first();
+        
+            // Ambil ID terakhir & buat ID baru dengan format 2 digit
+            $lastIdInvoice = $lastInvoice ? intval(explode('/', $lastInvoice->code_invoice)[0]) : 0;
+            $newIdInvoice  = str_pad($lastIdInvoice + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
+        
+            // Format kode Invoice: 00ID/INV/II/2025
+            $formattedCodeInvoice = "{$newIdInvoice}/INV/{$monthRoman[$currentMonth]}/{$currentYear}";
+        
+            // Buat Invoice
+            $invoice = Invoice::create([            
+                'customer_id'     => $request->customer_id,
+                'employee_id'     => $request->employee_id,
+                'code_invoice'    => $formattedCodeInvoice,                
+                'sub_total'       => $request->sub_total,
+                'ppn'             => $request->ppn,
+                'grand_total'     => $request->grand_total,
+                'deposit'         => 0,
+                'issue_at'        => $request->issue_at,
+                'due_at'          => $request->due_at,            
             ]);
 
-            DeliveryOrder::findOrFail($pro['id_do'])
-                ->update(['has_inv' => 1]);
-
-            $details = DeliveryOrder::where('id_do', $pro['id_so'])->get();
-
-            $delilverysales = $details->every(function ($item) {
-                return $item->has_inv == 1; 
-            });
-            
-            if ($delilverysales) {
-                $has_inv = SalesOrder::findOrFail($pro['id_so'])->update([
-                    'has_invoice' => true,
+            // $detailDo = DetailDo::findOrFail($request->id_so)->get();        
+        
+            foreach ($request->delivery_order_details as $pro) {            
+        
+                DetailInvoice::create([
+                    'id_invoice'    => $invoice->id_invoice,
+                    'id_so'         => $pro['id_so'],
+                    'id_detail_so'  => $pro['id_detail_so'],
+                    'id_detail_po'  => $pro['id_detail_po'],
+                    'id_detail_do'  => $pro['id_detail_do'],
+                    'id_do'         => $pro['id_do'],
+                    'product_id'    => $pro['product_id'],
+                    'quantity'      => $pro['quantity'],
+                    'price'         => $pro['price'],
+                    'amount'        => $pro['amount'],
+                    'created_at'    => now(),
+                    'updated_at'    => now(),
                 ]);
+
+                DeliveryOrder::findOrFail($pro['id_do'])
+                    ->update(['has_inv' => 1]);
+
+                $details = DeliveryOrder::where('id_do', $pro['id_so'])->get();
+
+                $delilverysales = $details->every(function ($item) {
+                    return $item->has_inv == 1; 
+                });
+                
+                if ($delilverysales) {
+                    $has_inv = SalesOrder::findOrFail($pro['id_so'])->update([
+                        'has_invoice' => true,
+                    ]);
+                }
             }
-        }        
-    
-        return response()->json([
-            'message'  => 'Invoice berhasil dibuat!',
-            'invoice'  => $invoice,            
-        ], 201);
+            DB::commit();
+            return response()->json([
+                'message'  => 'Invoice berhasil dibuat!',
+                'invoice'  => $invoice,            
+            ], 201);
+        } catch (\Excaption $e) {
+            DB::rollback();
+            return response()->json([
+                'message'  => 'Invoice berhasil dibuat!',
+                'error'  => $e,            
+            ], 403);
+        }            
     }
 
     public function detail( string $id){
@@ -156,9 +165,8 @@ class InvoiceController extends Controller
         $detailSo = DetailInvoice::with([
             'product', 
             'do', 
-            'invoice',
-            'invoice.customer',
-            'invoice.salesorder'
+            'so',            
+            'invoice.customer',            
         ])
         ->get();
         return response()->json($detailSo);
@@ -170,12 +178,11 @@ class InvoiceController extends Controller
         ]);
     }
 
-    public function test(){
-        $inv = Invoice::with([
-            'detailInv',                                    
-            'detailInv.invoice',            
-        ])->get();
-
+    public function test($id){
+        $inv = Invoice::whereHas('DetailInv', function($query) use ($id){
+            $query->where('id_so', $id);
+        })->distinct()
+        ->get();
         return response()->json($inv);
     }
     

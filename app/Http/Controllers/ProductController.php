@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\DetailPackage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -40,32 +41,40 @@ class ProductController extends Controller
             'product_desc'      => 'required|string',
             'package_details'   => 'array',                    
         ]);
+        try {
+            DB::beginTransaction();
+            $lastCode = Product::latest()->first();
+            $lastCodeProd = $lastCode ? $lastCode->product_code : 1000;
+            $newCodeProd = $lastCodeProd + 1;
 
-        $lastCode = Product::latest()->first();
-        $lastCodeProd = $lastCode ? $lastCode->product_code : 1000;
-        $newCodeProd = $lastCodeProd + 1;
+            $product = Product::create([  
+                'product_code'  => $newCodeProd,
+                'product_sn'    => $request->product_sn,         
+                'product_desc'  => $request->product_desc,
+                'product_brand' => $request->product_brand,
+                'product_uom'   => $request->product_uom,
+                'product_stock' => $request->product_stock,
+                'product_image' => $request->product_image,
+                'is_package'    => $request->is_package,
+                'product_category_id' => $request->product_category_id,
+            ]);
 
-        $product = Product::create([  
-            'product_code'  => $newCodeProd,
-            'product_sn'    => $request->product_sn,         
-            'product_desc'  => $request->product_desc,
-            'product_brand' => $request->product_brand,
-            'product_uom'   => $request->product_uom,
-            'product_stock' => $request->product_stock,
-            'product_image' => $request->product_image,
-            'is_package'    => $request->is_package,
-            'product_category_id' => $request->product_category_id,
-        ]);
-
-        if ($request->is_package = true) {
-            foreach ($request->package_details as $pack) {
-                DetailPackage::create([
-                    'product_id'  => $product->product_id,
-                    'products'    => $pack['product_id'],
-                ]);
-            }            
-        }
-
+            if ($request->is_package = true) {
+                foreach ($package_details as $pack) {
+                    DetailPackage::create([
+                        'product_id'  => $product->product_id,
+                        'products'    => $pack['product_id'],
+                    ]);
+                }            
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'message'   => 'Failed to Created Product',
+                'error'     => $e->getMessage()
+            ], 403);
+        }                
 
         return response()->json($product, 201);
     }

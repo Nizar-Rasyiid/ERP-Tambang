@@ -22,6 +22,7 @@ class PurchaseOrder extends Model
         'ppn',
         'grand_total',
         'has_gr',
+        'is_deleted',
         'approved',
         'desc',
         'issue_at',

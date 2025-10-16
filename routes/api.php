@@ -99,7 +99,7 @@ Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('show.e
 Route::post('/employees_code', [EmployeeController::class, 'store'])->name('post.employees');
 Route::put('/employees_code/{id}', [EmployeeController::class, 'update'])->name('put.employees');
 
-Route::get('/invoices/faktur', [InvoiceController::class, 'test'])->name('get.invoices');
+Route::get('/invoices/faktur/{id}', [InvoiceController::class, 'test'])->name('get.invoices');
 
 Route::get('/invoices', [InvoiceController::class, 'index'])->name('get.invoices');
 Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('show.invoice');
@@ -137,7 +137,8 @@ Route::post('/purchase_orders/edit_ppn/{id}', [PurchaseOrderController::class, '
 Route::post('/purchase_orders_code', [PurchaseOrderController::class, 'store'])->name('post.purchase_order');
 Route::put('/purchase_orders_code/{id}', [PurchaseOrderController::class, 'update'])->name('put.purchase_order');
 Route::post('/purchase_orders/good-receive', [PurchaseOrderController::class, 'goodReceive'])->name('show.purchase_orderReceive');
-Route::delete('/purchase_orders_delete/{id}', [PurchaseOrderController::class, 'destroy'])->name('delete.purchase_order');
+Route::put('/purchase_orders_delete/{id}', [PurchaseOrderController::class, 'destroy'])->name('delete.purchase_order');
+Route::put('/purchase_orders_restore/{id}', [PurchaseOrderController::class, 'restore'])->name('restore.purchase_order');
 
 Route::get('/po-jasakirim/detail', [JasaKirimController::class, 'indexDetail']);
 Route::get('/po-jasakirim', [JasaKirimController::class, 'index'])->name('get.jasakirim');
@@ -153,6 +154,7 @@ Route::get('/quatations', [QuatationController::class, 'index'])->name('get.quat
 Route::get('/quatations/monthly', [QuatationController::class, 'monthlyQuo'])->name('get.quatationMonthly');
 Route::get('/quatations/{id}', [QuatationController::class, 'show'])->name('get.quatationById');
 Route::post('/quatations_code', [QuatationController::class, 'store'])->name('post.quatation');
+Route::get('/code_quo', [QuatationController::class, 'code'])->name('code');
 Route::put('/quatations_code/{id}', [QuatationController::class, 'put'])->name('put.quatation');
 Route::post('/quatations_code/edit-ppn/{id}', [QuatationController::class, 'editPPn'])->name('put.quatation');
 Route::delete('/quatations_delete/{id}', [QuatationController::class, 'destroy'])->name('delete.quatation');
@@ -187,6 +189,7 @@ Route::get('/detail_tandater/{id}', [TandaTerimaController::class, 'detail'])->n
 Route::get('/detail_tandater', [TandaTerimaController::class, 'getDetail'])->name('detail.tandaters');
 Route::post('/addTandater', [TandaTerimaController::class, 'store'])->name('post.tandater');
 Route::put('/addTandater/{id}', [TandaTerimaController::class, 'update'])->name('put.tandater');
+Route::delete('/tandater/delete/{id}', [TandaTerimaController::class, 'destroy'])->name('delete.tandater');
 
 
 Route::get('/faktur-pajak', [FakturPajakController::class, 'index'])->name('get.fakturpajak');

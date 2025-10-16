@@ -9,6 +9,7 @@ use App\Models\SalesOrder;
 use App\Models\DetailDo;
 use App\Models\StockHistory;
 use App\Models\DetailSo;
+use App\Models\DetailPo;
 use App\Models\Customer;
 use App\Models\DetailPackage;
 use App\Models\Employee;
@@ -43,122 +44,136 @@ class DeliveryOrderController extends Controller
         $request->validate([
             'delivery_order_details' => 'required|array',
         ]);
-    
-        //Ambil bulan & tahun saat ini
-        $currentMonth = date('m'); // 02
-        $currentYear  = date('Y'); // 2025
-        $monthRoman   = [
-            '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
-            '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
-            '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
-        ];
-    
-        $lastDo = DeliveryOrder::latest()->first();
-    
-        $lastIdDo = $lastDo ? intval(explode('/', $lastDo->code_do)[0]) : 0;
-        $newIdDo  = str_pad($lastIdDo + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
-    
-        // Format kode DO: 00ID/DO/II/2025
-        $formattedCodeDo = "{$newIdDo}/DO/{$monthRoman[$currentMonth]}/{$currentYear}";
+        try {
+            DB::beginTransaction();
+            //Ambil bulan & tahun saat ini
+            $currentMonth = date('m'); // 02
+            $currentYear  = date('Y'); // 2025
+            $monthRoman   = [
+                '01' => 'I', '02' => 'II', '03' => 'III', '04' => 'IV',
+                '05' => 'V', '06' => 'VI', '07' => 'VII', '08' => 'VIII',
+                '09' => 'IX', '10' => 'X', '11' => 'XI', '12' => 'XII'
+            ];
+        
+            $lastDo = DeliveryOrder::latest()->first();
+        
+            $lastIdDo = $lastDo ? intval(explode('/', $lastDo->code_do)[0]) : 0;
+            $newIdDo  = str_pad($lastIdDo + 1, 2, '0', STR_PAD_LEFT); // Format 2 digit (00, 01, 02, ...)
+        
+            // Format kode DO: 00ID/DO/II/2025
+            $formattedCodeDo = "{$newIdDo}/DO/{$monthRoman[$currentMonth]}/{$currentYear}";
 
-        // buat data untuk table deliveryorder 
-        $deliveryOrder = DeliveryOrder::create([
-            'customer_id'     => $request->customer_id,
-            'employee_id'     => $request->employee_id,
-            'id_so'           => $request->id_so,
-            'id_customer_point' => $request->id_customer_point,
-            'code_do'         => $formattedCodeDo,
-            'sub_total'       => $request->sub_total,          
-            'ppn'             => $request->ppn,
-            'issue_at'        => $request->issue_at,
-            'due_at'          => $request->due_at,
-        ]);
+            // buat data untuk table deliveryorder 
+            $deliveryOrder = DeliveryOrder::create([
+                'customer_id'     => $request->customer_id,
+                'employee_id'     => $request->employee_id,
+                'id_so'           => $request->id_so,
+                'id_customer_point' => $request->id_customer_point,
+                'code_do'         => $formattedCodeDo,
+                'sub_total'       => $request->sub_total,          
+                'ppn'             => $request->ppn,
+                'issue_at'        => $request->issue_at,
+                'due_at'          => $request->due_at,
+            ]);
 
-        $allDelivered = true;
+            $allDelivered = true;
 
-        foreach ( $request->delivery_order_details as $do)
-        {
-            $product = Product::findOrFail($do['product_id']);
-            $detailSo = DetailSo::findOrFail($do['id_detail_so']);
+            foreach ( $request->delivery_order_details as $do)
+            {
+                $product = Product::findOrFail($do['product_id']);
+                $detailSo = DetailSo::findOrFail($do['id_detail_so']);
 
-            if ($do['is_package'] == 1) {
-                $detailsPackages = DetailPackage::where('product_id', $do['product_id'])->get();
+                if ($do['is_package'] == 1) {
+                    $detailsPackages = DetailPackage::where('product_id', $do['product_id'])->get();
 
-                foreach ($detailsPackages as $pack) {
-                    $stock = StockHistory::where('product_id', $pack->products)
-                        ->where('quantity_left', '>=', $do['quantity_left'])
-                        ->first();                    
-                    // $warehouse = WarehouseStock::where('product_id', $pack->product_id)
-                    //     ->where('quantity', '>=', $do['quantity_left'])
-                    //     ->first();
+                    foreach ($detailsPackages as $pack) {
+                        $stock = StockHistory::where('product_id', $pack->products)
+                            ->where('quantity_left', '>=', $do['quantity_left'])
+                            ->first();                    
+                        // $warehouse = WarehouseStock::where('product_id', $pack->product_id)
+                        //     ->where('quantity', '>=', $do['quantity_left'])
+                        //     ->first();
 
-                    if ($stock && $do['quantity_left'] > 0) {
-                        $detailSo->increment('quantity_left', $do['quantity_left']);
-                        $product->decrement('product_stock', $do['quantity_left']);
-                        $stock->decrement('quantity_left', $do['quantity_left']);
-                        // $warehouse->decrement('quantity', $do['quantity_left']);                        
-                    }                    
-                }
-                DetailDo::create([
-                    'id_do'         => $deliveryOrder->id_do,
-                    'id_po'         => $stock->id_po,
-                    'id_detail_po'  => $stock->id_detail_po,
-                    'id_detail_so'  => $do['id_detail_so'],
-                    'product_id'    => $pack['products'],
-                    'quantity'      => $do['quantity_left'],
-                    'quantity_left' => $detailSo->quantity - $do['quantity_left'],
-                    'price'         => $do['price'], // atau harga per item package
-                ]);
-
-                if ($detailSo->quantity == $detailSo->quantity_left) {
-                    $detailSo->update([
-                        'has_do'    => 1,
-                    ]);
-                }
-            }else {
-                $stock = StockHistory::where('product_id', $do['product_id'])
-                    ->where('quantity_left', '>=', $do['quantity_left'])
-                    ->first();
-                
-                if ($stock && $do['quantity_left'] > 0) {
-                    $detailSo->increment('quantity_left', $do['quantity_left']);
-                    $product->decrement('product_stock', $do['quantity_left']);
-                    $stock->decrement('quantity_left', $do['quantity_left']);
-
+                        if ($stock && $do['quantity_left'] > 0) {
+                            $detailSo->increment('quantity_left', $do['quantity_left']);
+                            $product->decrement('product_stock', $do['quantity_left']);
+                            $stock->decrement('quantity_left', $do['quantity_left']);
+                            // $warehouse->decrement('quantity', $do['quantity_left']);                        
+                        }                    
+                    }
                     DetailDo::create([
                         'id_do'         => $deliveryOrder->id_do,
                         'id_po'         => $stock->id_po,
                         'id_detail_po'  => $stock->id_detail_po,
                         'id_detail_so'  => $do['id_detail_so'],
-                        'product_id'    => $do['product_id'],                        
+                        'product_id'    => $pack['products'],
                         'quantity'      => $do['quantity_left'],
                         'quantity_left' => $detailSo->quantity - $do['quantity_left'],
-                        'price'         => $do['price'],                                                
+                        'price'         => $do['price'], // atau harga per item package
                     ]);
+
                     if ($detailSo->quantity == $detailSo->quantity_left) {
                         $detailSo->update([
                             'has_do'    => 1,
                         ]);
                     }
+                }else {
+                    $stock = StockHistory::where('product_id', $do['product_id'])
+                        ->where('quantity_left', '>=', $do['quantity_left'])
+                        ->first();
+                    
+                    if (!$stock) {
+                        $stock = DetailPo::where('product_id', $do['product_id'])
+                        ->where('quantity_left', '>=', $do['quantity_left'])
+                        ->first();
+                    }
+                    
+                    if ($stock && $do['quantity_left'] > 0) {
+                        $detailSo->increment('quantity_left', $do['quantity_left']);
+                        $product->decrement('product_stock', $do['quantity_left']);
+                        $stock->decrement('quantity_left', $do['quantity_left']);
+
+                        DetailDo::create([
+                            'id_do'         => $deliveryOrder->id_do,
+                            'id_po'         => $stock->id_po,
+                            'id_detail_po'  => $stock->id_detail_po,
+                            'id_detail_so'  => $do['id_detail_so'],
+                            'product_id'    => $do['product_id'],                        
+                            'quantity'      => $do['quantity_left'],
+                            'quantity_left' => $detailSo->quantity - $do['quantity_left'],
+                            'price'         => $do['price'],                                                
+                        ]);
+                        if ($detailSo->quantity == $detailSo->quantity_left) {
+                            $detailSo->update([
+                                'has_do'    => 1,
+                            ]);
+                        }
+                    }
                 }
+            }           
+            
+            $detail = DetailSo::where('id_so', $request->id_so)->get();
+            $allDelivered = $detail->every(function($item) {
+                return $item->has_do == 1;
+            });        
+
+            if ($allDelivered) {
+                $has_do = SalesOrder::findOrFail($request->id_so)->update([
+                    'has_do' => 1,
+                ]);
             }
-        }           
-        
-        $detail = DetailSo::where('id_so', $request->id_so)->get();
-        $allDelivered = $detail->every(function($item) {
-            return $item->has_do == 1;
-        });        
-
-        if ($allDelivered) {
-            $has_do = SalesOrder::findOrFail($request->id_so)->update([
-                'has_do' => 1,
-            ]);
-        }        
-
-        return response()->json([
-            'message'       => 'Delivery Order berhasil dibuat!',
-            'delivery_order'=> $deliveryOrder,                          
-        ], 201);
+            DB::commit();
+            return response()->json([
+                'message'       => 'Delivery Order berhasil dibuat!',
+                'delivery_order'=> $deliveryOrder,                          
+            ], 201);
+        } catch (\Excaption $e) {
+            DB::rollback();
+            return response()->json([
+                'message'       => 'Delivery Order berhasil dibuat!',
+                'error'         => $e->getMessage()                          
+            ], 403);
+        }                        
 
     }    
     
