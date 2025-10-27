@@ -179,9 +179,10 @@ class InvoiceController extends Controller
     }
 
     public function test($id){
-        $inv = Invoice::whereHas('DetailInv', function($query) use ($id){
-            $query->where('id_so', $id);
-        })->distinct()
+        $inv = Invoice::with([
+            'detailInv.so'
+        ])
+        ->where('customer_id', $id)
         ->get();
         return response()->json($inv);
     }

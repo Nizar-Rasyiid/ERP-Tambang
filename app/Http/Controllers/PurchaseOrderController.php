@@ -295,7 +295,32 @@ class PurchaseOrderController extends Controller
         return response()->json([
             'message' => 'Deposit updated successfully',
         ]);
-    }   
+    } 
+    
+    public function updateDepositJasaKirim(Request $request, $id)
+    {
+        $purchaseOrder = PoJasaKirim::findOrFail($id);
+        $purchaseOrder->update([
+            'deposit' => $request->deposit,
+            'status_payment'    => $request->status_payment,
+        ]);
+        $code = PaymentPurchaseOrder::latest()->first();
+
+        $lastCode = $code ? $code->code_paymentpo : 1000;
+        $newCode = (string)((int)$lastCode + 1);
+        $payment = PaymentPurchaseOrder::create([
+            'id_po'         => $id,
+            'payment_method'=> $request->payment_method,
+            'code_paymentpo'=> $newCode,
+            'price'         => $request->deposit,
+            'issue_at'      => $request->issue_at,
+            'due_at'        => $request->due_at,   
+        ]);
+
+        return response()->json([
+            'message' => 'Deposit updated successfully',
+        ]);
+    }
 
     public function resetPrice(Request $request, $id){
         $purchaseOrder = PurchaseOrder::findOrFail($id);

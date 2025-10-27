@@ -135,51 +135,67 @@ class SalesOrderController extends Controller
 
             // Proses detail
             if ($request->has('sales_order_details')) {            
-            $existingDetailIds = DetailSo::where('id_so', $id)
-                ->pluck('id_detail_so')->toArray();
-            $processedIds = [];
+                // $existingDetailIds = DetailSo::where('id_so', $id)
+                //     ->pluck('id_detail_so')->toArray();
+                $existingDetails = DetailSo::where('id_so', $id)
+                        ->get()->keyBy('id_detail_so');
+                $processedIds = [];
+                $hasChanged = false;
 
-            foreach ($request->sales_order_details as $detail) {                
+                foreach ($request->sales_order_details as $detail) {                
 
-                if (isset($detail['id_detail_so']) && in_array($detail['id_detail_so'], $existingDetailIds)) {
-                    DetailSo::where('id_detail_so', $detail['id_detail_so'])->update([                        
-                        'id_so'         => $salesOrder->id_so,
-                        'product_id'    => $detail['product_id'],
-                        'package_id'    => null,
-                        'product_type'  => $detail['product_type'],                                     
-                        'quantity'      => $detail['quantity'],                
-                        'quantity_left' => 0,         
-                        'discount'      => $detail['discount'],    
-                        'price'         => $detail['price'],                                
-                        'amount'        => $detail['amount'],
-                        'created_at'    => now(),
-                        'updated_at'    => now(),
-                    ]);
-                    $processedIds[] = $detail['id_detail_so'];
-                } else {
-                    $newDetail = DetailSo::create([    
-                        'id_so'         => $salesOrder->id_so,                    
-                        'product_id'    => $detail['product_id'],
-                        'package_id'    => null,
-                        'product_type'  => $detail['product_type'],                                     
-                        'quantity'      => $detail['quantity'],                
-                        'quantity_left' => 0,         
-                        'discount'      => $detail['discount'],    
-                        'price'         => $detail['price'],                                
-                        'amount'        => $detail['amount'],
-                        'created_at'    => now(),
-                        'updated_at'    => now(),
-                    ]);           
-                    if ($newDetail) {
-                        $processedIds[] = $newDetail->id_detail_so;
+                    $detailId = isset($detail['id_detail_so']) ? $detail['id_detail_so'] : null;
+
+                    if ($detailId && $existingDetailIds->has($detailId)) {
+                        $existingDetailIds = $existingDetailIds->get($detailId);
+
+                        $changes = array_diff_assoc($detail, $existingDetailIds->toArray());
+                        if (!empty($changes)) {
+                            if (isset($detail['id_detail_so']) && in_array($detail['id_detail_so'], $existingDetailIds)) {
+                                $hasChanged = true;
+                                DetailSo::where('id_detail_so', $detail['id_detail_so'])->update([
+                                    'id_detail_so'  => $detail['id_detail_so'],
+                                    'id_so'         => $salesOrder->id_so,
+                                    'product_id'    => $detail['product_id'],
+                                    'package_id'    => null,
+                                    'product_type'  => $detail['product_type'],                                     
+                                    'quantity'      => $detail['quantity'],                
+                                    'quantity_left' => 0,         
+                                    'discount'      => $detail['discount'],    
+                                    'price'         => $detail['price'],                                
+                                    'amount'        => $detail['amount'],
+                                    'created_at'    => now(),
+                                    'updated_at'    => now(),
+                                ]);
+                                $processedIds[] = $detail['id_detail_so'];
+                            } else {
+                                $hasChanged = true;
+                                $newDetail = DetailSo::create([    
+                                    'id_so'         => $salesOrder->id_so,                    
+                                    'product_id'    => $detail['product_id'],
+                                    'package_id'    => null,
+                                    'product_type'  => $detail['product_type'],                                     
+                                    'quantity'      => $detail['quantity'],                
+                                    'quantity_left' => 0,         
+                                    'discount'      => $detail['discount'],    
+                                    'price'         => $detail['price'],                                
+                                    'amount'        => $detail['amount'],
+                                    'created_at'    => now(),
+                                    'updated_at'    => now(),
+                                ]);           
+                                if ($newDetail) {
+                                    $processedIds[] = $newDetail->id_detail_so;
+                                }
+                            }
+                        }
                     }
                 }
-            }
 
-            $detailsToDelete = array_diff($existingDetailIds, $processedIds);
-            if (!empty($detailsToDelete)) {
-                DetailSo::whereIn('id_detail_so', $detailsToDelete)->delete();
-            }            
+                $detailsToDelete = array_diff($existingDetails->keys()->toArray(), $processedIds);
+
+                if (!empty($detailsToDelete) && $hasChanged) {
+                    DetailSo::whereIn('id_detail_so', $detailsToDelete)->delete();
+                }            
             }                        
         } catch (\Exception $e) {
             \Log::error('Sales Order Update Error: ' . $e->getMessage());

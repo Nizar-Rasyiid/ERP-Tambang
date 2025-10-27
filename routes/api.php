@@ -60,6 +60,7 @@ Route::put('/account_receivable_reset/{id}', [SalesOrderController::class, 'rese
 
 Route::get('/account_payable', [PurchaseOrderController::class, 'getAP'])->name('get.ap');
 Route::put('/account_payable_deposit/{id}', [PurchaseOrderController::class, 'updateDeposit'])->name('put.ap');
+Route::put('/account_payable_deposit_jakir/{id}', [PurchaseOrderController::class, 'updateDepositJasaKirim'])->name('put.ap.jakir');
 Route::put('/account_payable_reset/{id}', [PurchaseOrderController::class, 'resetPrice'])->name('put.ap');
 //b
 Route::get('/bank_accounts', [BankAccountController::class, 'index'])->name('get.bank_account');
@@ -195,6 +196,7 @@ Route::delete('/tandater/delete/{id}', [TandaTerimaController::class, 'destroy']
 Route::get('/faktur-pajak', [FakturPajakController::class, 'index'])->name('get.fakturpajak');
 Route::get('/faktur-pajak/{id}', [FakturPajakController::class, 'show'])->name('get.fakturpajak');
 Route::post('/faktur-pajak-code', [FakturPajakController::class, 'store'])->name('post.fakturpajak');
+Route::put('/faktur-pajak-code/{id}', [FakturPajakController::class, 'update'])->name('update.fakturpajak');
 
 //u
 //v

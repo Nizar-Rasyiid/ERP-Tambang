@@ -65,14 +65,33 @@ class FakturPajakController extends Controller
             'id_invoice' => 'required',
             'customer_id' => 'required',
             'code_faktur_pajak' => 'required',
-        ]);
+        ]);        
 
         $fakturpajak = FakturPajak::find($id);
         if (is_null($fakturpajak)) {
             return response()->json(['message' => 'Record not found'], 404);
         }
 
-        $fakturpajak->update($request->all());
+        $oldInvoiceId = $fakturpajak->id_invoice;
+        $newInvoiceId = $request->id_invoice;
+
+        if ($oldInvoiceId != $newInvoiceId) {
+            $oldInvoice = Invoice::find($oldInvoiceId);            
+            if ($oldInvoice) {
+                $oldInvoice->update(['has_faktur' => 0]);
+            }
+            $newInvoice = Invoice::find($newInvoiceId);
+            if ($newInvoice) {
+                $newInvoice->update(['has_faktur' => 1]);
+            }            
+        }
+
+        $fakturpajak->update([
+            'id_so'         => $request->id_so,
+            'id_invoice'    => $request->id_invoice,
+            'customer_id'   => $request->customer_id,
+            'code_faktur_pajak' => $request->code_faktur_pajak,            
+        ]);
         return response()->json($fakturpajak);
     }
 
