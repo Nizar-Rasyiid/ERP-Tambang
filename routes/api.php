@@ -173,6 +173,7 @@ Route::put('/opex_code/{id}', [OpexController::class, 'update'])->name('post.ope
 Route::post('/opex_code/absorb', [OpexController::class, 'storeAbsorb'])->name('post.opex');
 Route::put('/opex_code/absorb/{id}', [OpexController::class, 'updateAbsorb'])->name('update.opex');
 Route::post('/opex_code/approved/{id}', [OpexController::class, 'approved']);
+Route::delete('/opex_delete/{id}', [OpexController::class, 'destroy'])->name('delete.opex');
 
 Route::get('/sales_orders', [SalesOrderController::class, 'index'])->name('get.sales_order');
 Route::get('/sales_orders/monthly', [SalesOrderController::class, 'monthlySales']);
