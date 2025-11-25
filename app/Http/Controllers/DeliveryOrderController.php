@@ -81,42 +81,52 @@ class DeliveryOrderController extends Controller
             foreach ( $request->delivery_order_details as $do)
             {
                 $product = Product::findOrFail($do['product_id']);
-                $detailSo = DetailSo::findOrFail($do['id_detail_so']);
+                $detailSo = DetailSo::findOrFail($do['id_detail_so']);                
 
-                if ($do['is_package'] == 1) {
-                    $detailsPackages = DetailPackage::where('product_id', $do['product_id'])->get();
+                if ($do['is_package'] == 1) {                                        
+                    $detailsPackages = DetailPackage::where('product_id', $do['product_id'])->get();                    
+                    $packageStockProduct = $detailsPackages->firstWhere('used_for_stock', true);
+                    $product_package = Product::findOrFail($packageStockProduct->products);
+                    $totalQuantity = $detailsPackages->sum('quantity') * $do['quantity'];
+                    //variable for check is this product used for stock;
+                    $check_product_for_package = false; 
 
-                    foreach ($detailsPackages as $pack) {
-                        $stock = StockHistory::where('product_id', $pack->products)
-                            ->where('quantity_left', '>=', $do['quantity_left'])
-                            ->first();                    
-                        // $warehouse = WarehouseStock::where('product_id', $pack->product_id)
-                        //     ->where('quantity', '>=', $do['quantity_left'])
-                        //     ->first();
-
-                        if ($stock && $do['quantity_left'] > 0) {
-                            $detailSo->increment('quantity_left', $do['quantity_left']);
-                            $product->decrement('product_stock', $do['quantity_left']);
-                            $stock->decrement('quantity_left', $do['quantity_left']);
-                            // $warehouse->decrement('quantity', $do['quantity_left']);                        
-                        }                    
+                    // decrement the stock
+                    $stock = StockHistory::where('product_id', $packageStockProduct->products)
+                        ->where('quantity_left', '>=', $totalQuantity)
+                        ->first();
+                    
+                    if ($stock && $do['quantity_left'] > 0) {
+                        $detailSo->increment('quantity_left', $do['quantity_left']);
+                        $product_package->decrement('product_stock', $totalQuantity);
+                        $stock->decrement('quantity_left', $totalQuantity);
+                        $check_product_for_package = true;
+                        $product->update([
+                            'has_used' => true,
+                        ]);
+                    }else {
+                        return response()->json([
+                            'message' => 'quantity tidak mencukupi'
+                        ]);
+                        return;
                     }
-                    DetailDo::create([
-                        'id_do'         => $deliveryOrder->id_do,
-                        'id_po'         => $stock->id_po,
-                        'id_detail_po'  => $stock->id_detail_po,
-                        'id_detail_so'  => $do['id_detail_so'],
-                        'product_id'    => $pack['products'],
-                        'quantity'      => $do['quantity_left'],
-                        'quantity_left' => $detailSo->quantity - $do['quantity_left'],
-                        'price'         => $do['price'], // atau harga per item package
-                    ]);
 
-                    if ($detailSo->quantity == $detailSo->quantity_left) {
+                    if ($check_product_for_package) {
+                        DetailDo::create([
+                            'id_do'         => $deliveryOrder->id_do,
+                            'id_po'         => $stock->id_po,
+                            'id_detail_po'  => $stock->id_detail_po,
+                            'id_detail_so'  => $do['id_detail_so'],
+                            'product_id'    => $do['product_id'],
+                            'quantity'      => $do['quantity'],
+                            'quantity_left' => $detailSo->quantity - $do['quantity_left'],
+                            'price'         => $do['price'], // atau harga per item package
+                        ]);
+                        
                         $detailSo->update([
                             'has_do'    => 1,
-                        ]);
-                    }
+                        ]); 
+                    }                   
                 }else {
                     $stock = StockHistory::where('product_id', $do['product_id'])
                         ->where('quantity_left', '>=', $do['quantity_left'])

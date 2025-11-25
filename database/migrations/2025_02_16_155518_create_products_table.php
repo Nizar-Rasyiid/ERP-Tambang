@@ -21,7 +21,8 @@ return new class extends Migration
             $table->string('product_uom')->nullable();
             $table->integer('product_stock');
             $table->text('product_image')->nullable(); 
-            $table->boolean('is_package')->default(0);
+            $table->boolean('is_package')->default(0);            
+            $table->boolean('has_used')->default(0);            
             $table->timestamps();
         });
     }

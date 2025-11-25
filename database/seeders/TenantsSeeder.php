@@ -16,7 +16,7 @@ class TenantsSeeder extends Seeder
             [
                 'name'      => 'Utama',
                 'token'     => 'ERPKJP',
-                'database'  => 'erp_ahm_databases',
+                'database'  => 'erptambang',
                 'status'    => 'active',
             ]
         ];

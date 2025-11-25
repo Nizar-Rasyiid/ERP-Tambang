@@ -14,7 +14,10 @@ return new class extends Migration
         Schema::create('detailpackage', function (Blueprint $table) {
             $table->id('id_detail_package');
             $table->foreignId('product_id')->constrained('products', 'product_id')->onDelete('cascade');
-            $table->foreignId('products')->constrained('products', 'product_id')->onDelete('cascade');            
+            $table->foreignId('products')->constrained('products', 'product_id')->onDelete('cascade');
+            $table->integer('quantity')->default(0);
+            $table->boolean('use_for_stock')->default(false);
+            $table->boolean('has_used')->default(false);
             $table->timestamps();
         });
     }

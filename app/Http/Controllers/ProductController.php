@@ -59,11 +59,12 @@ class ProductController extends Controller
                 'product_category_id' => $request->product_category_id,
             ]);
 
-            if ($request->is_package = true) {
-                foreach ($package_details as $pack) {
+            if ($request->is_package != false) {
+                foreach ($request->package_details as $pack) {
                     DetailPackage::create([
                         'product_id'  => $product->product_id,
                         'products'    => $pack['product_id'],
+                        'quantity'    => $pack['quantity'],
                     ]);
                 }            
             }

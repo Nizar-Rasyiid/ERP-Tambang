@@ -20,6 +20,7 @@ class Product extends Model
         'product_stock',
         'is_package',
         'product_image',
+        'has_used',
     ];
 
     public function detailSo(){

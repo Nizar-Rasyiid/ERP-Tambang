@@ -12,7 +12,10 @@ class DetailPackage extends Model
     protected $primaryKey = 'id_detail_package';
     protected $fillable = [        
         'product_id',
-        'products'
+        'products',
+        'quantity',
+        'used_for_stock',
+        'has_used'
     ];
 
     public function product(){

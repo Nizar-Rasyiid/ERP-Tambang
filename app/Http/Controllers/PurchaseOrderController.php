@@ -79,8 +79,7 @@ class PurchaseOrderController extends Controller
                 'due_at'         => $request->due_at,
             ]);
 
-            foreach ($request->purchase_order_details as $pro) {       
-
+            foreach ($request->purchase_order_details as $pro) {                       
                 $detailpo = DetailPO::create([
                     'id_po'      => $purchaseOrder->id_po,                
                     'product_id' => $pro['product_id'],
@@ -149,44 +148,60 @@ class PurchaseOrderController extends Controller
             ]);
 
             // Proses detail
-            if ($request->has('purchase_order_details')) {
-                $sub_total = 0;
-                $existingDetailIds = DetailPo::where('id_po', $id)
-                    ->pluck('id_detail_po')->toArray();
+            if ($request->has('purchase_order_details')) {                
+                $existingDetails = DetailPo::where('id_po', $id)
+                    ->get()
+                    ->keyBy('id_detail_po');
                 $processedIds = [];
+                $hasChanged = false;
 
                 foreach ($request->purchase_order_details as $detail) {
-                    $quantity = $detail['quantity'] ?? 0;
-                    $price = $detail['price'] ?? 0;
-                    $amount = $detail['amount'] ?? ($price * $quantity);
 
-                    $sub_total += $amount;
+                    $detailId = isset($detail['id_detail_po']) ? $detail['id_detail_po'] : null;
 
-                    if (isset($detail['id_detail_po']) && in_array($detail['id_detail_po'], $existingDetailIds)) {
-                        DetailPo::where('id_detail_po', $detail['id_detail_po'])->update([
-                            'product_id'    => $detail['product_id'],
-                            'quantity'      => $quantity,
-                            'quantity_left' => $detail['quantity_left'] ?? 0,
-                            'price'         => $price,
-                            'amount'        => $amount,
-                        ]);
-                        $processedIds[] = $detail['id_detail_po'];
+                    if ($detailId && $existingDetails->has($detailId)) {
+                        $existingDetail = $existingDetails->get($detailId);
+
+                        $changes = array_diff_assoc($detail, $existingDetail->toArray());
+                        if (!empty($changes)) {                            
+                            $hasChanged = true;
+                            DetailPo::where('id_detail_po', $detail['id_detail_po'])->update([
+                                'product_id'    => $detail['product_id'],
+                                'quantity'      => $detail['quantity'],
+                                'quantity_left' => $detail['quantity_left'] ?? 0,
+                                'price'         => $detail['price'],
+                                'amount'        => $detail['amount'],
+                            ]);
+                            $processedIds[] = $detailId;                                                                                                              
+                        }
                     } else {
+                        $hasChanged = true;
                         $newDetail = DetailPo::create([
                             'id_po'         => $id,
                             'product_id'    => $detail['product_id'],
-                            'quantity'      => $quantity,
+                            'quantity'      => $detail['quantity'],
                             'quantity_left' => $detail['quantity_left'] ?? 0,
-                            'price'         => $price,
-                            'amount'        => $amount,
+                            'price'         => $detail['price'],
+                            'amount'        => $detail['amount'],
+                        ]);
+                        StockHistory::create([
+                            'id_po'         => $id,
+                            'product_id'    => $newDetail->product_id,
+                            'id_detail_po'  => $newDetail->id_detail_po,
+                            'price'         => $newDetail->price,
+                            'quantity'      => $newDetail->quantity,
+                            'quantity_left' => $newDetail->quantity,
                         ]);
                         if ($newDetail) {
                             $processedIds[] = $newDetail->id_detail_po;
-                        }
-                    }                    
+                        }  
+                    }                   
                 }
-                $detailsDelete = array_diff($existingDetailIds, $processedIds);
-                if (!empty($detailsDelete)) {
+                $detailsDelete = array_diff($existingDetails
+                    ->keys()
+                    ->toArray(), 
+                    $processedIds);
+                if (!empty($detailsDelete) && $hasChanged) {
                     DetailPo::whereIn('id_detail_po', $detailsDelete)->delete();
                 }
             }
